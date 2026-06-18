@@ -6,12 +6,12 @@
   <title>乖宝和溪溪 | 樱花流体玻璃</title>
   <style>
     :root {
-      --bg-color: #fff5f7; /* 极淡粉背景 */
-      --glass-bg: rgba(255, 255, 255, 0.7); /* 白色偏粉玻璃 */
-      --glass-border: rgba(255, 182, 193, 0.4); /* 粉色边框 */
-      --text-main: #2d3436; /* 深灰文字，不刺眼 */
+      --bg-color: #fff5f7;
+      --glass-bg: rgba(255, 255, 255, 0.6);
+      --glass-border: rgba(255, 182, 193, 0.4);
+      --text-main: #2d3436;
       --text-sub: #636e72;
-      --accent: #ff9a9e; /* 樱花粉强调色 */
+      --accent: #ff9a9e;
       --glow-1: rgba(255, 154, 158, 0.4);
       --glow-2: rgba(254, 207, 239, 0.4);
     }
@@ -24,107 +24,144 @@
       font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
       min-height: 100vh;
       overflow-x: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 60px 20px;
+      display: flex; flex-direction: column; align-items: center;
       perspective: 1200px;
     }
 
-    /* === 1. 背景呼吸光晕 === */
+    /* 背景呼吸光晕 */
     .bg-glow {
       position: fixed; top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       width: 140vw; height: 140vh;
       background: radial-gradient(circle at 30% 40%, var(--glow-1) 0%, transparent 50%),
                   radial-gradient(circle at 70% 60%, var(--glow-2) 0%, transparent 50%);
-      filter: blur(100px);
-      z-index: 0;
+      filter: blur(100px); z-index: 0;
       animation: breathe 12s infinite alternate ease-in-out;
       pointer-events: none;
     }
-
     @keyframes breathe {
       0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 0.8; }
       100% { transform: translate(-50%, -50%) scale(1.3) rotate(15deg); opacity: 1; }
     }
 
-    /* === 2. 通用玻璃卡片样式 === */
+    /* 通用玻璃卡片与动效 */
     .glass-card {
-      position: relative;
-      z-index: 10;
+      position: relative; z-index: 10;
       background: var(--glass-bg);
       border: 1px solid var(--glass-border);
       border-radius: 28px;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       box-shadow: 0 20px 50px rgba(255, 154, 158, 0.1);
-      transition: transform 0.1s ease-out, box-shadow 0.3s ease;
+      transition: transform 0.1s ease-out, box-shadow 0.3s ease, opacity 0.5s ease;
       overflow: hidden;
     }
-
-    /* 鼠标高光层 */
     .glass-card::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
       border-radius: 28px;
       background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.8) 0%, transparent 50%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      pointer-events: none;
-      z-index: 1;
+      opacity: 0; transition: opacity 0.3s ease; pointer-events: none; z-index: 2;
     }
     .glass-card:hover::before { opacity: 1; }
     .glass-card:hover { box-shadow: 0 30px 60px rgba(255, 154, 158, 0.2); }
 
-    /* === 3. Hero 主视觉区 === */
+    /* 顶部导航栏 */
+    .top-nav {
+      position: fixed; top: 0; left: 0; width: 100%; padding: 30px 40px;
+      display: flex; justify-content: space-between; align-items: center; z-index: 100;
+    }
+    .nav-btns { display: flex; gap: 15px; }
+    .nav-btn {
+      padding: 12px 28px; border-radius: 50px; font-size: 1rem; font-weight: 600;
+      cursor: pointer; border: 1px solid var(--glass-border); background: var(--glass-bg);
+      color: var(--text-main); transition: all 0.3s ease;
+    }
+    .nav-btn:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+
+    /* Hero 区 */
     .hero-card {
-      width: 100%; max-width: 800px;
-      padding: 80px 60px;
-      text-align: center;
-      margin-bottom: 40px;
+      width: 90%; max-width: 1000px; height: 85vh;
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      margin-top: 40px; padding: 40px; position: relative;
     }
     .hero-card h1 {
-      font-size: 3.5rem; font-weight: 800; letter-spacing: -1px;
-      margin-bottom: 20px;
+      font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; line-height: 1.2;
       background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 30px; z-index: 2;
     }
-    .hero-card p { font-size: 1.2rem; color: var(--text-sub); line-height: 1.8; max-width: 600px; margin: 0 auto 40px; }
-    .btn {
-      display: inline-block; padding: 16px 40px;
-      background: linear-gradient(135deg, #ff9a9e, #fecfef);
-      color: #fff; text-decoration: none; border-radius: 50px;
-      font-weight: 700; font-size: 1.1rem;
-      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      box-shadow: 0 10px 20px rgba(255, 154, 158, 0.3);
-    }
-    .btn:hover { transform: translateY(-4px) scale(1.05); box-shadow: 0 15px 30px rgba(255, 154, 158, 0.4); }
 
-    /* === 4. 功能卡片区 === */
+    /* 封面相框区域 (占下方 70%) */
+    .cover-frame {
+      flex: 1; width: 100%; border-radius: 24px;
+      background: rgba(255,255,255,0.3); border: 2px dashed rgba(255, 182, 193, 0.5);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; position: relative; transition: all 0.5s ease;
+    }
+    .cover-frame.has-img { border: none; background: transparent; }
+    .cover-frame img {
+      width: 100%; height: 100%; object-fit: cover;
+      opacity: 0; transition: opacity 0.8s ease;
+    }
+    .cover-frame.has-img img { opacity: 1; }
+    .cover-placeholder { color: var(--text-sub); font-size: 1.2rem; opacity: 0.6; }
+
+    /* 漂浮物容器 */
+    .floating-decos {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; overflow: hidden; z-index: 1;
+    }
+    .deco {
+      position: absolute; opacity: 0.6; fill: #ff9a9e;
+      animation: floatUp linear infinite;
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 0; }
+      10% { opacity: 0.6; }
+      90% { opacity: 0.6; }
+      100% { transform: translateY(-80vh) rotate(360deg) scale(1.2); opacity: 0; }
+    }
+
+    /* 二级界面 */
+    #diary-page {
+      display: none; width: 100%; max-width: 1000px;
+      padding: 120px 20px 60px; opacity: 0; transition: opacity 0.6s ease;
+    }
     .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 30px;
-      width: 100%; max-width: 1000px;
-      z-index: 10;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px; width: 100%;
     }
-    .feature-card {
-      padding: 40px 30px;
-      text-align: center;
-    }
-    .icon { font-size: 3rem; margin-bottom: 20px; display: block; }
-    .feature-card h3 { font-size: 1.5rem; margin-bottom: 12px; color: var(--text-main); }
-    .feature-card p { font-size: 1rem; color: var(--text-sub); line-height: 1.6; }
+    .feature-card { padding: 50px 30px; text-align: center; }
+    .icon { font-size: 3.5rem; margin-bottom: 24px; display: block; }
+    .feature-card h3 { font-size: 1.6rem; margin-bottom: 16px; color: var(--text-main); }
+    .feature-card p { font-size: 1.1rem; color: var(--text-sub); line-height: 1.6; }
 
-    /* === 5. 移动端适配 === */
+    /* 登录弹窗 */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(255, 245, 247, 0.6); backdrop-filter: blur(10px);
+      display: none; align-items: center; justify-content: center; z-index: 200;
+    }
+    .modal-overlay.active { display: flex; }
+    .login-box { width: 320px; padding: 40px; text-align: center; }
+    .login-box h2 { font-size: 1.5rem; margin-bottom: 30px; color: var(--text-main); }
+    .login-box input {
+      width: 100%; padding: 16px; border: 1px solid var(--glass-border); border-radius: 16px;
+      background: rgba(255,255,255,0.5); font-size: 1.2rem; text-align: center;
+      outline: none; margin-bottom: 20px; transition: border 0.3s;
+    }
+    .login-box input:focus { border-color: var(--accent); }
+    .login-box button {
+      width: 100%; padding: 16px; border: none; border-radius: 16px;
+      background: linear-gradient(135deg, #ff9a9e, #fecfef); color: #fff;
+      font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.3s;
+    }
+    .login-box button:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255, 154, 158, 0.4); }
+    .error-msg { color: #ff6b6b; font-size: 0.9rem; margin-top: -10px; margin-bottom: 10px; display: none; }
+
     @media (max-width: 768px) {
-      body { padding: 40px 15px; }
-      .hero-card { padding: 50px 30px; }
-      .hero-card h1 { font-size: 2.2rem; }
-      .hero-card p { font-size: 1rem; }
-      .grid { gap: 20px; }
-      .feature-card { padding: 30px 20px; }
+      .hero-card h1 { font-size: 2rem; }
+      .top-nav { padding: 20px; }
+      .nav-btn { padding: 10px 20px; font-size: 0.9rem; }
     }
   </style>
 </head>
@@ -132,61 +169,176 @@
 
   <div class="bg-glow"></div>
 
-  <!-- Hero 主视觉 -->
-  <div class="glass-card hero-card" data-tilt>
-    <h1>乖宝和溪溪的快乐生活</h1>
-    <p>这里是我们的小小世界，记录每一个闪光的瞬间。<br>每一页都藏着温柔，每一刻都值得被珍藏。</p>
-    <a href="#diary" class="btn">开始写日记 ✨</a>
+  <!-- 顶部导航 -->
+  <nav class="top-nav">
+    <div class="nav-btns" id="nav-btns-container"></div>
+    <button class="nav-btn" id="login-trigger-btn">登录</button>
+  </nav>
+
+  <!-- 一级界面：Hero -->
+  <div class="glass-card hero-card" data-tilt id="hero-page">
+    <h1>乖宝和溪溪的<br>快乐生活</h1>
+    <div class="cover-frame" id="cover-frame">
+      <span class="cover-placeholder" id="cover-placeholder">登录后点击“封面”上传你们的照片</span>
+      <img id="cover-img" src="" alt="Cover">
+      <!-- 动态漂浮物容器 -->
+      <div class="floating-decos" id="deco-container"></div>
+    </div>
   </div>
 
-  <!-- 功能卡片区 -->
-  <div class="grid">
-    <div class="glass-card feature-card" data-tilt>
-      <span class="icon">📔</span>
-      <h3>私密日记</h3>
-      <p>只有你能看到的文字，记录心情，锁住回忆。</p>
-    </div>
-    <div class="glass-card feature-card" data-tilt>
-      <span class="icon">📸</span>
-      <h3>相册时光</h3>
-      <p>照片会说话，把瞬间变成永恒的电影。</p>
-    </div>
-    <div class="glass-card feature-card" data-tilt>
-      <span class="icon">🎵</span>
-      <h3>我们的歌</h3>
-      <p>那些一起听过的旋律，是专属的暗号。</p>
+  <!-- 二级界面：功能卡片 -->
+  <div id="diary-page">
+    <div class="grid">
+      <div class="glass-card feature-card" data-tilt>
+        <span class="icon">📔</span>
+        <h3>私密日记</h3>
+        <p>只有你能看到的文字，记录心情，锁住回忆。</p>
+      </div>
+      <div class="glass-card feature-card" data-tilt>
+        <span class="icon">📸</span>
+        <h3>相册时光</h3>
+        <p>照片会说话，把瞬间变成永恒的电影。</p>
+      </div>
+      <div class="glass-card feature-card" data-tilt>
+        <span class="icon">🎵</span>
+        <h3>我们的歌</h3>
+        <p>那些一起听过的旋律，是专属的暗号。</p>
+      </div>
     </div>
   </div>
+
+  <!-- 登录弹窗 -->
+  <div id="login-modal" class="modal-overlay">
+    <div class="glass-card login-box" data-tilt>
+      <h2>身份验证</h2>
+      <input type="password" id="password-input" placeholder="请输入密码" autocomplete="off">
+      <div class="error-msg" id="error-msg">密码错误，请重试</div>
+      <button id="login-submit-btn">确认</button>
+    </div>
+  </div>
+
+  <!-- 隐藏的文件选择器 -->
+  <input type="file" id="cover-file-input" accept="image/*" style="display:none;">
 
   <script>
-    // 通用 3D 倾斜 + 高光追踪逻辑
-    const cards = document.querySelectorAll('[data-tilt]');
+    // ===== 核心安全与状态管理 =====
+    const CORRECT_PASS = 'XXYY';
+    const AUTH_KEY = 'xins_auth_session';
+    const COVER_KEY = 'xins_cover_base64';
+    
+    const navContainer = document.getElementById('nav-btns-container');
+    const loginTriggerBtn = document.getElementById('login-trigger-btn');
+    const heroPage = document.getElementById('hero-page');
+    const diaryPage = document.getElementById('diary-page');
+    const loginModal = document.getElementById('login-modal');
+    const passwordInput = document.getElementById('password-input');
+    const errorMsg = document.getElementById('error-msg');
+    const loginSubmitBtn = document.getElementById('login-submit-btn');
+    const coverFrame = document.getElementById('cover-frame');
+    const coverImg = document.getElementById('cover-img');
+    const coverPlaceholder = document.getElementById('cover-placeholder');
+    const coverFileInput = document.getElementById('cover-file-input');
+    const decoContainer = document.getElementById('deco-container');
 
-    cards.forEach(card => {
-      card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        // 计算倾斜角度
-        const xAxis = (window.innerWidth / 2 - (rect.left + rect.width / 2)) / 20;
-        const yAxis = (window.innerHeight / 2 - (rect.top + rect.height / 2)) / 20;
-        
-        card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
-        
-        // 高光位置
-        const px = (x / rect.width) * 100;
-        const py = (y / rect.height) * 100;
-        card.style.setProperty('--mouse-x', `${px}%`);
-        card.style.setProperty('--mouse-y', `${py}%`);
-      });
+    // 1. 初始化
+    function initApp() {
+      initAuth();
+      loadCover();
+      generateDecos(); // 生成漂浮物
+    }
 
-      card.addEventListener('mouseleave', () => {
-        card.style.transition = 'transform 0.5s ease, box-shadow 0.3s ease';
-        card.style.transform = `rotateY(0deg) rotateX(0deg)`;
-        setTimeout(() => { card.style.transition = 'transform 0.1s ease-out, box-shadow 0.3s ease'; }, 500);
-      });
-    });
-  </script>
-</body>
-</html>
+    // 2. 登录与导航按钮逻辑
+    function initAuth() {
+      if (sessionStorage.getItem(AUTH_KEY) === 'true') {
+        renderNavButtons();
+      }
+    }
+
+    function renderNavButtons() {
+      navContainer.innerHTML = '';
+      
+      // 创建“进入”按钮
+      const enterBtn = document.createElement('button');
+      enterBtn.className = 'nav-btn';
+      enterBtn.innerText = '进入';
+      enterBtn.onclick = enterDiaryPage;
+      
+      // 创建“封面”按钮
+      const coverBtn = document.createElement('button');
+      coverBtn.className = 'nav-btn';
+      coverBtn.innerText = '封面';
+      coverBtn.onclick = () => coverFileInput.click();
+
+      navContainer.appendChild(enterBtn);
+      navContainer.appendChild(coverBtn);
+      loginTriggerBtn.style.display = 'none';
+      
+      // 绑定动效
+      bindTiltEffect(enterBtn);
+      bindTiltEffect(coverBtn);
+    }
+
+    // 3. 封面上传与持久化
+    coverFileInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target.result;
+        localStorage.setItem(COVER_KEY, base64);
+        applyCover(base64);
+      };
+      reader.readAsDataURL(file);
+    };
+
+    function loadCover() {
+      const savedCover = localStorage.getItem(COVER_KEY);
+      if (savedCover) applyCover(savedCover);
+    }
+
+    function applyCover(src) {
+      coverImg.src = src;
+      coverFrame.classList.add('has-img');
+      coverPlaceholder.style.display = 'none';
+    }
+
+    // 4. 生成纯 CSS 漂浮物 (星星、爱心、四叶草、音符)
+    function generateDecos() {
+      const svgPaths = [
+        'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z', // 爱心
+        'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z', // 星星
+        'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z', // 圆形/小草
+        'M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z' // 音符
+      ];
+      
+      for(let i = 0; i < 15; i++) {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.classList.add('deco');
+        
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', svgPaths[Math.floor(Math.random() * svgPaths.length)]);
+        svg.appendChild(path);
+
+        // 随机样式
+        const size = Math.random() * 20 + 15;
+        svg.style.width = `${size}px`;
+        svg.style.height = `${size}px`;
+        svg.style.left = `${Math.random() * 100}%`;
+        svg.style.bottom = `-${size}px`;
+        svg.style.animationDuration = `${Math.random() * 10 + 10}s`;
+        svg.style.animationDelay = `${Math.random() * 10}s`;
+        
+        decoContainer.appendChild(svg);
+      }
+    }
+
+    // 5. 进入二级界面
+    function enterDiaryPage() {
+      heroPage.style.opacity = '0';
+      heroPage.style.transform = 'rotateX(10deg) scale(0.95)';
+      setTimeout(() => {
+        heroPage.style.display = 'none';
+        diaryPage.style.display = 'block';
+        requestAnimationFrame(() => { diaryPage.style.opacity = '1'; });
+        document.querySelectorAll
