@@ -10,7 +10,6 @@
             --google-blue-hover: #1669d0;
             --google-red: #ea4335;
             --bg-white: #fff;
-            --bg-gray: #f1f3f4;
             --text-primary: #202124;
             --text-secondary: #5f6368;
             --border-color: #dadce0;
@@ -59,7 +58,6 @@
         }
         .save-cover-btn.show { display:inline-block; }
 
-        /* 封面 */
         .cover-wrapper {
             flex:1; position:relative; margin:0 24px 24px; border-radius:28px; overflow:hidden;
             background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 50%, #fce4ec 100%);
@@ -73,9 +71,7 @@
             max-width:100%; max-height:100%; object-fit:contain; border-radius:24px;
             box-shadow: 0 0 30px rgba(255,255,255,0.9), 0 0 60px rgba(255,192,203,0.6), 0 10px 40px rgba(0,0,0,0.1);
         }
-        .cover-placeholder {
-            font-size:6rem; color:#f48fb1; opacity:0.6; z-index:2;
-        }
+        .cover-placeholder { font-size:6rem; color:#f48fb1; opacity:0.6; z-index:2; }
         .floating-elements { position:absolute; inset:0; pointer-events:none; z-index:1; overflow:hidden; }
         .bg-float {
             position: absolute; opacity:0.5;
@@ -97,7 +93,6 @@
             to { transform: translate(5px,-10px) scale(1.15); }
         }
 
-        /* 日记界面 (Gmail风格) */
         .diary-screen { display:none; flex-direction:column; height:100vh; background:var(--bg-white); }
         .diary-screen.active { display:flex; }
         .gmail-header {
@@ -220,15 +215,14 @@
     <script>
         (() => {
             const ADMIN = { user: 'XX', pass: 'YY' };
-            const DB_NAME = 'MyDiaryDB';
-            const STORE_COVER = 'cover';
-            const STORE_ATTACH = 'attachments';
-            const COVER_KEY = 'main';
-            const DIARY_KEY = 'diary_entries';
+            const COVER_STORAGE_KEY = 'cover_image_base64';
+            const DIARY_STORAGE_KEY = 'diary_entries';
             const AUTH_KEY = 'admin_auth';
+            const ATTACH_DB_NAME = 'DiaryAttachDB';
+            const ATTACH_STORE = 'attachments';
 
-            // DOM元素
-            const $ = (id) => document.getElementById(id);
+            // DOM
+            const $ = id => document.getElementById(id);
             const homeScreen = $('homeScreen'), diaryScreen = $('diaryScreen');
             const homeTopRight = $('homeTopRight'), diaryTopRight = $('diaryTopRight');
             const enterDiaryBtn = $('enterDiaryBtn'), backHomeBtn = $('backHomeBtn');
@@ -245,100 +239,104 @@
             const loginModal = $('loginModal'), uname = $('username'), pwd = $('password');
             const loginError = $('loginError'), loginSubmitBtn = $('loginSubmit'), cancelLoginBtn = $('cancelLogin');
 
-            let db = null;
+            let attachDB = null;
             let entries = [], currentId = null;
             let isAdmin = false;
-            let pendingCoverDataUrl = null;
 
-            // ---------- 数据库 ----------
-            function openDB() {
+            // ---------- 附件 IndexedDB ----------
+            function openAttachDB() {
                 return new Promise((resolve, reject) => {
-                    const req = indexedDB.open(DB_NAME, 1);
+                    const req = indexedDB.open(ATTACH_DB_NAME, 1);
                     req.onupgradeneeded = (e) => {
-                        const database = e.target.result;
-                        if (!database.objectStoreNames.contains(STORE_COVER)) database.createObjectStore(STORE_COVER);
-                        if (!database.objectStoreNames.contains(STORE_ATTACH)) database.createObjectStore(STORE_ATTACH);
+                        const db = e.target.result;
+                        if (!db.objectStoreNames.contains(ATTACH_STORE)) db.createObjectStore(ATTACH_STORE);
                     };
                     req.onsuccess = () => resolve(req.result);
                     req.onerror = () => reject(req.error);
                 });
             }
 
-            function dbPut(storeName, key, value) {
+            function dbPut(store, key, value) {
                 return new Promise((resolve, reject) => {
-                    const tx = db.transaction(storeName, 'readwrite');
-                    tx.objectStore(storeName).put(value, key);
+                    const tx = attachDB.transaction(store, 'readwrite');
+                    tx.objectStore(store).put(value, key);
                     tx.oncomplete = resolve;
                     tx.onerror = () => reject(tx.error);
                 });
             }
 
-            function dbGet(storeName, key) {
+            function dbGet(store, key) {
                 return new Promise((resolve, reject) => {
-                    const tx = db.transaction(storeName, 'readonly');
-                    const req = tx.objectStore(storeName).get(key);
+                    const tx = attachDB.transaction(store, 'readonly');
+                    const req = tx.objectStore(store).get(key);
                     req.onsuccess = () => resolve(req.result);
                     req.onerror = () => reject(req.error);
                 });
             }
 
-            function dbDelete(storeName, key) {
-                return new Promise((resolve, reject) => {
-                    const tx = db.transaction(storeName, 'readwrite');
-                    tx.objectStore(storeName).delete(key);
-                    tx.oncomplete = resolve;
-                    tx.onerror = () => reject(tx.error);
-                });
-            }
-
-            // ---------- 封面 ----------
-            async function loadCover() {
+            // ---------- 封面（localStorage + Canvas 压缩） ----------
+            function loadCover() {
+                const dataUrl = localStorage.getItem(COVER_STORAGE_KEY);
                 const oldImg = imageContainer.querySelector('.cover-img');
                 if (oldImg) oldImg.remove();
-                try {
-                    const dataUrl = await dbGet(STORE_COVER, COVER_KEY);
-                    if (dataUrl && typeof dataUrl === 'string') {
-                        coverPlaceholder.style.display = 'none';
-                        const img = document.createElement('img');
-                        img.className = 'cover-img';
-                        img.src = dataUrl;
-                        img.onload = () => updateSurround();
-                        img.onerror = () => { img.remove(); coverPlaceholder.style.display = 'block'; };
-                        imageContainer.appendChild(img);
-                    } else {
-                        coverPlaceholder.style.display = 'block';
-                    }
-                } catch (e) {
+                if (dataUrl) {
+                    coverPlaceholder.style.display = 'none';
+                    const img = document.createElement('img');
+                    img.className = 'cover-img';
+                    img.src = dataUrl;
+                    img.onload = () => updateSurround();
+                    img.onerror = () => { img.remove(); coverPlaceholder.style.display = 'block'; };
+                    imageContainer.appendChild(img);
+                } else {
                     coverPlaceholder.style.display = 'block';
                 }
             }
 
-            function previewCover(file) {
+            function compressAndPreview(file) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    pendingCoverDataUrl = e.target.result;
-                    const oldImg = imageContainer.querySelector('.cover-img');
-                    if (oldImg) oldImg.remove();
-                    const img = document.createElement('img');
-                    img.className = 'cover-img';
-                    img.src = pendingCoverDataUrl;
-                    imageContainer.appendChild(img);
-                    coverPlaceholder.style.display = 'none';
-                    saveCoverBtn.classList.add('show');
-                    updateSurround();
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 1200;
+                        let width = img.width, height = img.height;
+                        if (width > MAX_WIDTH) {
+                            height = height * (MAX_WIDTH / width);
+                            width = MAX_WIDTH;
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                        // 预览
+                        const oldImg = imageContainer.querySelector('.cover-img');
+                        if (oldImg) oldImg.remove();
+                        const previewImg = document.createElement('img');
+                        previewImg.className = 'cover-img';
+                        previewImg.src = dataUrl;
+                        imageContainer.appendChild(previewImg);
+                        coverPlaceholder.style.display = 'none';
+                        // 暂存待保存
+                        window._pendingCoverDataUrl = dataUrl;
+                        saveCoverBtn.classList.add('show');
+                        updateSurround();
+                    };
+                    img.src = e.target.result;
                 };
                 reader.readAsDataURL(file);
             }
 
-            async function saveCover() {
-                if (!pendingCoverDataUrl) return;
+            function saveCover() {
+                const dataUrl = window._pendingCoverDataUrl;
+                if (!dataUrl) return;
                 try {
-                    await dbPut(STORE_COVER, COVER_KEY, pendingCoverDataUrl);
-                    pendingCoverDataUrl = null;
+                    localStorage.setItem(COVER_STORAGE_KEY, dataUrl);
+                    window._pendingCoverDataUrl = null;
                     saveCoverBtn.classList.remove('show');
                     alert('封面已保存');
                 } catch (e) {
-                    alert('保存失败，可能是存储空间不足');
+                    alert('保存失败，可能是存储空间不足，请使用更小的图片');
                 }
             }
 
@@ -383,19 +381,19 @@
                 }
             }
 
-            // 日记功能
+            // ---------- 日记功能 ----------
             function loadEntries() {
-                const stored = localStorage.getItem(DIARY_KEY);
+                const stored = localStorage.getItem(DIARY_STORAGE_KEY);
                 entries = stored ? JSON.parse(stored) : [];
             }
-            function saveEntries() { localStorage.setItem(DIARY_KEY, JSON.stringify(entries)); }
+            function saveEntries() { localStorage.setItem(DIARY_STORAGE_KEY, JSON.stringify(entries)); }
 
             function renderList() {
                 if (!entries.length) {
                     diaryList.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-secondary);">暂无日记</div>';
                     return;
                 }
-                const sorted = [...entries].sort((a,b)=> b.date - a.date);
+                const sorted = [...entries].sort((a,b) => b.date - a.date);
                 diaryList.innerHTML = sorted.map(e => `
                     <div class="list-item${e.id===currentId?' active':''}" data-id="${e.id}">
                         <div style="font-size:12px;color:var(--text-secondary);">${new Date(e.date).toLocaleDateString()}</div>
@@ -407,12 +405,12 @@
 
             async function saveAttachment(id, blob, name) {
                 const attId = `att_${id}_${Date.now()}`;
-                await dbPut(STORE_ATTACH, attId, { blob, name });
+                await dbPut(ATTACH_STORE, attId, { blob, name });
                 return attId;
             }
 
             async function getAttachment(attId) {
-                return await dbGet(STORE_ATTACH, attId);
+                return await dbGet(ATTACH_STORE, attId);
             }
 
             function serializeContent() {
@@ -553,11 +551,9 @@
                 document.execCommand('insertHTML', false, a.outerHTML);
             }
 
-            // 登录与UI
+            // ---------- 登录与UI ----------
             function updateUI() {
-                const isAdminNow = localStorage.getItem(AUTH_KEY) === 'true';
-                isAdmin = isAdminNow;
-
+                isAdmin = localStorage.getItem(AUTH_KEY) === 'true';
                 homeTopRight.innerHTML = '';
                 if (isAdmin) {
                     const changeBtn = document.createElement('button');
@@ -588,8 +584,9 @@
                     };
                 }
 
-                const adminBtns = [newDiaryBtn, saveDiaryBtn, insertImageBtn, attachFileBtn, deleteDiaryBtn];
+                const adminBtns = [newDiaryBtn, saveDiaryBtn, insertImageBtn, attachFileBtn];
                 adminBtns.forEach(b => b.classList.toggle('show', isAdmin));
+                deleteDiaryBtn.classList.toggle('show', isAdmin && currentId !== null);
                 diaryTitle.readOnly = !isAdmin;
                 diaryContent.contentEditable = isAdmin ? 'true' : 'false';
             }
@@ -605,7 +602,6 @@
                 }
             };
             cancelLoginBtn.onclick = () => loginModal.classList.remove('active');
-            uname.addEventListener('keydown', e => e.key==='Enter' && pwd.focus());
             pwd.addEventListener('keydown', e => e.key==='Enter' && loginSubmitBtn.click());
 
             function enterDiary() {
@@ -629,7 +625,7 @@
                 const file = coverFileInput.files[0];
                 if (!file) return;
                 if (file.size > 10*1024*1024) return alert('图片不能超过10MB');
-                previewCover(file);
+                compressAndPreview(file);
                 coverFileInput.value = '';
             };
             saveCoverBtn.onclick = saveCover;
@@ -684,12 +680,11 @@
             // 初始化
             (async () => {
                 try {
-                    db = await openDB();
+                    attachDB = await openAttachDB();
                 } catch (e) {
-                    alert('浏览器不支持本地数据库，请使用现代浏览器');
-                    return;
+                    console.warn('附件数据库打开失败，附件功能可能不可用');
                 }
-                await loadCover();
+                loadCover();
                 initFloating();
                 loadEntries();
                 updateUI();
