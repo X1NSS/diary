@@ -169,7 +169,6 @@
     </style>
 </head>
 <body>
-    <!-- 首页 -->
     <div class="home-screen" id="homeScreen">
         <div class="top-bar">
             <div class="brand-link" id="enterDiaryBtn">乖宝和溪溪的快乐生活</div>
@@ -187,7 +186,6 @@
         </div>
     </div>
 
-    <!-- 日记界面 -->
     <div class="diary-screen" id="diaryScreen">
         <div class="gmail-header">
             <div class="gmail-menu-btn" id="backHomeBtn">←</div>
@@ -226,7 +224,6 @@
         </div>
     </div>
 
-    <!-- 登录弹窗 -->
     <div class="modal-overlay" id="loginModal">
         <div class="modal-card">
             <h2>管理员登录</h2>
@@ -322,31 +319,36 @@
                 currentObjectURLs = [];
             }
 
-            // ========= 封面加载（修复移动端） =========
+            // 将 File/Blob 转换为 ArrayBuffer
+            function readFileAsArrayBuffer(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsArrayBuffer(file);
+                });
+            }
+
+            // 封面加载（使用 ArrayBuffer 重建 Blob，兼容移动端）
             async function loadCoverDisplay() {
-                // 清除旧图片及URL
                 revokeURLs();
                 const oldImg = imageContainer.querySelector('.cover-img');
                 if (oldImg) oldImg.remove();
 
                 try {
-                    const blob = await idbGet(coverDB, STORAGE.coverStore, STORAGE.coverKey);
-                    if (blob) {
+                    const arrayBuffer = await idbGet(coverDB, STORAGE.coverStore, STORAGE.coverKey);
+                    if (arrayBuffer) {
                         coverPlaceholder.style.display = 'none';
+                        const blob = new Blob([arrayBuffer], { type: 'image/jpeg' }); // 类型可动态获取，这里先用通用
                         const url = URL.createObjectURL(blob);
                         currentObjectURLs.push(url);
                         const img = document.createElement('img');
                         img.className = 'cover-img';
                         img.alt = '封面';
-                        // 设置加载成功/失败回调
-                        img.onload = () => {
-                            updateSurroundDecorations();
-                        };
+                        img.onload = () => updateSurroundDecorations();
                         img.onerror = () => {
-                            // 加载失败则回退到占位符
                             coverPlaceholder.style.display = 'block';
                             img.remove();
-                            alert('封面图片加载失败，可能是浏览器限制，请尝试重新上传。');
                         };
                         img.src = url;
                         imageContainer.appendChild(img);
@@ -354,7 +356,7 @@
                         coverPlaceholder.style.display = 'block';
                     }
                 } catch (e) {
-                    console.error('封面加载出错:', e);
+                    console.error('封面加载失败:', e);
                     coverPlaceholder.style.display = 'block';
                 }
             }
@@ -376,17 +378,17 @@
             async function saveCoverToDB() {
                 if (!pendingCoverFile) return;
                 try {
-                    await idbPut(coverDB, STORAGE.coverStore, STORAGE.coverKey, pendingCoverFile);
+                    const arrayBuffer = await readFileAsArrayBuffer(pendingCoverFile);
+                    await idbPut(coverDB, STORAGE.coverStore, STORAGE.coverKey, arrayBuffer);
                     pendingCoverFile = null;
                     saveCoverBtn.classList.remove('show');
                     await loadCoverDisplay();
-                    alert('封面已保存！刷新后仍然可见。');
+                    alert('封面已保存！');
                 } catch (e) {
-                    alert('封面保存失败，请检查浏览器存储空间或权限。');
+                    alert('封面保存失败：' + e.message);
                 }
             }
 
-            // 背景浮动
             function createFloatingBg() {
                 floatingEls.innerHTML = '';
                 const emojis = ['🌸', '✨', '🪶', '💮', '🌺', '⭐', '❀', '✿'];
@@ -443,7 +445,7 @@
                 if (!homeScreen.classList.contains('hidden')) updateSurroundDecorations();
             });
 
-            // 日记功能（保持不变，但为了移动端性能取消了部分动画）
+            // 日记功能（不变）
             function loadEntries() { entries = JSON.parse(localStorage.getItem(STORAGE.diary) || '[]'); }
             function saveEntries() { localStorage.setItem(STORAGE.diary, JSON.stringify(entries)); }
 
@@ -778,7 +780,6 @@
                     attachDB = await openDB(STORAGE.attachDB, 1, STORAGE.attachStore);
                 } catch (e) {
                     alert('浏览器不支持本地存储，部分功能可能无法使用。');
-                    console.error(e);
                 }
                 await loadCoverDisplay();
                 createFloatingBg();
