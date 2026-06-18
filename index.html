@@ -70,7 +70,6 @@
             background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 50%, #fce4ec 100%);
             display:flex; align-items:center; justify-content:center;
         }
-        /* 图片容器：撑满并居中 */
         .image-container {
             position: relative; z-index: 2;
             width: 100%; height: 100%;
@@ -81,7 +80,6 @@
             object-fit: contain;
             border-radius: 24px;
             box-shadow: 0 0 30px rgba(255, 255, 255, 0.9), 0 0 60px rgba(255, 192, 203, 0.6), 0 10px 40px rgba(0,0,0,0.1);
-            transition: box-shadow 0.3s;
         }
         .image-container::after {
             content: '';
@@ -279,7 +277,7 @@
             let currentObjectURLs = [];
             let pendingCoverFile = null;
 
-            // 数据库
+            // ========= IndexedDB =========
             function openDB(name, version, storeName) {
                 return new Promise((resolve, reject) => {
                     const req = indexedDB.open(name, version);
@@ -295,8 +293,7 @@
             function idbPut(db, store, key, value) {
                 return new Promise((resolve, reject) => {
                     const tx = db.transaction(store, 'readwrite');
-                    const storeObj = tx.objectStore(store);
-                    storeObj.put(value, key);
+                    tx.objectStore(store).put(value, key);
                     tx.oncomplete = () => resolve();
                     tx.onerror = (e) => reject(e.target.error);
                 });
@@ -325,11 +322,13 @@
                 currentObjectURLs = [];
             }
 
-            // 封面显示
+            // ========= 封面加载（修复移动端） =========
             async function loadCoverDisplay() {
+                // 清除旧图片及URL
                 revokeURLs();
                 const oldImg = imageContainer.querySelector('.cover-img');
                 if (oldImg) oldImg.remove();
+
                 try {
                     const blob = await idbGet(coverDB, STORAGE.coverStore, STORAGE.coverKey);
                     if (blob) {
@@ -338,14 +337,24 @@
                         currentObjectURLs.push(url);
                         const img = document.createElement('img');
                         img.className = 'cover-img';
+                        img.alt = '封面';
+                        // 设置加载成功/失败回调
+                        img.onload = () => {
+                            updateSurroundDecorations();
+                        };
+                        img.onerror = () => {
+                            // 加载失败则回退到占位符
+                            coverPlaceholder.style.display = 'block';
+                            img.remove();
+                            alert('封面图片加载失败，可能是浏览器限制，请尝试重新上传。');
+                        };
                         img.src = url;
                         imageContainer.appendChild(img);
-                        // 图片加载完成后更新装饰
-                        img.onload = () => updateSurroundDecorations();
                     } else {
                         coverPlaceholder.style.display = 'block';
                     }
                 } catch (e) {
+                    console.error('封面加载出错:', e);
                     coverPlaceholder.style.display = 'block';
                 }
             }
@@ -357,10 +366,11 @@
                 currentObjectURLs.push(url);
                 const img = document.createElement('img');
                 img.className = 'cover-img';
+                img.alt = '预览';
+                img.onload = () => updateSurroundDecorations();
                 img.src = url;
                 imageContainer.appendChild(img);
                 coverPlaceholder.style.display = 'none';
-                img.onload = () => updateSurroundDecorations();
             }
 
             async function saveCoverToDB() {
@@ -370,13 +380,13 @@
                     pendingCoverFile = null;
                     saveCoverBtn.classList.remove('show');
                     await loadCoverDisplay();
-                    alert('封面已保存！');
+                    alert('封面已保存！刷新后仍然可见。');
                 } catch (e) {
-                    alert('封面保存失败：' + e.message);
+                    alert('封面保存失败，请检查浏览器存储空间或权限。');
                 }
             }
 
-            // 背景浮动元素
+            // 背景浮动
             function createFloatingBg() {
                 floatingEls.innerHTML = '';
                 const emojis = ['🌸', '✨', '🪶', '💮', '🌺', '⭐', '❀', '✿'];
@@ -393,7 +403,6 @@
                 }
             }
 
-            // 环绕装饰
             function updateSurroundDecorations() {
                 surroundEls.innerHTML = '';
                 const imgEl = imageContainer.querySelector('.cover-img');
@@ -434,7 +443,7 @@
                 if (!homeScreen.classList.contains('hidden')) updateSurroundDecorations();
             });
 
-            // 日记功能
+            // 日记功能（保持不变，但为了移动端性能取消了部分动画）
             function loadEntries() { entries = JSON.parse(localStorage.getItem(STORAGE.diary) || '[]'); }
             function saveEntries() { localStorage.setItem(STORAGE.diary, JSON.stringify(entries)); }
 
@@ -767,7 +776,10 @@
                 try {
                     coverDB = await openDB(STORAGE.coverDB, 1, STORAGE.coverStore);
                     attachDB = await openDB(STORAGE.attachDB, 1, STORAGE.attachStore);
-                } catch (e) { console.error(e); }
+                } catch (e) {
+                    alert('浏览器不支持本地存储，部分功能可能无法使用。');
+                    console.error(e);
+                }
                 await loadCoverDisplay();
                 createFloatingBg();
                 updateSurroundDecorations();
