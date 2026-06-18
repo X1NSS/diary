@@ -14,89 +14,205 @@
             --text-primary: #202124;
             --text-secondary: #5f6368;
             --border-color: #dadce0;
-            --shadow-2: 0 1px 3px 0 rgba(60,64,67,.3), 0 4px 8px 3px rgba(60,64,67,.15);
         }
         * { margin:0; padding:0; box-sizing:border-box; }
+
+        /* 液态玻璃文字阴影动画 */
+        @keyframes liquidGlassText {
+            0% { text-shadow: 0 0 8px rgba(255,255,255,0.4), 0 2px 8px rgba(26,115,232,0.3); }
+            25% { text-shadow: 0 2px 12px rgba(255,255,255,0.5), 0 4px 12px rgba(26,115,232,0.4); }
+            50% { text-shadow: 0 4px 16px rgba(255,255,255,0.6), 0 6px 16px rgba(26,115,232,0.5); }
+            75% { text-shadow: 0 2px 12px rgba(255,255,255,0.5), 0 4px 12px rgba(26,115,232,0.4); }
+            100% { text-shadow: 0 0 8px rgba(255,255,255,0.4), 0 2px 8px rgba(26,115,232,0.3); }
+        }
+        @keyframes liquidGlassBox {
+            0% { box-shadow: 0 4px 12px rgba(26,115,232,0.15), 0 1px 4px rgba(0,0,0,0.08); }
+            50% { box-shadow: 0 8px 24px rgba(26,115,232,0.25), 0 2px 8px rgba(0,0,0,0.12); }
+            100% { box-shadow: 0 4px 12px rgba(26,115,232,0.15), 0 1px 4px rgba(0,0,0,0.08); }
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background: #fff; color: var(--text-primary); height: 100vh; overflow: hidden;
+            /* 全局文字应用液态阴影 */
+            animation: liquidGlassText 4s infinite ease-in-out;
         }
 
         .home-screen { width:100%; height:100vh; display:flex; flex-direction:column; background: #fff; position: relative; }
         .home-screen.hidden { display:none; }
-        .top-bar { display:flex; align-items:center; justify-content:space-between; padding:12px 24px; height:60px; z-index:10; }
+        .top-bar { display:flex; align-items:center; justify-content:space-between; padding:12px 24px; height:60px; z-index:10; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); }
         .brand-link { text-decoration:none; color:var(--text-primary); font-size:14px; font-weight:500; padding:8px 12px; border-radius:20px; cursor:pointer; transition:background 0.2s; }
         .brand-link:hover { background:rgba(60,64,67,0.08); }
         .top-right { display:flex; gap:12px; align-items:center; }
         .btn-login, .btn-logout {
             background:var(--google-blue); color:white; border:none; font-size:14px; font-weight:500;
-            padding:8px 22px; border-radius:4px; cursor:pointer; transition:background 0.2s;
+            padding:8px 22px; border-radius:4px; cursor:pointer; transition:background 0.2s, box-shadow 0.3s;
+            animation: liquidGlassBox 4s infinite ease-in-out;
         }
         .btn-logout { background:transparent; color:var(--google-blue); border:1px solid var(--border-color); }
         .cover-change-btn {
             background:transparent; border:1px solid var(--border-color); color:var(--text-secondary);
-            padding:7px 16px; border-radius:4px; cursor:pointer; display:flex; align-items:center; gap:6px; visibility:hidden;
+            padding:7px 16px; border-radius:4px; cursor:pointer; display:flex; align-items:center; gap:6px;
+            visibility:hidden; font-size:13px; animation: liquidGlassBox 4s infinite ease-in-out;
         }
         .cover-change-btn.visible { visibility:visible; }
+        .save-cover-btn {
+            background: var(--google-blue); color: white; border: none; padding: 6px 16px;
+            border-radius: 4px; cursor: pointer; display: none; margin-left: 8px; font-size: 13px;
+            animation: liquidGlassBox 4s infinite ease-in-out;
+        }
+        .save-cover-btn.show { display: inline-block; }
 
+        /* 封面容器 */
         .cover-wrapper {
             flex:1; position:relative; margin:0 24px 24px; border-radius:28px; overflow:hidden;
             background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 50%, #fce4ec 100%);
             display:flex; align-items:center; justify-content:center;
         }
+        .image-container {
+            position: relative; z-index: 2;
+            display: flex; align-items: center; justify-content: center;
+            max-width: 100%; max-height: 100%;
+        }
         .cover-img {
-            max-width:100%; max-height:100%; object-fit:contain; display:none;
-            z-index:2; position:relative;
+            display: block;
+            max-width: 100%; max-height: 100%; object-fit: contain;
+            border-radius: 24px;
+            box-shadow: 
+                0 0 30px rgba(255, 255, 255, 0.9),
+                0 0 60px rgba(255, 192, 203, 0.6),
+                0 10px 40px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s;
+        }
+        .image-container::after {
+            content: '';
+            position: absolute;
+            inset: -20px;
+            background: radial-gradient(ellipse at center, transparent 40%, rgba(252,228,236,0.7) 100%);
+            pointer-events: none;
+            border-radius: 50%;
+            z-index: -1;
         }
         .cover-placeholder {
-            font-size:6rem; color:#f48fb1; opacity:0.6; z-index:2;
+            font-size:6rem; color:#f48fb1; opacity:0.6; z-index:2; position: relative;
+            animation: liquidGlassText 4s infinite ease-in-out;
         }
-        .floating-elements { position:absolute; inset:0; pointer-events:none; z-index:1; }
+        .floating-elements {
+            position:absolute; inset:0; pointer-events:none; z-index:1; overflow: hidden;
+        }
+        .floating-elements .bg-float {
+            position: absolute;
+            opacity: 0.5;
+            animation-name: bgFloat;
+            animation-duration: 8s;
+            animation-iteration-count: infinite;
+            animation-timing-function: ease-in-out;
+        }
+        @keyframes bgFloat {
+            0% { transform: translateY(0px) rotate(0deg); opacity: 0.5; }
+            50% { transform: translateY(-20px) rotate(5deg); opacity: 0.9; }
+            100% { transform: translateY(0px) rotate(0deg); opacity: 0.5; }
+        }
+        .surround-elements {
+            position: absolute; inset: 0; pointer-events: none; z-index: 3; overflow: visible;
+        }
+        .surround-elements span {
+            position: absolute;
+            font-size: 22px;
+            filter: drop-shadow(0 0 6px rgba(255,255,255,0.9));
+            animation: floatSurround 4s infinite alternate ease-in-out;
+        }
+        @keyframes floatSurround {
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(5px, -10px) scale(1.15); }
+        }
 
+        /* 日记界面 */
         .diary-screen { display:none; flex-direction:column; height:100vh; background:var(--bg-white); }
         .diary-screen.active { display:flex; }
         .gmail-header {
             height:64px; display:flex; align-items:center; padding:0 16px;
             border-bottom:1px solid var(--border-color); gap:12px;
+            animation: liquidGlassBox 4s infinite ease-in-out;
         }
         .gmail-menu-btn {
             width:40px; height:40px; display:flex; align-items:center; justify-content:center;
             border-radius:50%; cursor:pointer; font-size:20px;
+            animation: liquidGlassText 4s infinite ease-in-out;
         }
-        .gmail-logo { font-size:22px; display:flex; align-items:center; gap:8px; }
+        .gmail-logo { font-size:22px; display:flex; align-items:center; gap:8px; animation: liquidGlassText 4s infinite ease-in-out; }
         .gmail-logo span { color:var(--google-blue); }
         .gmail-actions { margin-left:auto; display:flex; gap:12px; align-items:center; }
         .gmail-body { display:flex; flex:1; overflow:hidden; }
         .sidebar-left { width:240px; border-right:1px solid var(--border-color); display:flex; flex-direction:column; padding:8px 0; }
         .compose-btn {
             margin:8px 16px; background:var(--google-blue); color:white; border:none;
-            border-radius:16px; padding:12px 24px; font-size:14px; cursor:pointer; display:flex; align-items:center; gap:8px;
+            border-radius:16px; padding:12px 24px; font-size:14px; cursor:pointer;
+            display:flex; align-items:center; gap:8px;
+            animation: liquidGlassBox 4s infinite ease-in-out;
         }
         .compose-btn:hover { background:var(--google-blue-hover); }
         .middle-list { width:360px; border-right:1px solid var(--border-color); overflow-y:auto; }
-        .list-item { padding:14px 16px; border-bottom:1px solid var(--border-color); cursor:pointer; }
+        .list-item {
+            padding:14px 16px; border-bottom:1px solid var(--border-color); cursor:pointer;
+            animation: liquidGlassText 4s infinite ease-in-out;
+        }
         .list-item.active { background:#e8f0fe; }
         .right-panel { flex:1; overflow-y:auto; display:flex; flex-direction:column; }
         .editor-container { display:none; flex-direction:column; height:100%; }
         .editor-header { padding:20px 24px 12px; border-bottom:1px solid var(--border-color); }
-        .title-input { border:none; font-size:22px; width:100%; outline:none; background:transparent; }
+        .title-input {
+            border:none; font-size:22px; width:100%; outline:none; background:transparent;
+            animation: liquidGlassText 4s infinite ease-in-out;
+        }
         .editor-body { flex:1; padding:16px 24px; overflow-y:auto; }
-        .content-editable { min-height:300px; outline:none; font-size:15px; line-height:1.6; }
+        .content-editable {
+            min-height:300px; outline:none; font-size:15px; line-height:1.6;
+            animation: liquidGlassText 4s infinite ease-in-out;
+        }
         .content-editable img { max-width:100%; border-radius:8px; margin:8px 0; }
         .content-editable a { color:var(--google-blue); }
         .editor-footer { padding:12px 24px; border-top:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; }
-        .save-btn { background:var(--google-blue); color:white; border:none; padding:8px 24px; border-radius:4px; cursor:pointer; }
-        .delete-btn { color:var(--google-red); background:none; border:1px solid var(--border-color); padding:8px 16px; border-radius:4px; cursor:pointer; }
-        .file-upload-btn { background:none; border:1px solid var(--border-color); padding:8px 16px; border-radius:4px; cursor:pointer; }
+        .save-btn {
+            background:var(--google-blue); color:white; border:none; padding:8px 24px;
+            border-radius:4px; cursor:pointer;
+            animation: liquidGlassBox 4s infinite ease-in-out;
+        }
+        .delete-btn {
+            color:var(--google-red); background:none; border:1px solid var(--border-color);
+            padding:8px 16px; border-radius:4px; cursor:pointer;
+            animation: liquidGlassBox 4s infinite ease-in-out;
+        }
+        .file-upload-btn {
+            background:none; border:1px solid var(--border-color); padding:8px 16px;
+            border-radius:4px; cursor:pointer;
+            animation: liquidGlassBox 4s infinite ease-in-out;
+        }
 
-        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:100; opacity:0; pointer-events:none; }
+        .modal-overlay {
+            position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex;
+            align-items:center; justify-content:center; z-index:100; opacity:0;
+            pointer-events:none; transition: opacity 0.2s;
+        }
         .modal-overlay.active { opacity:1; pointer-events:auto; }
-        .modal-card { background:white; border-radius:8px; padding:40px 32px; width:400px; box-shadow:0 24px 38px rgba(0,0,0,0.2); }
-        .modal-card h2 { font-size:24px; margin-bottom:24px; font-weight:400; }
-        .input-field { width:100%; padding:12px; margin-bottom:16px; border:1px solid var(--border-color); border-radius:4px; font-size:14px; }
+        .modal-card {
+            background:white; border-radius:8px; padding:40px 32px; width:400px;
+            box-shadow:0 24px 38px rgba(0,0,0,0.2);
+            animation: liquidGlassBox 4s infinite ease-in-out;
+        }
+        .modal-card h2 { font-size:24px; margin-bottom:24px; font-weight:400; animation: liquidGlassText 4s infinite ease-in-out; }
+        .input-field {
+            width:100%; padding:12px; margin-bottom:16px; border:1px solid var(--border-color);
+            border-radius:4px; font-size:14px; outline:none;
+            animation: liquidGlassText 4s infinite ease-in-out;
+        }
         .modal-actions { display:flex; justify-content:flex-end; gap:12px; margin-top:24px; }
-        .btn-cancel { background:none; border:none; color:var(--text-secondary); padding:10px 16px; cursor:pointer; font-weight:500; }
-        .error-text { color:var(--google-red); font-size:13px; display:none; margin-bottom:12px; }
+        .btn-cancel {
+            background:none; border:none; color:var(--text-secondary); padding:10px 16px;
+            cursor:pointer; font-weight:500;
+            animation: liquidGlassText 4s infinite ease-in-out;
+        }
+        .error-text { color:var(--google-red); font-size:13px; display:none; margin-bottom:12px; animation: liquidGlassText 4s infinite ease-in-out; }
     </style>
 </head>
 <body>
@@ -108,7 +224,13 @@
         </div>
         <div class="cover-wrapper" id="coverWrapper">
             <div class="floating-elements" id="floatingElements"></div>
-            <div class="cover-placeholder" id="coverPlaceholder">📷</div>
+            <div class="image-container" id="imageContainer">
+                <div class="cover-placeholder" id="coverPlaceholder">📷</div>
+            </div>
+            <div class="surround-elements" id="surroundElements"></div>
+        </div>
+        <div style="text-align:center; padding: 8px;">
+            <button class="save-cover-btn" id="saveCoverBtn">保存封面</button>
         </div>
     </div>
 
@@ -154,7 +276,7 @@
     <!-- 登录弹窗 -->
     <div class="modal-overlay" id="loginModal">
         <div class="modal-card">
-            <h2>登录</h2>
+            <h2>管理员登录</h2>
             <input type="text" class="input-field" id="username" placeholder="用户名" autocomplete="off">
             <input type="password" class="input-field" id="password" placeholder="密码">
             <div class="error-text" id="loginError">用户名或密码错误</div>
@@ -180,7 +302,6 @@
                 attachStore: 'attachments'
             };
 
-            // DOM 元素
             const $ = id => document.getElementById(id);
             const homeScreen = $('homeScreen'), diaryScreen = $('diaryScreen'),
                 homeTopRight = $('homeTopRight'), diaryTopRight = $('diaryTopRight'),
@@ -193,14 +314,17 @@
                 imageInput = $('imageInput'), fileInput = $('fileInput'),
                 coverFileInput = $('coverFileInput'), coverWrapper = $('coverWrapper'),
                 coverPlaceholder = $('coverPlaceholder'), floatingEls = $('floatingElements'),
+                imageContainer = $('imageContainer'), surroundEls = $('surroundElements'),
+                saveCoverBtn = $('saveCoverBtn'),
                 loginModal = $('loginModal'), uname = $('username'), pwd = $('password'),
                 loginError = $('loginError'), loginSubmit = $('loginSubmit'), cancelLogin = $('cancelLogin');
 
             let entries = [], currentId = null, isAdmin = false;
             let coverDB = null, attachDB = null;
             let currentObjectURLs = [];
+            let pendingCoverFile = null;
 
-            // ========== 可靠的 IndexedDB 操作 ==========
+            // 数据库操作
             function openDB(name, version, storeName) {
                 return new Promise((resolve, reject) => {
                     const req = indexedDB.open(name, version);
@@ -210,7 +334,6 @@
                     };
                     req.onsuccess = () => resolve(req.result);
                     req.onerror = () => reject(req.error);
-                    req.onblocked = () => console.warn('Database open blocked');
                 });
             }
 
@@ -221,7 +344,6 @@
                     storeObj.put(value, key);
                     tx.oncomplete = () => resolve();
                     tx.onerror = (e) => reject(e.target.error);
-                    tx.onabort = () => reject(new Error('Transaction aborted'));
                 });
             }
 
@@ -248,11 +370,11 @@
                 currentObjectURLs = [];
             }
 
-            // ========== 封面处理（持久化到 IndexedDB） ==========
+            // 封面显示
             async function loadCoverDisplay() {
                 revokeURLs();
-                const existingImg = coverWrapper.querySelector('.cover-img');
-                if (existingImg) existingImg.remove();
+                const oldImg = imageContainer.querySelector('.cover-img');
+                if (oldImg) oldImg.remove();
                 try {
                     const blob = await idbGet(coverDB, STORAGE.coverStore, STORAGE.coverKey);
                     if (blob) {
@@ -262,61 +384,123 @@
                         const img = document.createElement('img');
                         img.className = 'cover-img';
                         img.src = url;
-                        img.style.display = 'block';
-                        coverWrapper.appendChild(img);
+                        imageContainer.appendChild(img);
                     } else {
                         coverPlaceholder.style.display = 'block';
                     }
                 } catch (e) {
-                    console.error('Cover load error:', e);
                     coverPlaceholder.style.display = 'block';
                 }
+                setTimeout(updateSurroundDecorations, 100);
             }
 
-            async function saveCover(file) {
-                if (file.size > 10 * 1024 * 1024) {
-                    alert('封面图片不能超过 10MB');
-                    return;
-                }
+            function previewCoverFile(file) {
+                const oldImg = imageContainer.querySelector('.cover-img');
+                if (oldImg) oldImg.remove();
+                const url = URL.createObjectURL(file);
+                currentObjectURLs.push(url);
+                const img = document.createElement('img');
+                img.className = 'cover-img';
+                img.src = url;
+                imageContainer.appendChild(img);
+                coverPlaceholder.style.display = 'none';
+                setTimeout(updateSurroundDecorations, 100);
+            }
+
+            async function saveCoverToDB() {
+                if (!pendingCoverFile) return;
                 try {
-                    await idbPut(coverDB, STORAGE.coverStore, STORAGE.coverKey, file);
+                    await idbPut(coverDB, STORAGE.coverStore, STORAGE.coverKey, pendingCoverFile);
+                    pendingCoverFile = null;
+                    saveCoverBtn.classList.remove('show');
                     await loadCoverDisplay();
-                    // 可选提示
+                    alert('封面已保存！');
                 } catch (e) {
-                    console.error('Cover save error:', e);
-                    alert('封面保存失败，请检查浏览器存储空间或权限');
+                    alert('封面保存失败：' + e.message);
                 }
             }
 
-            // 动态爱心/气球
-            function createFloatingElements() {
+            // 动态背景元素
+            function createFloatingBg() {
                 floatingEls.innerHTML = '';
-                const emojis = ['❤️', '🎈', '💖', '🌸', '✨', '💕', '🎀', '💗'];
-                for (let i = 0; i < 18; i++) {
+                const emojis = ['🌸', '✨', '🪶', '💮', '🌺', '⭐', '❀', '✿'];
+                for (let i = 0; i < 24; i++) {
                     const span = document.createElement('span');
+                    span.className = 'bg-float';
                     span.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-                    span.style.cssText = `
-                        position:absolute; font-size:${16 + Math.random()*24}px;
-                        left:${Math.random()*100}%; top:${Math.random()*100}%;
-                        opacity:0.7; animation: float${i%4} ${4+Math.random()*6}s infinite ease-in-out;
-                        animation-delay:${Math.random()*5}s;
-                    `;
+                    span.style.left = Math.random()*100 + '%';
+                    span.style.top = Math.random()*100 + '%';
+                    span.style.fontSize = (20 + Math.random()*24) + 'px';
+                    span.style.animationDelay = Math.random()*5 + 's';
+                    span.style.animationDuration = (6 + Math.random()*8) + 's';
                     floatingEls.appendChild(span);
                 }
-                if (!document.getElementById('float-styles')) {
-                    const style = document.createElement('style');
-                    style.id = 'float-styles';
-                    style.textContent = `
-                        @keyframes float0 { 0%{transform:translateY(0px) rotate(0deg);} 50%{transform:translateY(-20px) rotate(5deg);} 100%{transform:translateY(0px) rotate(0deg);} }
-                        @keyframes float1 { 0%{transform:translateY(0px) rotate(0deg);} 50%{transform:translateY(-30px) rotate(-5deg);} 100%{transform:translateY(0px) rotate(0deg);} }
-                        @keyframes float2 { 0%{transform:translate(0,0) scale(1);} 50%{transform:translate(10px,-15px) scale(1.1);} 100%{transform:translate(0,0) scale(1);} }
-                        @keyframes float3 { 0%{transform:translateY(0px); opacity:0.7;} 50%{transform:translateY(-25px); opacity:1;} 100%{transform:translateY(0px); opacity:0.7;} }
-                    `;
-                    document.head.appendChild(style);
-                }
             }
 
-            // ========== 附件管理（IndexedDB） ==========
+            // 环绕装饰
+            function updateSurroundDecorations() {
+                surroundEls.innerHTML = '';
+                const imgEl = imageContainer.querySelector('.cover-img');
+                if (!imgEl) return;
+                const imgRect = imgEl.getBoundingClientRect();
+                const wrapperRect = coverWrapper.getBoundingClientRect();
+                const imgLeft = imgRect.left - wrapperRect.left;
+                const imgTop = imgRect.top - wrapperRect.top;
+                const imgWidth = imgRect.width;
+                const imgHeight = imgRect.height;
+
+                const decorations = ['🌸', '✨', '💮', '🌺', '⭐', '🪶', '💖', '🎀'];
+                const positions = [
+                    { x: imgLeft - 15, y: imgTop - 15 },
+                    { x: imgLeft + imgWidth/2 - 20, y: imgTop - 20 },
+                    { x: imgLeft + imgWidth - 15, y: imgTop - 10 },
+                    { x: imgLeft + imgWidth - 10, y: imgTop + imgHeight/2 - 20 },
+                    { x: imgLeft + imgWidth - 15, y: imgTop + imgHeight - 15 },
+                    { x: imgLeft + imgWidth/2 - 20, y: imgTop + imgHeight - 5 },
+                    { x: imgLeft - 15, y: imgTop + imgHeight - 15 },
+                    { x: imgLeft - 20, y: imgTop + imgHeight/2 - 20 },
+                    { x: imgLeft - 10, y: imgTop + 20 },
+                    { x: imgLeft + imgWidth - 20, y: imgTop + 20 },
+                    { x: imgLeft + 20, y: imgTop - 20 },
+                    { x: imgLeft + imgWidth - 30, y: imgTop + imgHeight - 20 },
+                ];
+
+                positions.forEach((pos, i) => {
+                    const span = document.createElement('span');
+                    span.textContent = decorations[i % decorations.length];
+                    span.style.left = pos.x + 'px';
+                    span.style.top = pos.y + 'px';
+                    span.style.animationDelay = (Math.random() * 1.5) + 's';
+                    surroundEls.appendChild(span);
+                });
+            }
+
+            window.addEventListener('resize', () => {
+                if (!homeScreen.classList.contains('hidden')) updateSurroundDecorations();
+            });
+            imageContainer.addEventListener('load', (e) => {
+                if (e.target.classList.contains('cover-img')) updateSurroundDecorations();
+            }, true);
+
+            // 日记数据管理
+            function loadEntries() { entries = JSON.parse(localStorage.getItem(STORAGE.diary) || '[]'); }
+            function saveEntries() { localStorage.setItem(STORAGE.diary, JSON.stringify(entries)); }
+
+            function renderList() {
+                if (!entries.length) {
+                    diaryList.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-secondary);">暂无日记</div>';
+                    return;
+                }
+                const sorted = [...entries].sort((a,b) => b.date - a.date);
+                diaryList.innerHTML = sorted.map(e => `
+                    <div class="list-item${e.id===currentId?' active':''}" data-id="${e.id}">
+                        <div style="font-size:12px;color:var(--text-secondary);">${new Date(e.date).toLocaleDateString()}</div>
+                        <div style="font-weight:500;">${escapeHtml(e.title||'无标题')}</div>
+                    </div>`).join('');
+            }
+
+            function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
             async function saveAttachment(diaryId, blob, fileName) {
                 const id = `att_${diaryId}_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
                 await idbPut(attachDB, STORAGE.attachStore, id, { blob, fileName, diaryId });
@@ -341,7 +525,6 @@
                 });
             }
 
-            // ========== 日记内容序列化/反序列化 ==========
             function serializeContent() {
                 const div = document.createElement('div');
                 div.innerHTML = diaryContent.innerHTML;
@@ -405,27 +588,6 @@
                 return div.innerHTML;
             }
 
-            // ========== 日记 UI ==========
-            function loadEntries() {
-                entries = JSON.parse(localStorage.getItem(STORAGE.diary) || '[]');
-            }
-            function saveEntries() { localStorage.setItem(STORAGE.diary, JSON.stringify(entries)); }
-
-            function renderList() {
-                if (!entries.length) {
-                    diaryList.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-secondary);">暂无日记</div>';
-                    return;
-                }
-                const sorted = [...entries].sort((a,b) => b.date - a.date);
-                diaryList.innerHTML = sorted.map(e => `
-                    <div class="list-item${e.id===currentId?' active':''}" data-id="${e.id}">
-                        <div style="font-size:12px;color:var(--text-secondary);">${new Date(e.date).toLocaleDateString()}</div>
-                        <div style="font-weight:500;">${escapeHtml(e.title||'无标题')}</div>
-                    </div>`).join('');
-            }
-
-            function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
             async function loadEditor(id) {
                 revokeURLs();
                 const entry = entries.find(e => e.id === id);
@@ -456,11 +618,7 @@
                 const now = Date.now();
                 if (currentId) {
                     const entry = entries.find(e => e.id === currentId);
-                    if (entry) {
-                        entry.title = title;
-                        entry.content = htmlContent;
-                        entry.date = now;
-                    }
+                    if (entry) { entry.title = title; entry.content = htmlContent; entry.date = now; }
                 } else {
                     currentId = now;
                     entries.push({ id: now, date: now, title, content: htmlContent });
@@ -473,7 +631,7 @@
 
             async function deleteCurrentDiary() {
                 if (!isAdmin || !currentId) return;
-                if (!confirm('确定删除这篇日记吗？')) return;
+                if (!confirm('确定删除？')) return;
                 await deleteAttachmentsByDiary(currentId);
                 entries = entries.filter(e => e.id !== currentId);
                 saveEntries();
@@ -483,7 +641,6 @@
 
             async function insertImageFile(file) {
                 if (!isAdmin) return;
-                // 确保有 currentId（可能是新建未保存）
                 const diaryId = currentId || 0;
                 const id = await saveAttachment(diaryId, file, file.name);
                 const url = URL.createObjectURL(file);
@@ -519,7 +676,7 @@
                 document.execCommand('insertHTML', false, a.outerHTML);
             }
 
-            // ========== 事件绑定 ==========
+            // 登录与UI控制
             function checkAuth() { isAdmin = localStorage.getItem(STORAGE.auth) === 'true'; }
             function setAuth(v) {
                 if (v) localStorage.setItem(STORAGE.auth, 'true');
@@ -551,18 +708,15 @@
 
                 diaryTopRight.innerHTML = '';
                 if (isAdmin) {
-                    diaryTopRight.innerHTML = '<span style="font-size:13px;color:var(--text-secondary);">👤 管理员</span>';
                     const logoutBtn = document.createElement('button');
                     logoutBtn.className = 'btn-logout';
                     logoutBtn.textContent = '退出';
-                    logoutBtn.onclick = () => setAuth(false);
+                    logoutBtn.onclick = () => {
+                        setAuth(false);
+                        diaryScreen.classList.remove('active');
+                        homeScreen.classList.remove('hidden');
+                    };
                     diaryTopRight.appendChild(logoutBtn);
-                } else {
-                    const loginBtn = document.createElement('button');
-                    loginBtn.className = 'btn-login';
-                    loginBtn.textContent = '登录';
-                    loginBtn.onclick = showLogin;
-                    diaryTopRight.appendChild(loginBtn);
                 }
 
                 newBtn.style.display = isAdmin ? 'flex' : 'none';
@@ -573,44 +727,47 @@
                 diaryContent.contentEditable = isAdmin ? 'true' : 'false';
             }
 
-            function showLogin() {
-                loginModal.classList.add('active');
-                uname.value = ''; pwd.value = '';
-                loginError.style.display = 'none';
-                uname.focus();
-            }
+            function showLogin() { loginModal.classList.add('active'); uname.focus(); }
             function hideLogin() { loginModal.classList.remove('active'); }
             loginSubmit.onclick = () => {
                 if (uname.value === ADMIN.user && pwd.value === ADMIN.pass) {
                     setAuth(true);
                     hideLogin();
-                } else {
-                    loginError.style.display = 'block';
-                    pwd.value = '';
-                }
+                    if (!diaryScreen.classList.contains('active')) enterDiary();
+                } else { loginError.style.display = 'block'; pwd.value = ''; }
             };
             cancelLogin.onclick = hideLogin;
-            pwd.addEventListener('keydown', e => { if (e.key === 'Enter') loginSubmit.click(); });
-
-            // 页面切换
-            enterDiaryBtn.onclick = () => {
+            function enterDiary() {
+                if (!isAdmin) { showLogin(); return; }
                 homeScreen.classList.add('hidden');
                 diaryScreen.classList.add('active');
                 renderList();
                 if (entries.length) loadEditor(entries.sort((a,b)=>b.date-a.date)[0].id);
                 else clearEditor();
-            };
+            }
+
+            enterDiaryBtn.onclick = enterDiary;
             backHomeBtn.onclick = () => {
                 diaryScreen.classList.remove('active');
                 homeScreen.classList.remove('hidden');
+                updateSurroundDecorations();
             };
 
-            // 日记列表点击
+            coverFileInput.addEventListener('change', () => {
+                const file = coverFileInput.files[0];
+                if (!file) return;
+                if (file.size > 10*1024*1024) { alert('图片不超过10MB'); return; }
+                pendingCoverFile = file;
+                previewCoverFile(file);
+                saveCoverBtn.classList.add('show');
+                coverFileInput.value = '';
+            });
+            saveCoverBtn.addEventListener('click', saveCoverToDB);
+
             diaryList.addEventListener('click', e => {
                 const item = e.target.closest('.list-item');
                 if (item) loadEditor(Number(item.dataset.id));
             });
-
             newBtn.onclick = () => {
                 revokeURLs();
                 currentId = null;
@@ -621,10 +778,8 @@
                 deleteBtn.style.display = 'none';
                 diaryTitle.focus();
             };
-
             saveBtn.onclick = saveCurrentDiary;
             deleteBtn.onclick = deleteCurrentDiary;
-
             insertImageBtn.onclick = () => imageInput.click();
             imageInput.addEventListener('change', () => {
                 const file = imageInput.files[0];
@@ -637,7 +792,6 @@
                 if (file) insertFileLink(file);
                 fileInput.value = '';
             });
-
             diaryContent.addEventListener('paste', (e) => {
                 if (!isAdmin) return;
                 const items = e.clipboardData.items;
@@ -650,13 +804,6 @@
                     }
                 }
             });
-
-            coverFileInput.addEventListener('change', () => {
-                const file = coverFileInput.files[0];
-                if (file) saveCover(file);
-                coverFileInput.value = '';
-            });
-
             document.addEventListener('keydown', (e) => {
                 if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                     e.preventDefault();
@@ -664,24 +811,20 @@
                 }
             });
 
-            // ========== 初始化 ==========
             async function init() {
                 try {
                     coverDB = await openDB(STORAGE.coverDB, 1, STORAGE.coverStore);
                     attachDB = await openDB(STORAGE.attachDB, 1, STORAGE.attachStore);
-                } catch (e) {
-                    console.error('Database open error:', e);
-                    alert('无法打开本地数据库，请检查浏览器隐私设置');
-                }
+                } catch (e) { console.error(e); }
                 await loadCoverDisplay();
-                createFloatingElements();
+                createFloatingBg();
+                updateSurroundDecorations();
                 checkAuth();
                 loadEntries();
                 updateUI();
                 homeScreen.classList.remove('hidden');
                 diaryScreen.classList.remove('active');
             }
-
             init();
         })();
     </script>
