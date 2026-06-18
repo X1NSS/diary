@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的日记本</title>
+    <title>乖宝和溪溪的快乐生活</title>
     <style>
         :root {
-            --bg: #f8f6f2;
+            --bg: #f5f5f7;
             --card: #ffffff;
-            --text: #3a3a3a;
-            --text-light: #8a8a8a;
-            --border: #e8e4df;
-            --accent: #6b9080;
-            --accent-hover: #567a6b;
-            --danger: #c26a6a;
-            --shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
-            --radius: 12px;
-            --transition: 0.2s ease;
+            --text: #1d1d1f;
+            --text-secondary: #86868b;
+            --accent: #0071e3;
+            --accent-hover: #0077ed;
+            --border: #d2d2d7;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --radius: 18px;
+            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * {
@@ -26,373 +26,596 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-            background: var(--bg);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background: #fbfbfd;
             color: var(--text);
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 页面容器 */
+        .app {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* ===== 首页 ===== */
+        .home-screen {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            transition: opacity 0.4s ease;
+            z-index: 2;
+        }
+
+        .home-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .cover-wrapper {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+        }
+
+        .cover-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.75);
+            transition: filter 0.5s;
+        }
+
+        .cover-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2c2c2e 0%, #1c1c1e 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 1.5rem;
+            color: rgba(255,255,255,0.4);
+            font-size: 3rem;
         }
 
-        .container {
-            background: var(--card);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
+        .cover-change-hint {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            color: white;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
             display: flex;
-            width: 100%;
-            max-width: 960px;
-            height: 80vh;
-            min-height: 500px;
-            overflow: hidden;
-            border: 1px solid var(--border);
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border: none;
         }
 
-        /* 左侧列表 */
+        .cover-change-hint:hover {
+            background: rgba(0,0,0,0.7);
+        }
+
+        .home-content {
+            position: relative;
+            z-index: 3;
+            text-align: center;
+            color: white;
+        }
+
+        .home-btn {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 500;
+            padding: 14px 36px;
+            border-radius: 50px;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            white-space: nowrap;
+        }
+
+        .home-btn:hover {
+            background: rgba(255,255,255,0.3);
+            border-color: rgba(255,255,255,0.5);
+            transform: scale(1.03);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+
+        /* ===== 日记界面 ===== */
+        .diary-screen {
+            position: absolute;
+            inset: 0;
+            background: var(--bg);
+            display: flex;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            z-index: 1;
+        }
+
+        .diary-screen.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* 侧边栏 */
         .sidebar {
-            width: 300px;
-            flex-shrink: 0;
-            border-right: 1px solid var(--border);
+            width: 320px;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(30px);
+            border-right: 1px solid rgba(0,0,0,0.08);
             display: flex;
             flex-direction: column;
-            background: #fdfcf9;
+            flex-shrink: 0;
+            z-index: 10;
         }
 
         .sidebar-header {
-            padding: 1.5rem 1.2rem 1rem;
+            padding: 28px 20px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border);
         }
 
-        .sidebar-header h2 {
-            font-size: 1.25rem;
+        .sidebar-title {
+            font-size: 1.5rem;
             font-weight: 600;
-            letter-spacing: 0.5px;
-            color: var(--accent);
+            letter-spacing: -0.3px;
+            color: var(--text);
         }
 
-        .btn {
-            border: none;
+        .btn-new {
             background: var(--accent);
+            border: none;
             color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             font-weight: 500;
-            transition: background var(--transition);
-            white-space: nowrap;
+            padding: 8px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background var(--transition), transform 0.15s;
         }
 
-        .btn:hover {
+        .btn-new:hover {
             background: var(--accent-hover);
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: var(--accent);
-            border: 1px solid var(--accent);
-        }
-
-        .btn-outline:hover {
-            background: rgba(107, 144, 128, 0.06);
-        }
-
-        .btn-danger {
-            background: transparent;
-            color: var(--danger);
-            border: 1px solid var(--danger);
-        }
-
-        .btn-danger:hover {
-            background: rgba(194, 106, 106, 0.06);
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 0.4rem;
-            margin-top: 1rem;
+            transform: scale(1.02);
         }
 
         .diary-list {
             flex: 1;
             overflow-y: auto;
-            padding: 0.5rem 0;
+            padding: 12px 0;
         }
 
         .diary-item {
-            padding: 1rem 1.2rem;
-            border-bottom: 1px solid var(--border);
+            padding: 14px 20px;
             cursor: pointer;
-            transition: background var(--transition);
+            border-left: 3px solid transparent;
+            transition: background 0.15s, border-color 0.2s;
         }
 
         .diary-item:hover {
-            background: #f1eee8;
+            background: rgba(0,0,0,0.03);
         }
 
         .diary-item.active {
-            background: #e9f0ec;
-            border-left: 3px solid var(--accent);
+            background: rgba(0,113,227,0.06);
+            border-left-color: var(--accent);
         }
 
         .diary-item .item-date {
             font-size: 0.8rem;
-            color: var(--text-light);
-            margin-bottom: 0.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
         }
 
         .diary-item .item-title {
             font-weight: 500;
-            color: var(--text);
+            font-size: 1rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .empty-list {
+        .item-preview {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        .empty-hint {
             text-align: center;
-            color: var(--text-light);
-            margin-top: 3rem;
+            color: var(--text-secondary);
+            padding: 40px 20px;
             font-style: italic;
         }
 
-        /* 右侧编辑区 */
-        .main {
+        /* 主编辑区 */
+        .editor {
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 2rem 2rem 1.5rem;
-            overflow-y: auto;
+            background: white;
+            overflow: hidden;
         }
 
-        .main-header {
-            margin-bottom: 1.5rem;
-        }
-
-        .main-header input {
-            width: 100%;
-            border: none;
+        .editor-toolbar {
+            padding: 16px 24px;
             border-bottom: 1px solid var(--border);
-            font-size: 1.6rem;
-            font-weight: 500;
-            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(10px);
+        }
+
+        .tool-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s;
+        }
+
+        .tool-btn:hover {
+            background: #f0f0f5;
+            border-color: #b0b0b8;
+        }
+
+        .editor-body {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .title-input {
+            border: none;
+            font-size: 2rem;
+            font-weight: 600;
+            width: 100%;
+            padding: 0 0 12px 0;
             outline: none;
             background: transparent;
             color: var(--text);
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+            margin-bottom: 16px;
         }
 
-        .main-header .date-display {
-            font-size: 0.85rem;
-            color: var(--text-light);
-            margin-top: 0.3rem;
+        .title-input:focus {
+            border-bottom-color: var(--accent);
         }
 
-        .main-content {
+        .content-editable {
             flex: 1;
-        }
-
-        .main-content textarea {
-            width: 100%;
-            height: 100%;
             border: none;
             outline: none;
-            resize: none;
-            font-size: 1rem;
+            font-size: 1.1rem;
             line-height: 1.7;
-            background: transparent;
             color: var(--text);
-            font-family: inherit;
+            min-height: 200px;
+            word-break: break-word;
         }
 
-        .main-actions {
+        .content-editable img {
+            max-width: 100%;
+            border-radius: 12px;
+            margin: 16px 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .content-editable:empty::before {
+            content: "开始写今天的快乐...";
+            color: #c7c7cc;
+        }
+
+        .editor-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
             display: flex;
-            justify-content: flex-end;
-            gap: 0.75rem;
-            margin-top: 1.5rem;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
         }
 
-        /* 移动端适配 */
-        @media (max-width: 700px) {
-            .container {
+        .action-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-save {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-save:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-delete {
+            background: none;
+            border: 1px solid #c0c0c0;
+            color: #c0392b;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-delete:hover {
+            background: rgba(192,57,43,0.05);
+        }
+
+        .back-home {
+            border: none;
+            background: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px;
+        }
+
+        .back-home:hover {
+            color: var(--text);
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .diary-screen {
                 flex-direction: column;
-                height: auto;
-                min-height: 100vh;
-                max-width: 100%;
             }
             .sidebar {
                 width: 100%;
+                height: 40%;
                 border-right: none;
                 border-bottom: 1px solid var(--border);
-                max-height: 40vh;
             }
-            .main {
-                padding: 1.5rem;
+            .editor {
+                height: 60%;
+            }
+            .home-btn {
+                font-size: 1rem;
+                padding: 12px 28px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- 左侧日记列表 -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h2>📒 我的日记</h2>
-                <button class="btn" id="newBtn">新建</button>
+    <div class="app">
+        <!-- 首页 -->
+        <div class="home-screen" id="homeScreen">
+            <div class="cover-wrapper" id="coverWrapper">
+                <!-- 封面图或占位符 -->
+                <div class="cover-placeholder" id="coverPlaceholder">📷</div>
             </div>
-            <div class="diary-list" id="diaryList">
-                <div class="empty-list">还没有日记，点击“新建”开始写吧。</div>
+            <button class="cover-change-hint" id="changeCoverBtn">
+                <span>🖼️</span> 更换封面
+            </button>
+            <input type="file" id="coverFileInput" accept="image/*" style="display:none;">
+            <div class="home-content">
+                <button class="home-btn" id="enterDiaryBtn">乖宝和溪溪的快乐生活</button>
             </div>
         </div>
 
-        <!-- 右侧编辑区 -->
-        <div class="main">
-            <div class="main-header">
-                <input type="text" id="titleInput" placeholder="日记标题..." maxlength="100">
-                <div class="date-display" id="dateDisplay"></div>
-            </div>
-            <div class="main-content">
-                <textarea id="contentInput" placeholder="今天发生了什么呢..."></textarea>
-            </div>
-            <div class="main-actions">
-                <div class="btn-group">
-                    <button class="btn-outline" id="exportBtn" title="导出所有日记为文件">导出</button>
-                    <button class="btn-outline" id="importBtn" title="从文件导入日记">导入</button>
-                    <input type="file" id="importFile" accept=".json" style="display:none;">
+        <!-- 日记界面 -->
+        <div class="diary-screen" id="diaryScreen">
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <span class="sidebar-title">📒 日记本</span>
+                    <button class="btn-new" id="newDiaryBtn">新建</button>
                 </div>
-                <button class="btn-danger" id="deleteBtn" style="display:none;">删除</button>
-                <button class="btn" id="saveBtn">保存</button>
-            </div>
+                <div class="diary-list" id="diaryList">
+                    <div class="empty-hint">还没有日记，写一篇吧</div>
+                </div>
+            </aside>
+            <main class="editor">
+                <div class="editor-toolbar">
+                    <button class="back-home" id="backHomeBtn">
+                        <span>←</span> 返回封面
+                    </button>
+                    <button class="tool-btn" id="insertImageBtn">
+                        <span>🖼️</span> 插入图片
+                    </button>
+                    <input type="file" id="imageFileInput" accept="image/*" style="display:none;">
+                </div>
+                <div class="editor-body">
+                    <input type="text" class="title-input" id="diaryTitle" placeholder="标题">
+                    <div class="content-editable" id="diaryContent" contenteditable="true"></div>
+                </div>
+                <div class="editor-footer">
+                    <div class="action-group">
+                        <button class="btn-delete" id="deleteDiaryBtn" style="display:none;">删除</button>
+                    </div>
+                    <button class="btn-save" id="saveDiaryBtn">保存</button>
+                </div>
+            </main>
         </div>
     </div>
 
     <script>
         (function() {
-            const STORAGE_KEY = 'my_diary_entries';
+            // 存储 key
+            const COVER_KEY = 'my_diary_cover';
+            const DIARY_KEY = 'my_diary_entries';
+
+            // DOM
+            const homeScreen = document.getElementById('homeScreen');
+            const diaryScreen = document.getElementById('diaryScreen');
+            const coverPlaceholder = document.getElementById('coverPlaceholder');
+            const coverFileInput = document.getElementById('coverFileInput');
+            const changeCoverBtn = document.getElementById('changeCoverBtn');
+            const enterDiaryBtn = document.getElementById('enterDiaryBtn');
+            const backHomeBtn = document.getElementById('backHomeBtn');
+            const diaryList = document.getElementById('diaryList');
+            const diaryTitle = document.getElementById('diaryTitle');
+            const diaryContent = document.getElementById('diaryContent');
+            const saveDiaryBtn = document.getElementById('saveDiaryBtn');
+            const deleteDiaryBtn = document.getElementById('deleteDiaryBtn');
+            const newDiaryBtn = document.getElementById('newDiaryBtn');
+            const insertImageBtn = document.getElementById('insertImageBtn');
+            const imageFileInput = document.getElementById('imageFileInput');
+
             let entries = [];
-            let currentId = null; // 当前选中的日记id
+            let currentId = null;
 
-            // DOM元素
-            const diaryListEl = document.getElementById('diaryList');
-            const titleInput = document.getElementById('titleInput');
-            const contentInput = document.getElementById('contentInput');
-            const dateDisplay = document.getElementById('dateDisplay');
-            const saveBtn = document.getElementById('saveBtn');
-            const deleteBtn = document.getElementById('deleteBtn');
-            const newBtn = document.getElementById('newBtn');
-            const exportBtn = document.getElementById('exportBtn');
-            const importBtn = document.getElementById('importBtn');
-            const importFile = document.getElementById('importFile');
+            // ---------- 封面图片处理 ----------
+            function loadCover() {
+                const saved = localStorage.getItem(COVER_KEY);
+                if (saved) {
+                    // 移除占位，放图片
+                    const existingImg = document.querySelector('.cover-img');
+                    if (existingImg) existingImg.remove();
+                    coverPlaceholder.style.display = 'none';
+                    const img = document.createElement('img');
+                    img.className = 'cover-img';
+                    img.src = saved;
+                    img.alt = '封面';
+                    document.getElementById('coverWrapper').prepend(img);
+                } else {
+                    // 显示占位
+                    coverPlaceholder.style.display = 'flex';
+                }
+            }
 
-            // 加载数据
+            function setCover(base64) {
+                localStorage.setItem(COVER_KEY, base64);
+                loadCover();
+            }
+
+            changeCoverBtn.addEventListener('click', () => coverFileInput.click());
+
+            coverFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    setCover(ev.target.result);
+                };
+                reader.readAsDataURL(file);
+                coverFileInput.value = '';
+            });
+
+            // ---------- 日记数据 ----------
             function loadEntries() {
-                const stored = localStorage.getItem(STORAGE_KEY);
+                const stored = localStorage.getItem(DIARY_KEY);
                 if (stored) {
-                    try {
-                        entries = JSON.parse(stored);
-                    } catch (e) {
-                        entries = [];
-                    }
+                    try { entries = JSON.parse(stored); } catch (e) { entries = []; }
                 } else {
                     entries = [];
                 }
             }
 
-            // 保存到localStorage
             function saveEntries() {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+                localStorage.setItem(DIARY_KEY, JSON.stringify(entries));
             }
 
-            // 格式化日期
-            function formatDate(isoString) {
-                const date = new Date(isoString);
-                const y = date.getFullYear();
-                const m = String(date.getMonth() + 1).padStart(2, '0');
-                const d = String(date.getDate()).padStart(2, '0');
-                const h = String(date.getHours()).padStart(2, '0');
-                const min = String(date.getMinutes()).padStart(2, '0');
-                return `${y}-${m}-${d} ${h}:${min}`;
+            function formatDate(iso) {
+                const d = new Date(iso);
+                return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
             }
 
-            // 渲染列表
+            function stripHtml(html) {
+                const tmp = document.createElement('div');
+                tmp.innerHTML = html;
+                return tmp.textContent || tmp.innerText || '';
+            }
+
             function renderList() {
-                if (entries.length === 0) {
-                    diaryListEl.innerHTML = '<div class="empty-list">还没有日记，点击“新建”开始写吧。</div>';
+                if (!entries.length) {
+                    diaryList.innerHTML = '<div class="empty-hint">还没有日记，写一篇吧</div>';
                     return;
                 }
-                // 按日期倒序
-                const sorted = [...entries].sort((a, b) => (b.date || b.id) - (a.date || a.id));
+                const sorted = [...entries].sort((a,b) => new Date(b.date) - new Date(a.date));
                 let html = '';
-                sorted.forEach(entry => {
-                    const activeClass = entry.id === currentId ? ' active' : '';
-                    const title = entry.title || '无标题';
-                    const dateStr = formatDate(entry.date || entry.id);
+                sorted.forEach(e => {
+                    const active = e.id === currentId ? ' active' : '';
+                    const preview = stripHtml(e.content).substring(0, 40);
                     html += `
-                        <div class="diary-item${activeClass}" data-id="${entry.id}">
-                            <div class="item-date">${dateStr}</div>
-                            <div class="item-title">${escapeHtml(title)}</div>
+                        <div class="diary-item${active}" data-id="${e.id}">
+                            <div class="item-date">${formatDate(e.date)}</div>
+                            <div class="item-title">${escapeHtml(e.title || '无标题')}</div>
+                            <div class="item-preview">${escapeHtml(preview)}</div>
                         </div>`;
                 });
-                diaryListEl.innerHTML = html;
+                diaryList.innerHTML = html;
             }
 
-            // 简单转义防止XSS
-            function escapeHtml(text) {
-                return String(text)
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;');
+            function escapeHtml(str) {
+                return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
             }
 
-            // 清空编辑区
             function clearEditor() {
                 currentId = null;
-                titleInput.value = '';
-                contentInput.value = '';
-                dateDisplay.textContent = '';
-                deleteBtn.style.display = 'none';
+                diaryTitle.value = '';
+                diaryContent.innerHTML = '';
+                deleteDiaryBtn.style.display = 'none';
             }
 
-            // 加载日记到编辑区
             function loadEditor(id) {
                 const entry = entries.find(e => e.id === id);
                 if (!entry) return;
                 currentId = id;
-                titleInput.value = entry.title || '';
-                contentInput.value = entry.content || '';
-                dateDisplay.textContent = '创建于 ' + formatDate(entry.date || entry.id);
-                deleteBtn.style.display = 'inline-block';
+                diaryTitle.value = entry.title || '';
+                diaryContent.innerHTML = entry.content || '';
+                deleteDiaryBtn.style.display = 'inline-block';
             }
 
-            // 选中日记
             function selectDiary(id) {
                 loadEditor(id);
                 renderList();
             }
 
-            // 保存当前编辑的日记
             function saveCurrent() {
-                const title = titleInput.value.trim();
-                const content = contentInput.value.trim();
+                const title = diaryTitle.value.trim();
+                const content = diaryContent.innerHTML.trim();
                 if (!title && !content) {
-                    alert('标题或内容不能都为空');
+                    alert('标题和内容不能都为空');
                     return;
                 }
-
                 if (currentId) {
-                    // 更新
                     const entry = entries.find(e => e.id === currentId);
                     if (entry) {
                         entry.title = title;
                         entry.content = content;
                     }
                 } else {
-                    // 新建
                     const newEntry = {
                         id: Date.now(),
                         date: new Date().toISOString(),
@@ -407,7 +630,6 @@
                 loadEditor(currentId);
             }
 
-            // 删除当前日记
             function deleteCurrent() {
                 if (!currentId) return;
                 if (!confirm('确定删除这篇日记吗？')) return;
@@ -417,96 +639,118 @@
                 renderList();
             }
 
-            // 导出
-            function exportData() {
-                const dataStr = JSON.stringify(entries, null, 2);
-                const blob = new Blob([dataStr], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `diary_backup_${new Date().toISOString().slice(0,10)}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-            }
+            // ---------- 图片插入 ----------
+            insertImageBtn.addEventListener('click', () => imageFileInput.click());
 
-            // 导入
-            function importData(file) {
+            imageFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const data = JSON.parse(e.target.result);
-                        if (!Array.isArray(data)) throw new Error('格式错误');
-                        if (confirm('导入将会合并到现有日记，确定继续吗？')) {
-                            // 合并，相同id覆盖
-                            data.forEach(item => {
-                                const idx = entries.findIndex(e => e.id === item.id);
-                                if (idx > -1) {
-                                    entries[idx] = item;
-                                } else {
-                                    entries.push(item);
-                                }
-                            });
-                            saveEntries();
-                            clearEditor();
-                            renderList();
-                            alert('导入成功！');
-                        }
-                    } catch (err) {
-                        alert('文件格式不正确，请选择之前导出的 JSON 文件。');
+                reader.onload = (ev) => {
+                    const img = document.createElement('img');
+                    img.src = ev.target.result;
+                    diaryContent.focus();
+                    // 插入图片
+                    const sel = window.getSelection();
+                    if (sel.rangeCount) {
+                        const range = sel.getRangeAt(0);
+                        range.deleteContents();
+                        range.insertNode(img);
+                        // 移动光标到图片后
+                        range.setStartAfter(img);
+                        range.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    } else {
+                        diaryContent.appendChild(img);
                     }
                 };
-                reader.readAsText(file);
-            }
-
-            // 事件绑定
-            newBtn.addEventListener('click', () => {
-                clearEditor();
-                renderList();
-                titleInput.focus();
+                reader.readAsDataURL(file);
+                imageFileInput.value = '';
             });
 
-            saveBtn.addEventListener('click', saveCurrent);
-
-            deleteBtn.addEventListener('click', deleteCurrent);
-
-            diaryListEl.addEventListener('click', (e) => {
-                const item = e.target.closest('.diary-item');
-                if (!item) return;
-                const id = Number(item.dataset.id);
-                if (id) selectDiary(id);
-            });
-
-            exportBtn.addEventListener('click', exportData);
-
-            importBtn.addEventListener('click', () => {
-                importFile.click();
-            });
-
-            importFile.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    importData(e.target.files[0]);
-                    importFile.value = ''; // 重置
+            // 支持粘贴图片
+            diaryContent.addEventListener('paste', (e) => {
+                const items = e.clipboardData?.items;
+                if (!items) return;
+                for (let item of items) {
+                    if (item.type.startsWith('image/')) {
+                        e.preventDefault();
+                        const file = item.getAsFile();
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            const img = document.createElement('img');
+                            img.src = ev.target.result;
+                            diaryContent.focus();
+                            const sel = window.getSelection();
+                            if (sel.rangeCount) {
+                                const range = sel.getRangeAt(0);
+                                range.deleteContents();
+                                range.insertNode(img);
+                                range.setStartAfter(img);
+                                range.collapse(true);
+                                sel.removeAllRanges();
+                                sel.addRange(range);
+                            } else {
+                                diaryContent.appendChild(img);
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
                 }
             });
 
-            // 快捷键 Ctrl+S 保存
+            // ---------- 视图切换 ----------
+            enterDiaryBtn.addEventListener('click', () => {
+                homeScreen.classList.add('hidden');
+                diaryScreen.classList.add('active');
+                renderList();
+                if (entries.length) {
+                    const sorted = [...entries].sort((a,b) => new Date(b.date) - new Date(a.date));
+                    selectDiary(sorted[0].id);
+                } else {
+                    clearEditor();
+                }
+            });
+
+            backHomeBtn.addEventListener('click', () => {
+                diaryScreen.classList.remove('active');
+                homeScreen.classList.remove('hidden');
+            });
+
+            // 列表点击
+            diaryList.addEventListener('click', (e) => {
+                const item = e.target.closest('.diary-item');
+                if (!item) return;
+                const id = Number(item.dataset.id);
+                selectDiary(id);
+            });
+
+            newDiaryBtn.addEventListener('click', () => {
+                clearEditor();
+                renderList();
+                diaryTitle.focus();
+            });
+
+            saveDiaryBtn.addEventListener('click', saveCurrent);
+            deleteDiaryBtn.addEventListener('click', deleteCurrent);
+
+            // 快捷键 Ctrl+S
             document.addEventListener('keydown', (e) => {
                 if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                     e.preventDefault();
-                    saveCurrent();
+                    if (diaryScreen.classList.contains('active')) {
+                        saveCurrent();
+                    }
                 }
             });
 
             // 初始化
+            loadCover();
             loadEntries();
-            renderList();
-            // 默认选中第一篇
-            if (entries.length > 0) {
-                const sorted = [...entries].sort((a, b) => (b.date || b.id) - (a.date || a.id));
-                selectDiary(sorted[0].id);
-            } else {
-                clearEditor();
-            }
+            // 默认显示首页
+            homeScreen.classList.remove('hidden');
+            diaryScreen.classList.remove('active');
         })();
     </script>
 </body>
