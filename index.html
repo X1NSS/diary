@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fluid Glass | 极致动效模板</title>
+  <title>乖宝和溪溪 | 樱花流体玻璃</title>
   <style>
-    /* === 1. 核心重置与全局变量 === */
     :root {
-      --bg-color: #0a0a0a;
-      --glass-bg: rgba(255, 255, 255, 0.03);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --text-main: #ffffff;
-      --text-sub: rgba(255, 255, 255, 0.6);
-      --accent: #7000ff; /* 高级紫 */
+      --bg-color: #fff5f7; /* 极淡粉背景 */
+      --glass-bg: rgba(255, 255, 255, 0.7); /* 白色偏粉玻璃 */
+      --glass-border: rgba(255, 182, 193, 0.4); /* 粉色边框 */
+      --text-main: #2d3436; /* 深灰文字，不刺眼 */
+      --text-sub: #636e72;
+      --accent: #ff9a9e; /* 樱花粉强调色 */
+      --glow-1: rgba(255, 154, 158, 0.4);
+      --glow-2: rgba(254, 207, 239, 0.4);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
@@ -20,92 +21,110 @@
     body {
       background-color: var(--bg-color);
       color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      height: 100vh;
-      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      perspective: 1000px; /* 3D视角准备 */
+      padding: 60px 20px;
+      perspective: 1200px;
     }
 
-    /* === 2. 极致背景：液态渐变光晕 === */
+    /* === 1. 背景呼吸光晕 === */
     .bg-glow {
-      position: fixed;
-      top: 50%; left: 50%;
+      position: fixed; top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      width: 120vw; height: 120vh;
-      background: radial-gradient(circle at 30% 40%, rgba(112, 0, 255, 0.15) 0%, transparent 50%),
-                  radial-gradient(circle at 70% 60%, rgba(0, 150, 255, 0.1) 0%, transparent 50%);
-      filter: blur(80px);
+      width: 140vw; height: 140vh;
+      background: radial-gradient(circle at 30% 40%, var(--glow-1) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 60%, var(--glow-2) 0%, transparent 50%);
+      filter: blur(100px);
       z-index: 0;
-      animation: breathe 10s infinite alternate ease-in-out;
+      animation: breathe 12s infinite alternate ease-in-out;
+      pointer-events: none;
     }
 
     @keyframes breathe {
-      0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
-      100% { transform: translate(-50%, -50%) scale(1.2) rotate(10deg); }
+      0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 0.8; }
+      100% { transform: translate(-50%, -50%) scale(1.3) rotate(15deg); opacity: 1; }
     }
 
-    /* === 3. 核心卡片：毛玻璃与3D交互 === */
+    /* === 2. 通用玻璃卡片样式 === */
     .glass-card {
       position: relative;
       z-index: 10;
-      width: 90%; max-width: 600px;
-      padding: 60px;
       background: var(--glass-bg);
       border: 1px solid var(--glass-border);
-      border-radius: 24px;
+      border-radius: 28px;
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 20px 50px rgba(255, 154, 158, 0.1);
       transition: transform 0.1s ease-out, box-shadow 0.3s ease;
-      text-align: center;
+      overflow: hidden;
     }
 
-    /* 鼠标跟随的高光效果 */
+    /* 鼠标高光层 */
     .glass-card::before {
       content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      border-radius: 24px;
-      background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.1) 0%, transparent 50%);
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      border-radius: 28px;
+      background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.8) 0%, transparent 50%);
       opacity: 0;
       transition: opacity 0.3s ease;
       pointer-events: none;
+      z-index: 1;
     }
     .glass-card:hover::before { opacity: 1; }
+    .glass-card:hover { box-shadow: 0 30px 60px rgba(255, 154, 158, 0.2); }
 
-    h1 {
-      font-size: 3rem;
-      font-weight: 700;
-      letter-spacing: -1px;
-      margin-bottom: 16px;
-      background: linear-gradient(to right, #fff, rgba(255,255,255,0.6));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    /* === 3. Hero 主视觉区 === */
+    .hero-card {
+      width: 100%; max-width: 800px;
+      padding: 80px 60px;
+      text-align: center;
+      margin-bottom: 40px;
     }
-
-    p { font-size: 1.1rem; color: var(--text-sub); line-height: 1.6; margin-bottom: 40px; }
-
+    .hero-card h1 {
+      font-size: 3.5rem; font-weight: 800; letter-spacing: -1px;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-card p { font-size: 1.2rem; color: var(--text-sub); line-height: 1.8; max-width: 600px; margin: 0 auto 40px; }
     .btn {
-      display: inline-block;
-      padding: 14px 36px;
-      background: var(--text-main);
-      color: var(--bg-color);
-      text-decoration: none;
-      border-radius: 50px;
-      font-weight: 600;
-      font-size: 1rem;
+      display: inline-block; padding: 16px 40px;
+      background: linear-gradient(135deg, #ff9a9e, #fecfef);
+      color: #fff; text-decoration: none; border-radius: 50px;
+      font-weight: 700; font-size: 1.1rem;
       transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      box-shadow: 0 10px 20px rgba(255, 154, 158, 0.3);
     }
-    .btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 10px 20px rgba(255,255,255,0.2); }
+    .btn:hover { transform: translateY(-4px) scale(1.05); box-shadow: 0 15px 30px rgba(255, 154, 158, 0.4); }
 
-    /* === 4. 移动端适配 === */
+    /* === 4. 功能卡片区 === */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      width: 100%; max-width: 1000px;
+      z-index: 10;
+    }
+    .feature-card {
+      padding: 40px 30px;
+      text-align: center;
+    }
+    .icon { font-size: 3rem; margin-bottom: 20px; display: block; }
+    .feature-card h3 { font-size: 1.5rem; margin-bottom: 12px; color: var(--text-main); }
+    .feature-card p { font-size: 1rem; color: var(--text-sub); line-height: 1.6; }
+
+    /* === 5. 移动端适配 === */
     @media (max-width: 768px) {
-      .glass-card { padding: 40px 30px; }
-      h1 { font-size: 2rem; }
-      p { font-size: 1rem; }
+      body { padding: 40px 15px; }
+      .hero-card { padding: 50px 30px; }
+      .hero-card h1 { font-size: 2.2rem; }
+      .hero-card p { font-size: 1rem; }
+      .grid { gap: 20px; }
+      .feature-card { padding: 30px 20px; }
     }
   </style>
 </head>
@@ -113,36 +132,60 @@
 
   <div class="bg-glow"></div>
 
-  <div class="glass-card" id="card">
-    <h1>Fluid Glass</h1>
-    <p>这是一个零依赖、极致丝滑的通用网页模板。<br>移动你的鼠标，感受液态玻璃的光影跟随与3D微动效。</p>
-    <a href="#" class="btn">探索更多</a>
+  <!-- Hero 主视觉 -->
+  <div class="glass-card hero-card" data-tilt>
+    <h1>乖宝和溪溪的快乐生活</h1>
+    <p>这里是我们的小小世界，记录每一个闪光的瞬间。<br>每一页都藏着温柔，每一刻都值得被珍藏。</p>
+    <a href="#diary" class="btn">开始写日记 ✨</a>
+  </div>
+
+  <!-- 功能卡片区 -->
+  <div class="grid">
+    <div class="glass-card feature-card" data-tilt>
+      <span class="icon">📔</span>
+      <h3>私密日记</h3>
+      <p>只有你能看到的文字，记录心情，锁住回忆。</p>
+    </div>
+    <div class="glass-card feature-card" data-tilt>
+      <span class="icon">📸</span>
+      <h3>相册时光</h3>
+      <p>照片会说话，把瞬间变成永恒的电影。</p>
+    </div>
+    <div class="glass-card feature-card" data-tilt>
+      <span class="icon">🎵</span>
+      <h3>我们的歌</h3>
+      <p>那些一起听过的旋律，是专属的暗号。</p>
+    </div>
   </div>
 
   <script>
-    // 核心动效逻辑：鼠标跟随 3D 倾斜 + 高光追踪
-    const card = document.getElementById('card');
+    // 通用 3D 倾斜 + 高光追踪逻辑
+    const cards = document.querySelectorAll('[data-tilt]');
 
-    document.addEventListener('mousemove', (e) => {
-      const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
-      const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
-      
-      // 3D 倾斜
-      card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
-      
-      // 高光位置追踪
-      const rect = card.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
-      card.style.setProperty('--mouse-x', `${x}%`);
-      card.style.setProperty('--mouse-y', `${y}%`);
-    });
+    cards.forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        // 计算倾斜角度
+        const xAxis = (window.innerWidth / 2 - (rect.left + rect.width / 2)) / 20;
+        const yAxis = (window.innerHeight / 2 - (rect.top + rect.height / 2)) / 20;
+        
+        card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        
+        // 高光位置
+        const px = (x / rect.width) * 100;
+        const py = (y / rect.height) * 100;
+        card.style.setProperty('--mouse-x', `${px}%`);
+        card.style.setProperty('--mouse-y', `${py}%`);
+      });
 
-    // 鼠标移出时平滑复位
-    document.addEventListener('mouseleave', () => {
-      card.style.transition = 'transform 0.5s ease';
-      card.style.transform = `rotateY(0deg) rotateX(0deg)`;
-      setTimeout(() => { card.style.transition = 'transform 0.1s ease-out, box-shadow 0.3s ease'; }, 500);
+      card.addEventListener('mouseleave', () => {
+        card.style.transition = 'transform 0.5s ease, box-shadow 0.3s ease';
+        card.style.transform = `rotateY(0deg) rotateX(0deg)`;
+        setTimeout(() => { card.style.transition = 'transform 0.1s ease-out, box-shadow 0.3s ease'; }, 500);
+      });
     });
   </script>
 </body>
