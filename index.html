@@ -99,8 +99,11 @@
     }
     .cover-frame.has-img { border: none; background: transparent; }
     .cover-frame img {
-      width: 100%; height: 100%; object-fit: cover;
+      width: 100%; height: 100%; 
+      object-fit: cover; 
+      object-position: center center;
       opacity: 0; transition: opacity 0.8s ease;
+      pointer-events: none; 
     }
     .cover-frame.has-img img { opacity: 1; }
     .cover-placeholder { color: var(--text-sub); font-size: 1.2rem; opacity: 0.6; }
@@ -220,7 +223,7 @@
   <input type="file" id="cover-file-input" accept="image/*" style="display:none;">
 
   <script>
-    // ===== 核心安全与状态管理 =====
+    // ===== 核心状态与配置 =====
     const CORRECT_PASS = 'XXYY';
     const AUTH_KEY = 'xins_auth_session';
     const COVER_KEY = 'xins_cover_base64';
@@ -239,11 +242,12 @@
     const coverFileInput = document.getElementById('cover-file-input');
     const decoContainer = document.getElementById('deco-container');
 
-    // 1. 初始化
+    // 1. 初始化应用
     function initApp() {
       initAuth();
       loadCover();
       generateDecos();
+      bindGlobalTilt();
     }
 
     // 2. 登录与导航按钮逻辑
@@ -256,13 +260,11 @@
     function renderNavButtons() {
       navContainer.innerHTML = '';
       
-      // 创建“进入”按钮
       const enterBtn = document.createElement('button');
       enterBtn.className = 'nav-btn';
       enterBtn.innerText = '进入';
       enterBtn.onclick = enterDiaryPage;
       
-      // 创建“封面”按钮
       const coverBtn = document.createElement('button');
       coverBtn.className = 'nav-btn';
       coverBtn.innerText = '封面';
@@ -272,7 +274,6 @@
       navContainer.appendChild(coverBtn);
       loginTriggerBtn.style.display = 'none';
       
-      // 绑定动效
       bindTiltEffect(enterBtn);
       bindTiltEffect(coverBtn);
     }
@@ -342,7 +343,7 @@
       }, 400);
     }
 
-    // 6. 登录弹窗交互逻辑（修复核心）
+    // 6. 登录弹窗交互逻辑
     loginTriggerBtn.onclick = () => { 
       loginModal.classList.add('active'); 
       passwordInput.value = ''; 
@@ -364,4 +365,15 @@
       }
     };
 
-    // ===== 通用 3D 倾斜
+    // ===== 通用 3D 倾斜动效引擎 =====
+    function bindTiltEffect(el) {
+      el.addEventListener('mousemove', (e) => {
+        const rect = el.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = ((y - centerY) / centerY) * -8;
+        const rotateY = ((x - centerX) / centerX) * 8;
+        
+        el.style.transform = `perspective(1000px) rotate
