@@ -78,19 +78,40 @@
       background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 30px; z-index: 2;
     }
+    /* 修复后的封面框 */
     .cover-frame {
-      width: 100%; max-height: 60vh; border-radius: 24px;
-      background: rgba(255,255,255,0.3); border: 2px dashed rgba(255, 182, 193, 0.5);
-      display: inline-flex; align-items: center; justify-content: center;
-      overflow: hidden; position: relative; transition: all 0.5s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.3);
+      border: 2px dashed rgba(255, 182, 193, 0.5);
+      overflow: hidden;
+      position: relative;
+      transition: all 0.5s ease;
+      max-width: 100%;
+      max-height: 60vh;
     }
-    .cover-frame.has-img { border: none; background: transparent; }
+    .cover-frame.has-img {
+      border: none;
+      background: transparent;
+    }
     .cover-frame img {
-      object-fit: contain; max-width: 100%; max-height: 100%; height: auto !important;
-      opacity: 0; transition: opacity 0.8s ease; pointer-events: none;
+      object-fit: contain;
+      max-width: 100%;
+      max-height: 60vh;
+      height: auto;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+      pointer-events: none;
     }
     .cover-frame.has-img img { opacity: 1; }
-    .cover-placeholder { color: var(--text-sub); font-size: 1.2rem; opacity: 0.6; }
+    .cover-placeholder {
+      color: var(--text-sub);
+      font-size: 1.2rem;
+      opacity: 0.6;
+      padding: 40px;
+    }
     .floating-decos {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
       pointer-events: none; overflow: hidden; z-index: 1;
@@ -232,7 +253,6 @@
 
   <script>
     (() => {
-      // ==================== 配置 ====================
       const ADMIN = { user: 'XX', pass: 'YY' };
       const AUTH_KEY = 'xins_auth_session';
       const COVER_KEY = 'xins_cover_base64';
@@ -240,12 +260,10 @@
       const DB_NAME = 'XinsAttachDB';
       const STORE_NAME = 'attachments';
 
-      // ==================== 全局变量 ====================
       let db = null;
       let entries = [];
       let currentDiaryId = null;
 
-      // DOM 元素
       const navContainer = document.getElementById('nav-btns-container');
       const loginTriggerBtn = document.getElementById('login-trigger-btn');
       const heroPage = document.getElementById('hero-page');
@@ -271,25 +289,15 @@
       const imageInput = document.getElementById('image-input');
       const fileInput = document.getElementById('file-input');
 
-      // ==================== 工具函数 ====================
-      function escapeHtml(s) {
-        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      }
-      function stripHtml(html) {
-        const div = document.createElement('div');
-        div.innerHTML = html;
-        return div.textContent || '';
-      }
+      function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+      function stripHtml(html) { const div = document.createElement('div'); div.innerHTML = html; return div.textContent || ''; }
 
-      // ==================== IndexedDB ====================
       async function openDB() {
         return new Promise((resolve, reject) => {
           const req = indexedDB.open(DB_NAME, 1);
           req.onupgradeneeded = (e) => {
             const database = e.target.result;
-            if (!database.objectStoreNames.contains(STORE_NAME)) {
-              database.createObjectStore(STORE_NAME);
-            }
+            if (!database.objectStoreNames.contains(STORE_NAME)) database.createObjectStore(STORE_NAME);
           };
           req.onsuccess = () => resolve(req.result);
           req.onerror = () => reject(req.error);
@@ -304,7 +312,6 @@
           tx.onerror = () => reject(tx.error);
         });
       }
-
       function dbGet(key) {
         return new Promise((resolve, reject) => {
           const tx = db.transaction(STORE_NAME, 'readonly');
@@ -313,7 +320,6 @@
           req.onerror = () => reject(req.error);
         });
       }
-
       async function dbDelete(key) {
         return new Promise((resolve, reject) => {
           const tx = db.transaction(STORE_NAME, 'readwrite');
@@ -323,26 +329,16 @@
         });
       }
 
-      // ==================== 登录与权限 ====================
-      function isLoggedIn() {
-        return sessionStorage.getItem(AUTH_KEY) === 'true';
-      }
+      function isLoggedIn() { return sessionStorage.getItem(AUTH_KEY) === 'true'; }
 
       function updateNav() {
         navContainer.innerHTML = '';
         if (isLoggedIn()) {
           const enterBtn = document.createElement('button');
-          enterBtn.className = 'nav-btn';
-          enterBtn.textContent = '📔 日记';
-          enterBtn.onclick = enterDiaryPage;
-          navContainer.appendChild(enterBtn);
-
+          enterBtn.className = 'nav-btn'; enterBtn.textContent = '📔 日记'; enterBtn.onclick = enterDiaryPage;
           const coverBtn = document.createElement('button');
-          coverBtn.className = 'nav-btn';
-          coverBtn.textContent = '🖼️ 封面';
-          coverBtn.onclick = () => coverFileInput.click();
-          navContainer.appendChild(coverBtn);
-
+          coverBtn.className = 'nav-btn'; coverBtn.textContent = '🖼️ 封面'; coverBtn.onclick = () => coverFileInput.click();
+          navContainer.appendChild(enterBtn); navContainer.appendChild(coverBtn);
           loginTriggerBtn.style.display = 'none';
         } else {
           loginTriggerBtn.style.display = 'inline-block';
@@ -352,16 +348,10 @@
 
       loginTriggerBtn.onclick = () => {
         loginModal.classList.add('active');
-        usernameInput.value = '';
-        passwordInput.value = '';
-        errorMsg.style.display = 'none';
+        usernameInput.value = ''; passwordInput.value = ''; errorMsg.style.display = 'none';
         usernameInput.focus();
       };
-
-      loginModal.onclick = (e) => {
-        if (e.target === loginModal) loginModal.classList.remove('active');
-      };
-
+      loginModal.onclick = (e) => { if (e.target === loginModal) loginModal.classList.remove('active'); };
       loginSubmitBtn.onclick = () => {
         if (usernameInput.value === ADMIN.user && passwordInput.value === ADMIN.pass) {
           sessionStorage.setItem(AUTH_KEY, 'true');
@@ -372,12 +362,9 @@
           passwordInput.value = '';
         }
       };
+      passwordInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') loginSubmitBtn.click(); });
 
-      passwordInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') loginSubmitBtn.click();
-      });
-
-      // ==================== 封面 ====================
+      // ==================== 封面（自适应修复） ====================
       function loadCover() {
         const saved = localStorage.getItem(COVER_KEY);
         if (saved) applyCover(saved);
@@ -387,18 +374,15 @@
         coverImg.src = src;
         coverFrame.classList.add('has-img');
         coverPlaceholder.style.display = 'none';
+        // 图片加载完成后，容器会自动适应图片尺寸
       }
 
       coverFileInput.onchange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        if (file.size > 10 * 1024 * 1024) {
-          alert('封面图片不能超过10MB');
-          return;
-        }
+        if (file.size > 10 * 1024 * 1024) { alert('封面图片不能超过10MB'); return; }
         const reader = new FileReader();
         reader.onload = (ev) => {
-          // 压缩处理
           const img = new Image();
           img.onload = () => {
             const canvas = document.createElement('canvas');
@@ -421,7 +405,6 @@
         coverFileInput.value = '';
       };
 
-      // 漂浮装饰
       function generateDecos() {
         const paths = [
           'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z',
@@ -429,30 +412,25 @@
         ];
         for (let i = 0; i < 15; i++) {
           const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-          svg.setAttribute('viewBox', '0 0 24 24');
-          svg.classList.add('deco');
+          svg.setAttribute('viewBox', '0 0 24 24'); svg.classList.add('deco');
           const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
           path.setAttribute('d', paths[Math.floor(Math.random() * paths.length)]);
           svg.appendChild(path);
           const size = Math.random() * 20 + 15;
-          svg.style.width = `${size}px`;
-          svg.style.height = `${size}px`;
-          svg.style.left = `${Math.random() * 100}%`;
-          svg.style.bottom = `-${size}px`;
+          svg.style.width = `${size}px`; svg.style.height = `${size}px`;
+          svg.style.left = `${Math.random() * 100}%`; svg.style.bottom = `-${size}px`;
           svg.style.animationDuration = `${Math.random() * 10 + 10}s`;
           svg.style.animationDelay = `${Math.random() * 10}s`;
           decoContainer.appendChild(svg);
         }
       }
 
-      // ==================== 日记功能 ====================
+      // ==================== 日记 ====================
       function loadEntries() {
         const stored = localStorage.getItem(DIARY_KEY);
         entries = stored ? JSON.parse(stored) : [];
       }
-      function saveEntries() {
-        localStorage.setItem(DIARY_KEY, JSON.stringify(entries));
-      }
+      function saveEntries() { localStorage.setItem(DIARY_KEY, JSON.stringify(entries)); }
 
       function renderDiaryList() {
         const sorted = [...entries].sort((a,b) => b.date - a.date);
@@ -471,15 +449,12 @@
       }
 
       function openEditor(id) {
-        if (!isLoggedIn()) {
-          alert('请先登录');
-          return;
-        }
+        if (!isLoggedIn()) { alert('请先登录'); return; }
         currentDiaryId = id || null;
         if (id) {
           const entry = entries.find(e => e.id === id);
           editorTitle.value = entry.title || '';
-          editorContent.innerHTML = deserializeContent(entry.content || '');
+          deserializeContent(entry.content || '');
         } else {
           editorTitle.value = '';
           editorContent.innerHTML = '';
@@ -488,11 +463,8 @@
         editorTitle.focus();
       }
 
-      function closeEditor() {
-        editorModal.classList.remove('active');
-      }
+      function closeEditor() { editorModal.classList.remove('active'); }
 
-      // 序列化/反序列化附件占位
       function serializeContent() {
         const div = document.createElement('div');
         div.innerHTML = editorContent.innerHTML;
@@ -551,24 +523,17 @@
             el.replaceWith(document.createTextNode('[附件丢失]'));
           }
         }
-        return div.innerHTML;
+        editorContent.innerHTML = div.innerHTML;
       }
 
       async function saveDiary() {
         const title = editorTitle.value.trim();
         const content = serializeContent();
-        if (!title && !content) {
-          alert('标题和内容不能都为空');
-          return;
-        }
+        if (!title && !content) { alert('标题和内容不能都为空'); return; }
         const now = Date.now();
         if (currentDiaryId) {
           const entry = entries.find(e => e.id === currentDiaryId);
-          if (entry) {
-            entry.title = title;
-            entry.content = content;
-            entry.date = now;
-          }
+          if (entry) { entry.title = title; entry.content = content; entry.date = now; }
         } else {
           currentDiaryId = now;
           entries.push({ id: now, date: now, title, content });
@@ -581,18 +546,10 @@
       async function deleteDiary() {
         if (!currentDiaryId) return;
         if (!confirm('确定删除这篇日记吗？')) return;
-        // 删除关联附件
         const tx = db.transaction(STORE_NAME, 'readwrite');
         const store = tx.objectStore(STORE_NAME);
-        const allKeys = await new Promise(resolve => {
-          const req = store.getAllKeys();
-          req.onsuccess = () => resolve(req.result);
-        });
-        for (const key of allKeys) {
-          if (key.startsWith(`att_${currentDiaryId}_`)) {
-            store.delete(key);
-          }
-        }
+        const allKeys = await new Promise(resolve => { const req = store.getAllKeys(); req.onsuccess = () => resolve(req.result); });
+        for (const key of allKeys) { if (key.startsWith(`att_${currentDiaryId}_`)) store.delete(key); }
         await new Promise(resolve => { tx.oncomplete = resolve; });
         entries = entries.filter(e => e.id !== currentDiaryId);
         saveEntries();
@@ -623,23 +580,16 @@
           dbGet(attId).then(data => {
             const url = URL.createObjectURL(data.blob);
             const tmpA = document.createElement('a');
-            tmpA.href = url;
-            tmpA.download = data.name;
-            tmpA.click();
+            tmpA.href = url; tmpA.download = data.name; tmpA.click();
           });
         };
         editorContent.focus();
         document.execCommand('insertHTML', false, a.outerHTML);
       }
 
-      // 进入日记页
       function enterDiaryPage() {
-        if (!isLoggedIn()) {
-          alert('请先登录');
-          return;
-        }
-        heroPage.style.opacity = '0';
-        heroPage.style.transform = 'rotateX(10deg) scale(0.95)';
+        if (!isLoggedIn()) { alert('请先登录'); return; }
+        heroPage.style.opacity = '0'; heroPage.style.transform = 'rotateX(10deg) scale(0.95)';
         setTimeout(() => {
           heroPage.style.display = 'none';
           diaryPage.style.display = 'block';
@@ -649,51 +599,26 @@
         }, 400);
       }
 
-      // ==================== 事件绑定 ====================
-      // 返回首页 (点击logo)
-      document.querySelector('.top-nav').addEventListener('click', (e) => {
-        if (e.target.id === 'login-trigger-btn') return;
-      });
-      // 简单返回：双击标题可以返回首页
+      // 双击顶部返回首页
       let clickTimer;
       document.querySelector('.top-nav').addEventListener('click', (e) => {
-        if (e.target.classList.contains('nav-btn')) return;
-        if (clickTimer) {
-          clearTimeout(clickTimer);
-          clickTimer = null;
-          // 双击返回首页
-          diaryPage.style.display = 'none';
-          heroPage.style.display = '';
-          heroPage.style.opacity = '1';
-          heroPage.style.transform = '';
-        } else {
-          clickTimer = setTimeout(() => { clickTimer = null; }, 300);
-        }
+        if (e.target.classList.contains('nav-btn') || e.target.id === 'login-trigger-btn') return;
+        if (clickTimer) { clearTimeout(clickTimer); clickTimer = null;
+          diaryPage.style.display = 'none'; heroPage.style.display = ''; heroPage.style.opacity = '1'; heroPage.style.transform = '';
+        } else { clickTimer = setTimeout(() => { clickTimer = null; }, 300); }
       });
 
       diaryGrid.addEventListener('click', (e) => {
         const card = e.target.closest('.diary-card');
-        if (card) {
-          const id = Number(card.dataset.id);
-          openEditor(id);
-        }
+        if (card) { const id = Number(card.dataset.id); openEditor(id); }
       });
 
       saveDiaryBtn.onclick = saveDiary;
       deleteDiaryBtn.onclick = deleteDiary;
-
       insertImageBtn.onclick = () => imageInput.click();
-      imageInput.onchange = () => {
-        const file = imageInput.files[0];
-        if (file) insertImage(file);
-        imageInput.value = '';
-      };
+      imageInput.onchange = () => { const file = imageInput.files[0]; if (file) insertImage(file); imageInput.value = ''; };
       attachFileBtn.onclick = () => fileInput.click();
-      fileInput.onchange = () => {
-        const file = fileInput.files[0];
-        if (file) insertFile(file);
-        fileInput.value = '';
-      };
+      fileInput.onchange = () => { const file = fileInput.files[0]; if (file) insertFile(file); fileInput.value = ''; };
 
       editorContent.addEventListener('paste', (e) => {
         const items = e.clipboardData.items;
@@ -707,7 +632,6 @@
         }
       });
 
-      // Ctrl+S 保存
       document.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 's') {
           e.preventDefault();
@@ -715,12 +639,8 @@
         }
       });
 
-      // 关闭编辑器（点击背景）
-      editorModal.addEventListener('click', (e) => {
-        if (e.target === editorModal) closeEditor();
-      });
+      editorModal.addEventListener('click', (e) => { if (e.target === editorModal) closeEditor(); });
 
-      // ==================== 3D倾斜效果 ====================
       function bindTiltToCards() {
         document.querySelectorAll('.glass-card').forEach(card => {
           if (card.dataset.tiltBound) return;
@@ -735,26 +655,17 @@
             card.style.setProperty('--mouse-x', `${x}px`);
             card.style.setProperty('--mouse-y', `${y}px`);
           });
-          card.addEventListener('mouseleave', () => {
-            card.style.transform = 'rotateX(0) rotateY(0) scale(1)';
-          });
+          card.addEventListener('mouseleave', () => { card.style.transform = 'rotateX(0) rotateY(0) scale(1)'; });
         });
       }
 
-      // ==================== 初始化 ====================
       async function init() {
-        try {
-          db = await openDB();
-        } catch (e) {
-          console.warn('附件数据库打开失败，附件功能可能不可用');
-        }
+        try { db = await openDB(); } catch (e) { console.warn('附件数据库打开失败'); }
         loadCover();
         generateDecos();
         updateNav();
         bindTiltToCards();
-        // 默认显示首页
-        heroPage.style.display = '';
-        diaryPage.style.display = 'none';
+        heroPage.style.display = ''; diaryPage.style.display = 'none';
       }
 
       window.onload = init;
