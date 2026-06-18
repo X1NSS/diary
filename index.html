@@ -9,304 +9,109 @@
             --google-blue: #1a73e8;
             --google-blue-hover: #1669d0;
             --google-red: #ea4335;
-            --google-green: #34a853;
-            --google-yellow: #fbbc04;
-            --bg-white: #ffffff;
-            --bg-gray-50: #f8f9fa;
+            --bg-white: #fff;
             --bg-gray-100: #f1f3f4;
             --text-primary: #202124;
             --text-secondary: #5f6368;
             --border-color: #dadce0;
-            --shadow-1: 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
             --shadow-2: 0 1px 3px 0 rgba(60,64,67,.3), 0 4px 8px 3px rgba(60,64,67,.15);
-            --radius-1: 8px;
-            --radius-2: 16px;
-            --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+            --radius: 16px;
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin:0; padding:0; box-sizing:border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: #fff;
-            color: var(--text-primary);
-            height: 100vh;
-            overflow: hidden;
-            -webkit-font-smoothing: antialiased;
+            background: #fff; color: var(--text-primary); height: 100vh; overflow: hidden;
         }
 
-        /* ========== 封面页 ========== */
-        .home-screen {
-            position: relative;
-            width: 100%; height: 100vh;
-            display: flex; flex-direction: column;
-            background: #fff;
+        /* 首页 */
+        .home-screen { width:100%; height:100vh; display:flex; flex-direction:column; background: #fff; position: relative; }
+        .home-screen.hidden { display:none; }
+        .top-bar { display:flex; align-items:center; justify-content:space-between; padding:12px 24px; height:60px; z-index:10; }
+        .brand-link { text-decoration:none; color:var(--text-primary); font-size:14px; font-weight:500; padding:8px 12px; border-radius:20px; cursor:pointer; transition:background 0.2s; }
+        .brand-link:hover { background:rgba(60,64,67,0.08); }
+        .top-right { display:flex; gap:12px; align-items:center; }
+        .btn-login, .btn-logout {
+            background:var(--google-blue); color:white; border:none; font-size:14px; font-weight:500;
+            padding:8px 22px; border-radius:4px; cursor:pointer; transition:background 0.2s;
         }
-        .home-screen.hidden { display: none; }
-
-        .top-bar {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 12px 24px;
-            height: 60px;
-        }
-        .top-bar-left {
-            display: flex; align-items: center; gap: 16px;
-        }
-        .brand-link {
-            text-decoration: none;
-            color: var(--text-primary);
-            font-size: 14px;
-            font-weight: 500;
-            letter-spacing: 0.2px;
-            padding: 8px 12px;
-            border-radius: 20px;
-            transition: background 0.2s;
-            cursor: pointer;
-        }
-        .brand-link:hover { background: rgba(60,64,67,0.08); }
-
-        .top-bar-right {
-            display: flex; align-items: center; gap: 12px;
-        }
-
-        .login-btn, .logout-btn {
-            background: var(--google-blue);
-            color: white;
-            border: none;
-            font-size: 14px;
-            font-weight: 500;
-            padding: 8px 22px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.2s, box-shadow 0.2s;
-            letter-spacing: 0.3px;
-        }
-        .login-btn:hover { background: var(--google-blue-hover); box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
-        .logout-btn {
-            background: transparent;
-            color: var(--google-blue);
-            border: 1px solid var(--border-color);
-        }
-        .logout-btn:hover { background: rgba(26,115,232,0.08); }
-
+        .btn-logout { background:transparent; color:var(--google-blue); border:1px solid var(--border-color); }
         .cover-change-btn {
-            background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            font-size: 13px;
-            padding: 7px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex; align-items: center; gap: 6px;
-            transition: all 0.2s;
-            visibility: hidden;
+            background:transparent; border:1px solid var(--border-color); color:var(--text-secondary);
+            padding:7px 16px; border-radius:4px; cursor:pointer; display:flex; align-items:center; gap:6px; visibility:hidden;
         }
-        .cover-change-btn.visible { visibility: visible; }
-        .cover-change-btn:hover {
-            background: rgba(60,64,67,0.04);
-            border-color: var(--google-blue);
-        }
+        .cover-change-btn.visible { visibility:visible; }
 
-        /* 封面大图 */
-        .cover-container {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-            background: #f8f9fa;
-            margin: 0 24px 24px;
-            border-radius: 28px;
-            box-shadow: var(--shadow-2);
+        .cover-wrapper {
+            flex:1; position:relative; margin:0 24px 24px; border-radius:28px; overflow:hidden;
+            background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 50%, #fce4ec 100%);
+            display:flex; align-items:center; justify-content:center;
         }
         .cover-img {
-            width: 100%; height: 100%; object-fit: cover; display: none;
+            max-width:100%; max-height:100%; object-fit:contain; display:none;
+            z-index:2; position:relative;
         }
         .cover-placeholder {
-            width: 100%; height: 100%;
-            display: flex; align-items: center; justify-content: center;
-            background: linear-gradient(135deg, #e8eaed 0%, #f1f3f4 100%);
-            font-size: 6rem; color: #9aa0a6; opacity: 0.5;
+            font-size:6rem; color:#f48fb1; opacity:0.6; z-index:2;
         }
+        /* 动态元素容器 */
+        .floating-elements { position:absolute; inset:0; pointer-events:none; z-index:1; }
 
-        /* ========== 日记界面 (Gmail 风格) ========== */
-        .diary-screen {
-            width: 100%; height: 100vh;
-            display: none; flex-direction: column;
-            background: var(--bg-white);
-        }
-        .diary-screen.active { display: flex; }
-
+        /* 日记界面 */
+        .diary-screen { display:none; flex-direction:column; height:100vh; background:var(--bg-white); }
+        .diary-screen.active { display:flex; }
         .gmail-header {
-            height: 64px; display: flex; align-items: center; padding: 0 16px;
-            border-bottom: 1px solid var(--border-color); background: #fff; gap: 12px;
+            height:64px; display:flex; align-items:center; padding:0 16px;
+            border-bottom:1px solid var(--border-color); gap:12px;
         }
         .gmail-menu-btn {
-            width: 40px; height: 40px;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 50%; cursor: pointer; font-size: 20px;
-            transition: background 0.2s;
+            width:40px; height:40px; display:flex; align-items:center; justify-content:center;
+            border-radius:50%; cursor:pointer; font-size:20px;
         }
-        .gmail-menu-btn:hover { background: rgba(60,64,67,0.08); }
-        .gmail-logo {
-            display: flex; align-items: center; gap: 8px;
-            font-size: 22px; color: var(--text-primary); font-weight: 400;
-        }
-        .gmail-logo span { color: var(--google-blue); font-weight: 500; }
-        .gmail-search {
-            flex: 1; max-width: 600px; margin-left: 40px;
-            background: #f1f3f4; border-radius: 24px; height: 48px;
-            display: flex; align-items: center; padding: 0 16px;
-            color: var(--text-secondary);
-        }
-        .gmail-search input {
-            flex: 1; border: none; background: transparent;
-            outline: none; font-size: 14px; color: var(--text-primary);
-        }
-        .gmail-actions {
-            display: flex; align-items: center; gap: 12px; margin-left: auto;
-        }
-
-        /* 三栏布局 */
-        .gmail-body { display: flex; flex: 1; overflow: hidden; }
-
-        .sidebar-left {
-            width: 240px; padding: 8px 0;
-            border-right: 1px solid var(--border-color);
-            display: flex; flex-direction: column; overflow-y: auto;
-        }
+        .gmail-logo { font-size:22px; display:flex; align-items:center; gap:8px; }
+        .gmail-logo span { color:var(--google-blue); }
+        .gmail-actions { margin-left:auto; display:flex; gap:12px; align-items:center; }
+        .gmail-body { display:flex; flex:1; overflow:hidden; }
+        .sidebar-left { width:240px; border-right:1px solid var(--border-color); display:flex; flex-direction:column; padding:8px 0; }
         .compose-btn {
-            margin: 8px 16px 16px;
-            background: var(--google-blue); color: white; border: none;
-            border-radius: 16px; padding: 12px 24px; font-size: 14px; font-weight: 500;
-            display: flex; align-items: center; gap: 12px;
-            cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-            transition: box-shadow 0.2s, background 0.2s;
+            margin:8px 16px; background:var(--google-blue); color:white; border:none;
+            border-radius:16px; padding:12px 24px; font-size:14px; cursor:pointer; display:flex; align-items:center; gap:8px;
         }
-        .compose-btn:hover {
-            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-            background: var(--google-blue-hover);
-        }
-        .nav-item {
-            display: flex; align-items: center; padding: 8px 16px;
-            font-size: 14px; color: var(--text-primary);
-            cursor: pointer; border-radius: 0 20px 20px 0;
-            margin-right: 8px; transition: background 0.15s;
-        }
-        .nav-item.active { background: #e8f0fe; color: var(--google-blue); font-weight: 500; }
-        .nav-item:hover { background: #f1f3f4; }
+        .compose-btn:hover { background:var(--google-blue-hover); }
+        .middle-list { width:360px; border-right:1px solid var(--border-color); overflow-y:auto; }
+        .list-item { padding:14px 16px; border-bottom:1px solid var(--border-color); cursor:pointer; }
+        .list-item.active { background:#e8f0fe; }
+        .right-panel { flex:1; overflow-y:auto; display:flex; flex-direction:column; }
+        .editor-container { display:none; flex-direction:column; height:100%; }
+        .editor-header { padding:20px 24px 12px; border-bottom:1px solid var(--border-color); }
+        .title-input { border:none; font-size:22px; width:100%; outline:none; background:transparent; }
+        .editor-body { flex:1; padding:16px 24px; overflow-y:auto; }
+        .content-editable { min-height:300px; outline:none; font-size:15px; line-height:1.6; }
+        .content-editable img { max-width:100%; border-radius:8px; margin:8px 0; }
+        .content-editable a { color:var(--google-blue); }
+        .editor-footer { padding:12px 24px; border-top:1px solid var(--border-color); display:flex; justify-content:space-between; }
+        .save-btn { background:var(--google-blue); color:white; border:none; padding:8px 24px; border-radius:4px; cursor:pointer; }
+        .delete-btn { color:var(--google-red); background:none; border:1px solid var(--border-color); padding:8px 16px; border-radius:4px; cursor:pointer; }
+        .file-upload-btn { background:none; border:1px solid var(--border-color); padding:8px 16px; border-radius:4px; cursor:pointer; display:none; }
 
-        .middle-list {
-            width: 360px; border-right: 1px solid var(--border-color);
-            display: flex; flex-direction: column; overflow-y: auto; background: #fff;
-        }
-        .list-item {
-            padding: 14px 16px; border-bottom: 1px solid var(--border-color);
-            cursor: pointer; transition: background 0.15s;
-            display: flex; flex-direction: column; gap: 4px;
-        }
-        .list-item:hover { background: #f6f8fc; }
-        .list-item.active { background: #e8f0fe; }
-        .list-item-date { font-size: 12px; color: var(--text-secondary); }
-        .list-item-title { font-size: 14px; font-weight: 500; }
-        .list-item-preview {
-            font-size: 13px; color: var(--text-secondary);
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .empty-list { text-align: center; color: var(--text-secondary); padding: 40px 16px; }
-
-        .right-panel {
-            flex: 1; display: flex; flex-direction: column; background: #fff; overflow-y: auto;
-        }
-        .right-empty {
-            display: flex; align-items: center; justify-content: center;
-            height: 100%; color: var(--text-secondary); font-size: 16px;
-        }
-        .editor-container { display: none; flex-direction: column; height: 100%; }
-        .editor-header { padding: 20px 24px 12px; border-bottom: 1px solid var(--border-color); }
-        .title-input {
-            border: none; font-size: 22px; font-weight: 400;
-            width: 100%; outline: none; background: transparent; color: var(--text-primary);
-        }
-        .title-input:read-only { color: var(--text-primary); }
-        .editor-body { flex: 1; padding: 16px 24px; overflow-y: auto; }
-        .content-editable {
-            border: none; outline: none; font-size: 15px;
-            line-height: 1.6; color: var(--text-primary); min-height: 300px;
-        }
-        .content-editable img { max-width: 100%; border-radius: 8px; margin: 12px 0; }
-        .content-editable:empty::before { content: "写下今天的快乐..."; color: #80868b; }
-        .editor-footer {
-            padding: 12px 24px; border-top: 1px solid var(--border-color);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .editor-actions { display: flex; gap: 12px; align-items: center; }
-        .icon-btn {
-            background: none; border: none; color: var(--text-secondary);
-            width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: background 0.2s; font-size: 18px;
-        }
-        .icon-btn:hover { background: rgba(60,64,67,0.08); }
-        .save-btn {
-            background: var(--google-blue); color: white; border: none;
-            padding: 8px 24px; border-radius: 4px; font-weight: 500;
-            cursor: pointer; transition: background 0.2s;
-        }
-        .save-btn:hover { background: var(--google-blue-hover); }
-        .delete-btn {
-            color: var(--google-red); background: none; border: 1px solid var(--border-color);
-            padding: 8px 16px; border-radius: 4px; cursor: pointer;
-        }
-        .delete-btn:hover { background: rgba(234,67,53,0.04); }
-
-        /* 登录弹窗 */
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.2s;
-        }
-        .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-card {
-            background: white; border-radius: 8px; padding: 40px 32px;
-            width: 400px; box-shadow: 0 24px 38px rgba(0,0,0,0.2);
-        }
-        .modal-card h2 { font-weight: 400; font-size: 24px; margin-bottom: 24px; }
-        .input-field {
-            width: 100%; padding: 12px 14px; margin-bottom: 16px;
-            border: 1px solid var(--border-color); border-radius: 4px;
-            font-size: 14px; outline: none; transition: border-color 0.2s;
-        }
-        .input-field:focus { border-color: var(--google-blue); }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
-        .btn-cancel {
-            background: none; border: none; color: var(--text-secondary);
-            font-weight: 500; padding: 10px 16px; border-radius: 4px; cursor: pointer;
-        }
-        .btn-cancel:hover { background: rgba(0,0,0,0.04); }
-        .btn-login {
-            background: var(--google-blue); color: white; border: none;
-            font-weight: 500; padding: 10px 24px; border-radius: 4px; cursor: pointer;
-        }
-        .btn-login:hover { background: var(--google-blue-hover); }
-        .error-text { color: var(--google-red); font-size: 13px; margin-bottom: 12px; display: none; }
-
-        @media (max-width: 700px) {
-            .gmail-body { flex-direction: column; }
-            .sidebar-left { width: 100%; flex-direction: row; overflow-x: auto; }
-            .middle-list { width: 100%; max-height: 200px; }
-        }
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:100; opacity:0; pointer-events:none; }
+        .modal-overlay.active { opacity:1; pointer-events:auto; }
+        .modal-card { background:white; border-radius:8px; padding:40px 32px; width:400px; box-shadow:0 24px 38px rgba(0,0,0,0.2); }
+        .modal-card h2 { font-size:24px; margin-bottom:24px; }
+        .input-field { width:100%; padding:12px; margin-bottom:16px; border:1px solid var(--border-color); border-radius:4px; }
+        .modal-actions { display:flex; justify-content:flex-end; gap:12px; margin-top:24px; }
+        .btn-cancel { background:none; border:none; color:var(--text-secondary); padding:10px 16px; cursor:pointer; }
+        .error-text { color:var(--google-red); display:none; }
     </style>
 </head>
 <body>
-    <!-- 封面页 -->
+    <!-- 首页 -->
     <div class="home-screen" id="homeScreen">
         <div class="top-bar">
-            <div class="top-bar-left">
-                <div class="brand-link" id="enterDiaryBtn">乖宝和溪溪的快乐生活</div>
-            </div>
-            <div class="top-bar-right" id="homeTopRight">
-                <!-- 动态插入登录按钮或更换封面 -->
-            </div>
+            <div class="brand-link" id="enterDiaryBtn">乖宝和溪溪的快乐生活</div>
+            <div class="top-right" id="homeTopRight"></div>
         </div>
-        <div class="cover-container" id="coverContainer">
+        <div class="cover-wrapper" id="coverWrapper">
+            <div class="floating-elements" id="floatingElements"></div>
             <div class="cover-placeholder" id="coverPlaceholder">📷</div>
         </div>
     </div>
@@ -314,43 +119,36 @@
     <!-- 日记界面 -->
     <div class="diary-screen" id="diaryScreen">
         <div class="gmail-header">
-            <div class="gmail-menu-btn" id="backToHomeBtn">←</div>
+            <div class="gmail-menu-btn" id="backHomeBtn">←</div>
             <div class="gmail-logo"><span>📒</span> 日记</div>
-            <div class="gmail-search">
-                <span>🔍</span>
-                <input type="text" placeholder="搜索日记" disabled>
-            </div>
-            <div class="gmail-actions" id="diaryTopRight">
-                <!-- 动态插入登录状态 -->
-            </div>
+            <div class="gmail-actions" id="diaryTopRight"></div>
         </div>
-
         <div class="gmail-body">
             <div class="sidebar-left">
-                <button class="compose-btn" id="newDiaryBtn" style="display:none;">
-                    <span>✏️</span> 写日记
-                </button>
+                <button class="compose-btn" id="newDiaryBtn" style="display:none;">✏️ 写日记</button>
                 <div class="nav-item active">📋 所有日记</div>
             </div>
-            <div class="middle-list" id="diaryList">
-                <div class="empty-list">暂无日记</div>
-            </div>
+            <div class="middle-list" id="diaryList"><div style="padding:20px;text-align:center;color:var(--text-secondary);">暂无日记</div></div>
             <div class="right-panel" id="rightPanel">
-                <div class="right-empty" id="emptyState">选择一篇日记查看</div>
+                <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-secondary);" id="emptyState">选择一篇日记查看</div>
                 <div class="editor-container" id="editorContainer">
                     <div class="editor-header">
-                        <input type="text" class="title-input" id="diaryTitle" placeholder="标题" readonly>
+                        <input type="text" class="title-input" id="diaryTitle" placeholder="标题">
                     </div>
                     <div class="editor-body">
-                        <div class="content-editable" id="diaryContent" contenteditable="false"></div>
+                        <div class="content-editable" id="diaryContent" contenteditable="true"></div>
                     </div>
                     <div class="editor-footer">
-                        <div class="editor-actions">
-                            <button class="icon-btn" id="insertImageBtn" style="display:none;">🖼️</button>
-                            <input type="file" id="imageFileInput" accept="image/*" style="display:none;">
-                            <button class="delete-btn" id="deleteDiaryBtn" style="display:none;">删除</button>
+                        <div>
+                            <button class="file-upload-btn" id="attachFileBtn" style="display:none;">📎 上传附件</button>
+                            <button class="file-upload-btn" id="insertImageBtn" style="display:none;">🖼️ 插入图片</button>
+                            <input type="file" id="imageInput" accept="image/*" style="display:none;">
+                            <input type="file" id="fileInput" style="display:none;">
                         </div>
-                        <button class="save-btn" id="saveDiaryBtn" style="display:none;">保存</button>
+                        <div>
+                            <button class="delete-btn" id="deleteDiaryBtn" style="display:none;">删除</button>
+                            <button class="save-btn" id="saveDiaryBtn" style="display:none;">保存</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -361,12 +159,12 @@
     <div class="modal-overlay" id="loginModal">
         <div class="modal-card">
             <h2>登录</h2>
-            <input type="text" class="input-field" id="loginUsername" placeholder="用户名" autocomplete="off">
-            <input type="password" class="input-field" id="loginPassword" placeholder="密码">
+            <input type="text" class="input-field" id="username" placeholder="用户名">
+            <input type="password" class="input-field" id="password" placeholder="密码">
             <div class="error-text" id="loginError">用户名或密码错误</div>
             <div class="modal-actions">
-                <button class="btn-cancel" id="cancelLoginBtn">取消</button>
-                <button class="btn-login" id="loginSubmitBtn">登录</button>
+                <button class="btn-cancel" id="cancelLogin">取消</button>
+                <button class="btn-login" id="loginSubmit">登录</button>
             </div>
         </div>
     </div>
@@ -375,180 +173,274 @@
 
     <script>
         (function() {
-            const ADMIN_USER = 'XX';
-            const ADMIN_PASS = 'YY';
-
-            const COVER_KEY = 'g_cover', DIARY_KEY = 'g_diary', AUTH_KEY = 'g_admin';
+            const ADMIN = { user: 'XX', pass: 'YY' };
+            const STORAGE = {
+                diary: 'g_diary',
+                auth: 'g_admin',
+                coverDB: 'CoverDB',
+                coverStore: 'covers',
+                coverKey: 'main_cover',
+                attachDB: 'AttachDB',
+                attachStore: 'attachments'
+            };
 
             // DOM
-            const homeScreen = document.getElementById('homeScreen');
-            const diaryScreen = document.getElementById('diaryScreen');
-            const homeTopRight = document.getElementById('homeTopRight');
-            const diaryTopRight = document.getElementById('diaryTopRight');
-            const enterDiaryBtn = document.getElementById('enterDiaryBtn');
-            const backToHomeBtn = document.getElementById('backToHomeBtn');
-            const diaryListEl = document.getElementById('diaryList');
-            const emptyState = document.getElementById('emptyState');
-            const editorContainer = document.getElementById('editorContainer');
-            const diaryTitle = document.getElementById('diaryTitle');
-            const diaryContent = document.getElementById('diaryContent');
-            const saveDiaryBtn = document.getElementById('saveDiaryBtn');
-            const deleteDiaryBtn = document.getElementById('deleteDiaryBtn');
-            const newDiaryBtn = document.getElementById('newDiaryBtn');
-            const insertImageBtn = document.getElementById('insertImageBtn');
-            const imageFileInput = document.getElementById('imageFileInput');
-            const coverFileInput = document.getElementById('coverFileInput');
-            const coverContainer = document.getElementById('coverContainer');
-            const coverPlaceholder = document.getElementById('coverPlaceholder');
-            const loginModal = document.getElementById('loginModal');
-            const loginUsername = document.getElementById('loginUsername');
-            const loginPassword = document.getElementById('loginPassword');
-            const loginError = document.getElementById('loginError');
-            const loginSubmitBtn = document.getElementById('loginSubmitBtn');
-            const cancelLoginBtn = document.getElementById('cancelLoginBtn');
+            const $ = id => document.getElementById(id);
+            const homeScreen = $('homeScreen'), diaryScreen = $('diaryScreen'),
+                homeTopRight = $('homeTopRight'), diaryTopRight = $('diaryTopRight'),
+                enterDiaryBtn = $('enterDiaryBtn'), backHomeBtn = $('backHomeBtn'),
+                diaryList = $('diaryList'), emptyState = $('emptyState'),
+                editorContainer = $('editorContainer'), diaryTitle = $('diaryTitle'),
+                diaryContent = $('diaryContent'), saveBtn = $('saveDiaryBtn'),
+                deleteBtn = $('deleteDiaryBtn'), newBtn = $('newDiaryBtn'),
+                insertImageBtn = $('insertImageBtn'), attachFileBtn = $('attachFileBtn'),
+                imageInput = $('imageInput'), fileInput = $('fileInput'),
+                coverFileInput = $('coverFileInput'), coverWrapper = $('coverWrapper'),
+                coverPlaceholder = $('coverPlaceholder'), floatingEls = $('floatingElements'),
+                loginModal = $('loginModal'), uname = $('username'), pwd = $('password'),
+                loginError = $('loginError'), loginSubmit = $('loginSubmit'), cancelLogin = $('cancelLogin');
 
             let entries = [], currentId = null, isAdmin = false;
+            let coverDB = null, attachDB = null;
+            let currentObjectURLs = []; // 用于清理 URL
 
-            function checkAuth() { return localStorage.getItem(AUTH_KEY) === 'true'; }
-            function setAuth(val) {
-                if (val) localStorage.setItem(AUTH_KEY, 'true');
-                else localStorage.removeItem(AUTH_KEY);
-                isAdmin = val;
-                updateAllUI();
+            // ========== 工具函数 ==========
+            function openDB(name, version, storeName) {
+                return new Promise((resolve, reject) => {
+                    const req = indexedDB.open(name, version);
+                    req.onupgradeneeded = (e) => {
+                        const db = e.target.result;
+                        if (!db.objectStoreNames.contains(storeName)) db.createObjectStore(storeName);
+                    };
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
             }
 
-            function updateAllUI() {
-                // 封面页右上角
-                homeTopRight.innerHTML = '';
-                if (isAdmin) {
-                    const changeBtn = document.createElement('button');
-                    changeBtn.className = 'cover-change-btn visible';
-                    changeBtn.innerHTML = '🖼️ 更换封面';
-                    changeBtn.onclick = () => coverFileInput.click();
-                    homeTopRight.appendChild(changeBtn);
-
-                    const logoutBtn = document.createElement('button');
-                    logoutBtn.className = 'logout-btn';
-                    logoutBtn.textContent = '退出';
-                    logoutBtn.onclick = () => setAuth(false);
-                    homeTopRight.appendChild(logoutBtn);
-                } else {
-                    const loginBtn = document.createElement('button');
-                    loginBtn.className = 'login-btn';
-                    loginBtn.textContent = '登录';
-                    loginBtn.onclick = showLoginModal;
-                    homeTopRight.appendChild(loginBtn);
-                }
-
-                // 日记界面右上角
-                diaryTopRight.innerHTML = '';
-                if (isAdmin) {
-                    diaryTopRight.innerHTML = '<span style="color:var(--text-secondary);font-size:13px;">👤 管理员</span>';
-                    const logoutBtn = document.createElement('button');
-                    logoutBtn.className = 'logout-btn';
-                    logoutBtn.textContent = '退出';
-                    logoutBtn.onclick = () => setAuth(false);
-                    diaryTopRight.appendChild(logoutBtn);
-                } else {
-                    const loginBtn = document.createElement('button');
-                    loginBtn.className = 'login-btn';
-                    loginBtn.textContent = '登录';
-                    loginBtn.onclick = showLoginModal;
-                    diaryTopRight.appendChild(loginBtn);
-                }
-
-                // 编辑控件显示
-                newDiaryBtn.style.display = isAdmin ? 'flex' : 'none';
-                saveDiaryBtn.style.display = isAdmin ? 'inline-block' : 'none';
-                insertImageBtn.style.display = isAdmin ? 'flex' : 'none';
-                diaryTitle.readOnly = !isAdmin;
-                diaryContent.contentEditable = isAdmin ? 'true' : 'false';
-                deleteDiaryBtn.style.display = (isAdmin && currentId) ? 'inline-block' : 'none';
+            function idbPut(db, store, key, value) {
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction(store, 'readwrite');
+                    const req = tx.objectStore(store).put(value, key);
+                    req.onsuccess = () => resolve();
+                    req.onerror = () => reject(req.error);
+                });
             }
 
-            function showLoginModal() {
-                loginModal.classList.add('active');
-                loginUsername.value = '';
-                loginPassword.value = '';
-                loginError.style.display = 'none';
-                loginUsername.focus();
+            function idbGet(db, store, key) {
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction(store, 'readonly');
+                    const req = tx.objectStore(store).get(key);
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
             }
-            function hideLoginModal() { loginModal.classList.remove('active'); }
-            function attemptLogin() {
-                if (loginUsername.value.trim() === ADMIN_USER && loginPassword.value === ADMIN_PASS) {
-                    setAuth(true);
-                    hideLoginModal();
-                    if (diaryScreen.classList.contains('active') && currentId) loadEditor(currentId);
-                } else {
-                    loginError.style.display = 'block';
-                    loginPassword.value = '';
-                    loginPassword.focus();
+
+            function idbDelete(db, store, key) {
+                return new Promise((resolve, reject) => {
+                    const tx = db.transaction(store, 'readwrite');
+                    const req = tx.objectStore(store).delete(key);
+                    req.onsuccess = () => resolve();
+                    req.onerror = () => reject(req.error);
+                });
+            }
+
+            function revokeURLs() {
+                currentObjectURLs.forEach(url => URL.revokeObjectURL(url));
+                currentObjectURLs = [];
+            }
+
+            // ========== 封面处理 ==========
+            async function loadCoverDisplay() {
+                revokeURLs();
+                const existingImg = coverWrapper.querySelector('.cover-img');
+                if (existingImg) existingImg.remove();
+                try {
+                    const blob = await idbGet(coverDB, STORAGE.coverStore, STORAGE.coverKey);
+                    if (blob) {
+                        coverPlaceholder.style.display = 'none';
+                        const url = URL.createObjectURL(blob);
+                        currentObjectURLs.push(url);
+                        const img = document.createElement('img');
+                        img.className = 'cover-img';
+                        img.src = url;
+                        img.style.display = 'block';
+                        coverWrapper.appendChild(img);
+                    } else {
+                        coverPlaceholder.style.display = 'block';
+                    }
+                } catch (e) {
+                    coverPlaceholder.style.display = 'block';
                 }
             }
-            loginSubmitBtn.onclick = attemptLogin;
-            cancelLoginBtn.onclick = hideLoginModal;
-            loginPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
-            loginModal.addEventListener('click', (e) => { if (e.target === loginModal) hideLoginModal(); });
 
-            // 封面图片
-            function loadCover() {
-                const saved = localStorage.getItem(COVER_KEY);
-                const oldImg = coverContainer.querySelector('.cover-img');
-                if (oldImg) oldImg.remove();
-                if (saved) {
-                    coverPlaceholder.style.display = 'none';
-                    const img = document.createElement('img');
-                    img.className = 'cover-img';
-                    img.src = saved;
-                    img.style.display = 'block';
-                    coverContainer.prepend(img);
-                } else {
-                    coverPlaceholder.style.display = 'flex';
+            async function saveCover(file) {
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('封面图片不能超过10MB');
+                    return;
+                }
+                try {
+                    await idbPut(coverDB, STORAGE.coverStore, STORAGE.coverKey, file);
+                    await loadCoverDisplay();
+                } catch (e) {
+                    alert('封面保存失败');
                 }
             }
-            coverFileInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    localStorage.setItem(COVER_KEY, ev.target.result);
-                    loadCover();
-                };
-                reader.readAsDataURL(file);
-                coverFileInput.value = '';
-            });
 
-            // 日记数据
+            // 动态爱心/气球
+            function createFloatingElements() {
+                floatingEls.innerHTML = '';
+                const emojis = ['❤️', '🎈', '💖', '🌸', '✨', '💕', '🎀', '💗'];
+                for (let i = 0; i < 18; i++) {
+                    const span = document.createElement('span');
+                    span.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    span.style.cssText = `
+                        position:absolute; font-size:${16 + Math.random()*24}px;
+                        left:${Math.random()*100}%; top:${Math.random()*100}%;
+                        opacity:0.7; animation: float${i%4} ${4+Math.random()*6}s infinite ease-in-out;
+                        animation-delay:${Math.random()*5}s;
+                    `;
+                    floatingEls.appendChild(span);
+                }
+                // 动态样式
+                if (!document.getElementById('float-styles')) {
+                    const style = document.createElement('style');
+                    style.id = 'float-styles';
+                    style.textContent = `
+                        @keyframes float0 { 0%{transform:translateY(0px) rotate(0deg);} 50%{transform:translateY(-20px) rotate(5deg);} 100%{transform:translateY(0px) rotate(0deg);} }
+                        @keyframes float1 { 0%{transform:translateY(0px) rotate(0deg);} 50%{transform:translateY(-30px) rotate(-5deg);} 100%{transform:translateY(0px) rotate(0deg);} }
+                        @keyframes float2 { 0%{transform:translate(0,0) scale(1);} 50%{transform:translate(10px,-15px) scale(1.1);} 100%{transform:translate(0,0) scale(1);} }
+                        @keyframes float3 { 0%{transform:translateY(0px); opacity:0.7;} 50%{transform:translateY(-25px); opacity:1;} 100%{transform:translateY(0px); opacity:0.7;} }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+
+            // ========== 附件管理（IndexedDB） ==========
+            async function saveAttachment(diaryId, blob, fileName) {
+                const id = `att_${diaryId}_${Date.now()}_${Math.random().toString(36)}`;
+                await idbPut(attachDB, STORAGE.attachStore, id, { blob, fileName, diaryId });
+                return id;
+            }
+
+            async function getAttachment(id) {
+                const data = await idbGet(attachDB, STORAGE.attachStore, id);
+                return data; // { blob, fileName, diaryId }
+            }
+
+            async function deleteAttachmentsByDiary(diaryId) {
+                return new Promise((resolve, reject) => {
+                    const tx = attachDB.transaction(STORAGE.attachStore, 'readwrite');
+                    const store = tx.objectStore(STORAGE.attachStore);
+                    const allReq = store.getAllKeys();
+                    allReq.onsuccess = () => {
+                        const keys = allReq.result.filter(k => k.startsWith(`att_${diaryId}_`));
+                        keys.forEach(k => store.delete(k));
+                    };
+                    tx.oncomplete = resolve;
+                    tx.onerror = reject;
+                });
+            }
+
+            // ========== 日记内容序列化/反序列化 ==========
+            // 保存时，将 contentEditable 里的 [data-attachment-id] 替换为占位符
+            function serializeContent() {
+                const div = document.createElement('div');
+                div.innerHTML = diaryContent.innerHTML;
+                // 处理图片和文件链接
+                div.querySelectorAll('[data-attachment-id]').forEach(el => {
+                    const id = el.getAttribute('data-attachment-id');
+                    if (el.tagName === 'IMG') {
+                        const placeholder = document.createElement('span');
+                        placeholder.setAttribute('data-attachment-id', id);
+                        placeholder.setAttribute('data-type', 'image');
+                        el.replaceWith(placeholder);
+                    } else if (el.tagName === 'A') {
+                        const placeholder = document.createElement('span');
+                        placeholder.setAttribute('data-attachment-id', id);
+                        placeholder.setAttribute('data-type', 'file');
+                        placeholder.textContent = el.textContent;
+                        el.replaceWith(placeholder);
+                    }
+                });
+                return div.innerHTML;
+            }
+
+            // 加载时，根据占位符恢复附件 URL
+            async function deserializeContent(html) {
+                const div = document.createElement('div');
+                div.innerHTML = html;
+                const placeholders = div.querySelectorAll('[data-attachment-id]');
+                for (const el of placeholders) {
+                    const id = el.getAttribute('data-attachment-id');
+                    const type = el.getAttribute('data-type');
+                    try {
+                        const data = await getAttachment(id);
+                        if (data && data.blob) {
+                            const url = URL.createObjectURL(data.blob);
+                            currentObjectURLs.push(url);
+                            if (type === 'image') {
+                                const img = document.createElement('img');
+                                img.src = url;
+                                img.setAttribute('data-attachment-id', id);
+                                el.replaceWith(img);
+                            } else {
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = data.fileName;
+                                a.textContent = el.textContent || data.fileName;
+                                a.setAttribute('data-attachment-id', id);
+                                el.replaceWith(a);
+                            }
+                        }
+                    } catch (e) {
+                        // 附件丢失，保留占位文字
+                    }
+                }
+                // 清理其余占位
+                div.querySelectorAll('[data-attachment-id]').forEach(el => {
+                    if (el.tagName === 'SPAN') el.replaceWith(document.createTextNode('[附件丢失]'));
+                });
+                return div.innerHTML;
+            }
+
+            // 收集当前编辑器中的新附件 ID（用于保存时不重复上传已存在的）
+            function getCurrentAttachmentIds() {
+                const ids = new Set();
+                diaryContent.querySelectorAll('[data-attachment-id]').forEach(el => ids.add(el.getAttribute('data-attachment-id')));
+                return ids;
+            }
+
+            // ========== 日记 UI ==========
             function loadEntries() {
-                const stored = localStorage.getItem(DIARY_KEY);
-                entries = stored ? JSON.parse(stored) : [];
+                entries = JSON.parse(localStorage.getItem(STORAGE.diary) || '[]');
             }
-            function saveEntries() { localStorage.setItem(DIARY_KEY, JSON.stringify(entries)); }
-            function formatDate(iso) {
-                const d = new Date(iso);
-                return `${d.getMonth()+1}月${d.getDate()}日`;
-            }
-            function stripHtml(html) {
-                const tmp = document.createElement('div');
-                tmp.innerHTML = html;
-                return tmp.textContent || '';
-            }
-            function escapeHtml(s) {
-                return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-            }
+            function saveEntries() { localStorage.setItem(STORAGE.diary, JSON.stringify(entries)); }
 
             function renderList() {
                 if (!entries.length) {
-                    diaryListEl.innerHTML = '<div class="empty-list">暂无日记</div>';
+                    diaryList.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-secondary);">暂无日记</div>';
                     return;
                 }
-                const sorted = [...entries].sort((a,b) => new Date(b.date) - new Date(a.date));
-                diaryListEl.innerHTML = sorted.map(e => `
-                    <div class="list-item${e.id === currentId ? ' active' : ''}" data-id="${e.id}">
-                        <div class="list-item-date">${formatDate(e.date)}</div>
-                        <div class="list-item-title">${escapeHtml(e.title || '无标题')}</div>
-                        <div class="list-item-preview">${escapeHtml(stripHtml(e.content).substring(0, 30))}</div>
+                const sorted = [...entries].sort((a,b) => b.date - a.date);
+                diaryList.innerHTML = sorted.map(e => `
+                    <div class="list-item${e.id===currentId?' active':''}" data-id="${e.id}">
+                        <div style="font-size:12px;color:var(--text-secondary);">${new Date(e.date).toLocaleDateString()}</div>
+                        <div style="font-weight:500;">${escapeHtml(e.title||'无标题')}</div>
                     </div>`).join('');
+            }
+
+            function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+            async function loadEditor(id) {
+                revokeURLs();
+                const entry = entries.find(e => e.id === id);
+                if (!entry) { clearEditor(); return; }
+                currentId = id;
+                diaryTitle.value = entry.title || '';
+                diaryContent.innerHTML = await deserializeContent(entry.content || '');
+                editorContainer.style.display = 'flex';
+                emptyState.style.display = 'none';
+                deleteBtn.style.display = isAdmin ? 'inline-block' : 'none';
             }
 
             function clearEditor() {
@@ -557,148 +449,251 @@
                 diaryContent.innerHTML = '';
                 editorContainer.style.display = 'none';
                 emptyState.style.display = 'flex';
-                deleteDiaryBtn.style.display = 'none';
+                deleteBtn.style.display = 'none';
+                revokeURLs();
             }
 
-            function loadEditor(id) {
-                const entry = entries.find(e => e.id === id);
-                if (!entry) { clearEditor(); return; }
-                currentId = id;
-                diaryTitle.value = entry.title || '';
-                diaryContent.innerHTML = entry.content || '';
-                editorContainer.style.display = 'flex';
-                emptyState.style.display = 'none';
-                deleteDiaryBtn.style.display = isAdmin ? 'inline-block' : 'none';
-            }
-
-            function selectDiary(id) { loadEditor(id); renderList(); }
-
-            function saveCurrent() {
+            async function saveCurrentDiary() {
                 if (!isAdmin) return alert('请先登录');
                 const title = diaryTitle.value.trim();
-                const content = diaryContent.innerHTML.trim();
-                if (!title && !content) return alert('标题和内容不能都为空');
+                const htmlContent = serializeContent();
+                if (!title && !htmlContent) return alert('不能为空');
+                const now = Date.now();
                 if (currentId) {
                     const entry = entries.find(e => e.id === currentId);
-                    if (entry) { entry.title = title; entry.content = content; }
+                    if (entry) {
+                        entry.title = title;
+                        entry.content = htmlContent;
+                        entry.date = now;
+                    }
                 } else {
-                    const newEntry = { id: Date.now(), date: new Date().toISOString(), title, content };
-                    entries.push(newEntry);
-                    currentId = newEntry.id;
+                    currentId = now;
+                    entries.push({ id: now, date: now, title, content: htmlContent });
                 }
                 saveEntries();
                 renderList();
-                loadEditor(currentId);
+                // 重新加载以恢复附件展示
+                await loadEditor(currentId);
+                alert('保存成功');
             }
 
-            function deleteCurrent() {
+            async function deleteCurrentDiary() {
                 if (!isAdmin || !currentId) return;
-                if (!confirm('确定删除这篇日记？')) return;
+                if (!confirm('确定删除？')) return;
+                await deleteAttachmentsByDiary(currentId);
                 entries = entries.filter(e => e.id !== currentId);
                 saveEntries();
                 clearEditor();
                 renderList();
             }
 
-            // 图片插入
-            insertImageBtn.onclick = () => { if (isAdmin) imageFileInput.click(); };
-            imageFileInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    const img = document.createElement('img');
-                    img.src = ev.target.result;
-                    diaryContent.focus();
-                    const sel = window.getSelection();
-                    if (sel.rangeCount) {
-                        const range = sel.getRangeAt(0);
-                        range.deleteContents();
-                        range.insertNode(img);
-                        range.setStartAfter(img);
-                        range.collapse(true);
-                        sel.removeAllRanges();
-                        sel.addRange(range);
-                    } else diaryContent.appendChild(img);
-                };
-                reader.readAsDataURL(file);
-                imageFileInput.value = '';
-            });
-            diaryContent.addEventListener('paste', (e) => {
+            // 插入图片
+            async function insertImageFile(file) {
                 if (!isAdmin) return;
-                const items = e.clipboardData?.items;
-                if (!items) return;
-                for (let item of items) {
-                    if (item.type.startsWith('image/')) {
-                        e.preventDefault();
-                        const file = item.getAsFile();
-                        const reader = new FileReader();
-                        reader.onload = (ev) => {
-                            const img = document.createElement('img');
-                            img.src = ev.target.result;
-                            diaryContent.focus();
-                            const sel = window.getSelection();
-                            if (sel.rangeCount) {
-                                const range = sel.getRangeAt(0);
-                                range.deleteContents();
-                                range.insertNode(img);
-                                range.setStartAfter(img);
-                                range.collapse(true);
-                                sel.removeAllRanges();
-                                sel.addRange(range);
-                            } else diaryContent.appendChild(img);
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                }
-            });
+                const id = await saveAttachment(currentId || 0, file, file.name);
+                const url = URL.createObjectURL(file);
+                currentObjectURLs.push(url);
+                const img = document.createElement('img');
+                img.src = url;
+                img.setAttribute('data-attachment-id', id);
+                diaryContent.focus();
+                document.execCommand('insertHTML', false, img.outerHTML);
+            }
 
-            // 视图切换
+            // 插入文件链接
+            async function insertFileLink(file) {
+                if (!isAdmin) return;
+                const id = await saveAttachment(currentId || 0, file, file.name);
+                const a = document.createElement('a');
+                a.href = '#';
+                a.textContent = file.name;
+                a.setAttribute('data-attachment-id', id);
+                a.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    const data = await getAttachment(id);
+                    if (data && data.blob) {
+                        const url = URL.createObjectURL(data.blob);
+                        const aDownload = document.createElement('a');
+                        aDownload.href = url;
+                        aDownload.download = data.fileName;
+                        aDownload.click();
+                        URL.revokeObjectURL(url);
+                    }
+                });
+                diaryContent.focus();
+                document.execCommand('insertHTML', false, a.outerHTML);
+            }
+
+            // ========== 事件绑定 ==========
+            // 登录逻辑
+            function checkAuth() { isAdmin = localStorage.getItem(STORAGE.auth) === 'true'; }
+            function setAuth(v) {
+                if (v) localStorage.setItem(STORAGE.auth, 'true');
+                else localStorage.removeItem(STORAGE.auth);
+                isAdmin = v;
+                updateUI();
+            }
+
+            function updateUI() {
+                // 首页右上
+                homeTopRight.innerHTML = '';
+                if (isAdmin) {
+                    const changeBtn = document.createElement('button');
+                    changeBtn.className = 'cover-change-btn visible';
+                    changeBtn.textContent = '🖼️ 更换封面';
+                    changeBtn.onclick = () => coverFileInput.click();
+                    homeTopRight.appendChild(changeBtn);
+                    const logoutBtn = document.createElement('button');
+                    logoutBtn.className = 'btn-logout';
+                    logoutBtn.textContent = '退出';
+                    logoutBtn.onclick = () => setAuth(false);
+                    homeTopRight.appendChild(logoutBtn);
+                } else {
+                    const loginBtn = document.createElement('button');
+                    loginBtn.className = 'btn-login';
+                    loginBtn.textContent = '登录';
+                    loginBtn.onclick = showLogin;
+                    homeTopRight.appendChild(loginBtn);
+                }
+                // 日记右上
+                diaryTopRight.innerHTML = '';
+                if (isAdmin) {
+                    diaryTopRight.innerHTML = '<span style="font-size:13px;color:var(--text-secondary);">👤 管理员</span>';
+                    const logoutBtn = document.createElement('button');
+                    logoutBtn.className = 'btn-logout';
+                    logoutBtn.textContent = '退出';
+                    logoutBtn.onclick = () => setAuth(false);
+                    diaryTopRight.appendChild(logoutBtn);
+                } else {
+                    const loginBtn = document.createElement('button');
+                    loginBtn.className = 'btn-login';
+                    loginBtn.textContent = '登录';
+                    loginBtn.onclick = showLogin;
+                    diaryTopRight.appendChild(loginBtn);
+                }
+                // 编辑控件
+                newBtn.style.display = isAdmin ? 'flex' : 'none';
+                saveBtn.style.display = isAdmin ? 'inline-block' : 'none';
+                insertImageBtn.style.display = isAdmin ? 'inline-block' : 'none';
+                attachFileBtn.style.display = isAdmin ? 'inline-block' : 'none';
+                diaryTitle.readOnly = !isAdmin;
+                diaryContent.contentEditable = isAdmin ? 'true' : 'false';
+            }
+
+            function showLogin() {
+                loginModal.classList.add('active');
+                uname.value = ''; pwd.value = '';
+                loginError.style.display = 'none';
+                uname.focus();
+            }
+            function hideLogin() { loginModal.classList.remove('active'); }
+            loginSubmit.onclick = () => {
+                if (uname.value === ADMIN.user && pwd.value === ADMIN.pass) {
+                    setAuth(true);
+                    hideLogin();
+                } else {
+                    loginError.style.display = 'block';
+                }
+            };
+            cancelLogin.onclick = hideLogin;
+            pwd.addEventListener('keydown', e => { if (e.key==='Enter') loginSubmit.click(); });
+
+            // 首页进入日记
             enterDiaryBtn.onclick = () => {
                 homeScreen.classList.add('hidden');
                 diaryScreen.classList.add('active');
                 renderList();
-                if (entries.length) {
-                    const sorted = [...entries].sort((a,b) => new Date(b.date) - new Date(a.date));
-                    selectDiary(sorted[0].id);
-                } else clearEditor();
+                if (entries.length) loadEditor(entries.sort((a,b)=>b.date-a.date)[0].id);
+                else clearEditor();
             };
-            backToHomeBtn.onclick = () => {
+            backHomeBtn.onclick = () => {
                 diaryScreen.classList.remove('active');
                 homeScreen.classList.remove('hidden');
             };
 
-            diaryListEl.addEventListener('click', (e) => {
+            // 日记列表点击
+            diaryList.addEventListener('click', e => {
                 const item = e.target.closest('.list-item');
-                if (item) selectDiary(Number(item.dataset.id));
+                if (item) loadEditor(Number(item.dataset.id));
             });
-            newDiaryBtn.onclick = () => {
-                clearEditor();
-                editorContainer.style.display = 'flex';
-                emptyState.style.display = 'none';
+
+            // 新建日记
+            newBtn.onclick = () => {
+                revokeURLs();
+                currentId = null;
                 diaryTitle.value = '';
                 diaryContent.innerHTML = '';
-                currentId = null;
-                renderList();
+                editorContainer.style.display = 'flex';
+                emptyState.style.display = 'none';
+                deleteBtn.style.display = 'none';
                 diaryTitle.focus();
             };
-            saveDiaryBtn.onclick = saveCurrent;
-            deleteDiaryBtn.onclick = deleteCurrent;
 
-            document.addEventListener('keydown', (e) => {
-                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                    e.preventDefault();
-                    if (diaryScreen.classList.contains('active') && isAdmin) saveCurrent();
+            // 保存/删除
+            saveBtn.onclick = saveCurrentDiary;
+            deleteBtn.onclick = deleteCurrentDiary;
+
+            // 图片上传
+            insertImageBtn.onclick = () => imageInput.click();
+            imageInput.addEventListener('change', () => {
+                const file = imageInput.files[0];
+                if (file) insertImageFile(file);
+                imageInput.value = '';
+            });
+
+            // 附件上传
+            attachFileBtn.onclick = () => fileInput.click();
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files[0];
+                if (file) insertFileLink(file);
+                fileInput.value = '';
+            });
+
+            // 粘贴图片支持
+            diaryContent.addEventListener('paste', (e) => {
+                if (!isAdmin) return;
+                const items = e.clipboardData.items;
+                for (let item of items) {
+                    if (item.type.startsWith('image/')) {
+                        e.preventDefault();
+                        const blob = item.getAsFile();
+                        insertImageFile(blob);
+                        break;
+                    }
                 }
             });
 
-            // 初始化
-            isAdmin = checkAuth();
-            loadCover();
-            loadEntries();
-            updateAllUI();
-            homeScreen.classList.remove('hidden');
-            diaryScreen.classList.remove('active');
+            // 封面更换
+            coverFileInput.addEventListener('change', async () => {
+                const file = coverFileInput.files[0];
+                if (file) await saveCover(file);
+                coverFileInput.value = '';
+            });
+
+            // 快捷键保存
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey||e.metaKey) && e.key==='s') {
+                    e.preventDefault();
+                    if (diaryScreen.classList.contains('active') && isAdmin) saveCurrentDiary();
+                }
+            });
+
+            // ========== 初始化 ==========
+            async function init() {
+                try {
+                    coverDB = await openDB(STORAGE.coverDB, 1, STORAGE.coverStore);
+                    attachDB = await openDB(STORAGE.attachDB, 1, STORAGE.attachStore);
+                } catch (e) { console.error('DB open error', e); }
+                await loadCoverDisplay();
+                createFloatingElements();
+                checkAuth();
+                loadEntries();
+                updateUI();
+                homeScreen.classList.remove('hidden');
+                diaryScreen.classList.remove('active');
+            }
+
+            init();
         })();
     </script>
 </body>
