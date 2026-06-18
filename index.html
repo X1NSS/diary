@@ -5,10 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>乖宝和溪溪的快乐生活</title>
     <style>
-        /* Google 风格全局变量 */
         :root {
             --google-blue: #1a73e8;
-            --google-blue-hover: #1765cc;
+            --google-blue-hover: #1669d0;
             --google-red: #ea4335;
             --google-green: #34a853;
             --google-yellow: #fbbc04;
@@ -27,7 +26,7 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Google Sans', Roboto, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background: #fff;
             color: var(--text-primary);
             height: 100vh;
@@ -35,7 +34,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* ========== 封面页 (Google 风格) ========== */
+        /* ========== 封面页 ========== */
         .home-screen {
             position: relative;
             width: 100%; height: 100vh;
@@ -44,15 +43,13 @@
         }
         .home-screen.hidden { display: none; }
 
-        /* 顶部导航条 */
         .top-bar {
             display: flex; align-items: center; justify-content: space-between;
             padding: 12px 24px;
             height: 60px;
-            box-sizing: border-box;
         }
         .top-bar-left {
-            display: flex; align-items: center; gap: 24px;
+            display: flex; align-items: center; gap: 16px;
         }
         .brand-link {
             text-decoration: none;
@@ -64,22 +61,44 @@
             border-radius: 20px;
             transition: background 0.2s;
             cursor: pointer;
-            white-space: nowrap;
         }
-        .brand-link:hover {
-            background: rgba(60,64,67,0.08);
+        .brand-link:hover { background: rgba(60,64,67,0.08); }
+
+        .top-bar-right {
+            display: flex; align-items: center; gap: 12px;
         }
+
+        .login-btn, .logout-btn {
+            background: var(--google-blue);
+            color: white;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 22px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s, box-shadow 0.2s;
+            letter-spacing: 0.3px;
+        }
+        .login-btn:hover { background: var(--google-blue-hover); box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+        .logout-btn {
+            background: transparent;
+            color: var(--google-blue);
+            border: 1px solid var(--border-color);
+        }
+        .logout-btn:hover { background: rgba(26,115,232,0.08); }
+
         .cover-change-btn {
-            background: none;
+            background: transparent;
             border: 1px solid var(--border-color);
             color: var(--text-secondary);
             font-size: 13px;
-            padding: 6px 16px;
+            padding: 7px 16px;
             border-radius: 4px;
             cursor: pointer;
             display: flex; align-items: center; gap: 6px;
             transition: all 0.2s;
-            visibility: hidden; /* 默认隐藏，管理员可见 */
+            visibility: hidden;
         }
         .cover-change-btn.visible { visibility: visible; }
         .cover-change-btn:hover {
@@ -98,19 +117,13 @@
             box-shadow: var(--shadow-2);
         }
         .cover-img {
-            width: 100%; height: 100%;
-            object-fit: cover;
-            display: none;
+            width: 100%; height: 100%; object-fit: cover; display: none;
         }
         .cover-placeholder {
             width: 100%; height: 100%;
             display: flex; align-items: center; justify-content: center;
             background: linear-gradient(135deg, #e8eaed 0%, #f1f3f4 100%);
-        }
-        .cover-placeholder-icon {
-            font-size: 6rem;
-            color: #9aa0a6;
-            opacity: 0.5;
+            font-size: 6rem; color: #9aa0a6; opacity: 0.5;
         }
 
         /* ========== 日记界面 (Gmail 风格) ========== */
@@ -121,25 +134,20 @@
         }
         .diary-screen.active { display: flex; }
 
-        /* Gmail 顶部栏 */
         .gmail-header {
-            height: 64px;
-            display: flex; align-items: center; padding: 0 16px;
-            border-bottom: 1px solid var(--border-color);
-            background: #fff;
-            gap: 12px;
+            height: 64px; display: flex; align-items: center; padding: 0 16px;
+            border-bottom: 1px solid var(--border-color); background: #fff; gap: 12px;
         }
         .gmail-menu-btn {
             width: 40px; height: 40px;
             display: flex; align-items: center; justify-content: center;
-            border-radius: 50%; cursor: pointer; transition: background 0.2s;
-            font-size: 20px;
+            border-radius: 50%; cursor: pointer; font-size: 20px;
+            transition: background 0.2s;
         }
         .gmail-menu-btn:hover { background: rgba(60,64,67,0.08); }
         .gmail-logo {
             display: flex; align-items: center; gap: 8px;
             font-size: 22px; color: var(--text-primary); font-weight: 400;
-            letter-spacing: 0.2px;
         }
         .gmail-logo span { color: var(--google-blue); font-weight: 500; }
         .gmail-search {
@@ -155,40 +163,22 @@
         .gmail-actions {
             display: flex; align-items: center; gap: 12px; margin-left: auto;
         }
-        .gmail-login-area {
-            display: flex; align-items: center; gap: 12px; font-size: 14px;
-        }
-        .login-link, .logout-link {
-            color: var(--google-blue); cursor: pointer; font-weight: 500;
-            padding: 8px 12px; border-radius: 4px; transition: background 0.2s;
-        }
-        .login-link:hover, .logout-link:hover { background: rgba(26,115,232,0.08); }
-        .admin-badge {
-            color: var(--text-secondary); font-size: 13px;
-            display: flex; align-items: center; gap: 4px;
-        }
 
-        /* Gmail 主体三栏布局 */
-        .gmail-body {
-            display: flex; flex: 1; overflow: hidden;
-        }
+        /* 三栏布局 */
+        .gmail-body { display: flex; flex: 1; overflow: hidden; }
 
-        /* 左侧边栏 (写日记按钮 + 列表) */
         .sidebar-left {
             width: 240px; padding: 8px 0;
             border-right: 1px solid var(--border-color);
-            display: flex; flex-direction: column;
-            overflow-y: auto;
+            display: flex; flex-direction: column; overflow-y: auto;
         }
         .compose-btn {
             margin: 8px 16px 16px;
-            background: var(--google-blue);
-            color: white; border: none; border-radius: 16px;
-            padding: 12px 24px; font-size: 14px; font-weight: 500;
+            background: var(--google-blue); color: white; border: none;
+            border-radius: 16px; padding: 12px 24px; font-size: 14px; font-weight: 500;
             display: flex; align-items: center; gap: 12px;
             cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1);
             transition: box-shadow 0.2s, background 0.2s;
-            white-space: nowrap;
         }
         .compose-btn:hover {
             box-shadow: 0 1px 4px rgba(0,0,0,0.2);
@@ -198,20 +188,14 @@
             display: flex; align-items: center; padding: 8px 16px;
             font-size: 14px; color: var(--text-primary);
             cursor: pointer; border-radius: 0 20px 20px 0;
-            margin-right: 8px;
-            transition: background 0.15s;
+            margin-right: 8px; transition: background 0.15s;
         }
-        .nav-item.active {
-            background: #e8f0fe; color: var(--google-blue); font-weight: 500;
-        }
+        .nav-item.active { background: #e8f0fe; color: var(--google-blue); font-weight: 500; }
         .nav-item:hover { background: #f1f3f4; }
 
-        /* 中间日记列表 */
         .middle-list {
             width: 360px; border-right: 1px solid var(--border-color);
-            display: flex; flex-direction: column;
-            overflow-y: auto;
-            background: #fff;
+            display: flex; flex-direction: column; overflow-y: auto; background: #fff;
         }
         .list-item {
             padding: 14px 16px; border-bottom: 1px solid var(--border-color);
@@ -221,51 +205,34 @@
         .list-item:hover { background: #f6f8fc; }
         .list-item.active { background: #e8f0fe; }
         .list-item-date { font-size: 12px; color: var(--text-secondary); }
-        .list-item-title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+        .list-item-title { font-size: 14px; font-weight: 500; }
         .list-item-preview {
             font-size: 13px; color: var(--text-secondary);
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .empty-list {
-            text-align: center; color: var(--text-secondary); padding: 40px 16px;
-        }
+        .empty-list { text-align: center; color: var(--text-secondary); padding: 40px 16px; }
 
-        /* 右侧阅读/编辑窗格 */
         .right-panel {
-            flex: 1; display: flex; flex-direction: column;
-            background: #fff; overflow-y: auto;
+            flex: 1; display: flex; flex-direction: column; background: #fff; overflow-y: auto;
         }
         .right-empty {
             display: flex; align-items: center; justify-content: center;
             height: 100%; color: var(--text-secondary); font-size: 16px;
         }
-        .editor-container {
-            display: flex; flex-direction: column; height: 100%;
-        }
-        .editor-header {
-            padding: 20px 24px 12px; border-bottom: 1px solid var(--border-color);
-        }
+        .editor-container { display: none; flex-direction: column; height: 100%; }
+        .editor-header { padding: 20px 24px 12px; border-bottom: 1px solid var(--border-color); }
         .title-input {
             border: none; font-size: 22px; font-weight: 400;
-            width: 100%; outline: none; background: transparent;
-            color: var(--text-primary);
+            width: 100%; outline: none; background: transparent; color: var(--text-primary);
         }
         .title-input:read-only { color: var(--text-primary); }
-        .editor-body {
-            flex: 1; padding: 16px 24px;
-            overflow-y: auto;
-        }
+        .editor-body { flex: 1; padding: 16px 24px; overflow-y: auto; }
         .content-editable {
             border: none; outline: none; font-size: 15px;
-            line-height: 1.6; color: var(--text-primary);
-            min-height: 300px;
+            line-height: 1.6; color: var(--text-primary); min-height: 300px;
         }
-        .content-editable img {
-            max-width: 100%; border-radius: 8px; margin: 12px 0;
-        }
-        .content-editable:empty::before {
-            content: "写下今天的快乐..."; color: #80868b;
-        }
+        .content-editable img { max-width: 100%; border-radius: 8px; margin: 12px 0; }
+        .content-editable:empty::before { content: "写下今天的快乐..."; color: #80868b; }
         .editor-footer {
             padding: 12px 24px; border-top: 1px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center;
@@ -290,7 +257,7 @@
         }
         .delete-btn:hover { background: rgba(234,67,53,0.04); }
 
-        /* 登录弹窗 (Google 风格) */
+        /* 登录弹窗 */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.5);
             display: flex; align-items: center; justify-content: center;
@@ -308,10 +275,7 @@
             font-size: 14px; outline: none; transition: border-color 0.2s;
         }
         .input-field:focus { border-color: var(--google-blue); }
-        .modal-actions {
-            display: flex; justify-content: flex-end; gap: 12px;
-            margin-top: 24px;
-        }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
         .btn-cancel {
             background: none; border: none; color: var(--text-secondary);
             font-weight: 500; padding: 10px 16px; border-radius: 4px; cursor: pointer;
@@ -324,75 +288,56 @@
         .btn-login:hover { background: var(--google-blue-hover); }
         .error-text { color: var(--google-red); font-size: 13px; margin-bottom: 12px; display: none; }
 
-        /* 响应式：小屏幕折叠 */
-        @media (max-width: 900px) {
-            .middle-list { width: 260px; }
-        }
         @media (max-width: 700px) {
             .gmail-body { flex-direction: column; }
-            .sidebar-left { width: 100%; flex-direction: row; overflow-x: auto; padding: 8px; }
-            .middle-list { width: 100%; flex: none; max-height: 200px; }
-            .right-panel { flex: 1; }
+            .sidebar-left { width: 100%; flex-direction: row; overflow-x: auto; }
+            .middle-list { width: 100%; max-height: 200px; }
         }
     </style>
 </head>
 <body>
-    <!-- ========== 封面页 ========== -->
+    <!-- 封面页 -->
     <div class="home-screen" id="homeScreen">
         <div class="top-bar">
             <div class="top-bar-left">
                 <div class="brand-link" id="enterDiaryBtn">乖宝和溪溪的快乐生活</div>
             </div>
-            <button class="cover-change-btn" id="changeCoverBtn">
-                <span>🖼️</span> 更换封面
-            </button>
-            <input type="file" id="coverFileInput" accept="image/*" style="display:none;">
+            <div class="top-bar-right" id="homeTopRight">
+                <!-- 动态插入登录按钮或更换封面 -->
+            </div>
         </div>
         <div class="cover-container" id="coverContainer">
-            <div class="cover-placeholder" id="coverPlaceholder">
-                <span class="cover-placeholder-icon">📷</span>
-            </div>
+            <div class="cover-placeholder" id="coverPlaceholder">📷</div>
         </div>
     </div>
 
-    <!-- ========== 日记界面 (Gmail 风格) ========== -->
+    <!-- 日记界面 -->
     <div class="diary-screen" id="diaryScreen">
-        <!-- 顶部栏 -->
         <div class="gmail-header">
-            <div class="gmail-menu-btn" id="backToHomeBtn" title="返回封面">←</div>
-            <div class="gmail-logo">
-                <span style="color:var(--google-blue);">📒</span> 日记
-            </div>
+            <div class="gmail-menu-btn" id="backToHomeBtn">←</div>
+            <div class="gmail-logo"><span>📒</span> 日记</div>
             <div class="gmail-search">
                 <span>🔍</span>
                 <input type="text" placeholder="搜索日记" disabled>
             </div>
-            <div class="gmail-actions">
-                <div class="gmail-login-area" id="loginArea">
-                    <!-- 动态填充 -->
-                </div>
+            <div class="gmail-actions" id="diaryTopRight">
+                <!-- 动态插入登录状态 -->
             </div>
         </div>
 
-        <!-- 三栏主体 -->
         <div class="gmail-body">
-            <!-- 左侧边栏 -->
             <div class="sidebar-left">
                 <button class="compose-btn" id="newDiaryBtn" style="display:none;">
                     <span>✏️</span> 写日记
                 </button>
-                <div class="nav-item active" id="allDiariesNav">📋 所有日记</div>
+                <div class="nav-item active">📋 所有日记</div>
             </div>
-
-            <!-- 中间日记列表 -->
             <div class="middle-list" id="diaryList">
                 <div class="empty-list">暂无日记</div>
             </div>
-
-            <!-- 右侧编辑/阅读窗格 -->
             <div class="right-panel" id="rightPanel">
                 <div class="right-empty" id="emptyState">选择一篇日记查看</div>
-                <div class="editor-container" id="editorContainer" style="display:none;">
+                <div class="editor-container" id="editorContainer">
                     <div class="editor-header">
                         <input type="text" class="title-input" id="diaryTitle" placeholder="标题" readonly>
                     </div>
@@ -401,7 +346,7 @@
                     </div>
                     <div class="editor-footer">
                         <div class="editor-actions">
-                            <button class="icon-btn" id="insertImageBtn" title="插入图片" style="display:none;">🖼️</button>
+                            <button class="icon-btn" id="insertImageBtn" style="display:none;">🖼️</button>
                             <input type="file" id="imageFileInput" accept="image/*" style="display:none;">
                             <button class="delete-btn" id="deleteDiaryBtn" style="display:none;">删除</button>
                         </div>
@@ -426,28 +371,23 @@
         </div>
     </div>
 
+    <input type="file" id="coverFileInput" accept="image/*" style="display:none;">
+
     <script>
         (function() {
-            // 管理员账号
             const ADMIN_USER = 'XX';
             const ADMIN_PASS = 'YY';
 
-            // 本地存储 key
-            const COVER_KEY = 'g_cover';
-            const DIARY_KEY = 'g_diary';
-            const AUTH_KEY = 'g_admin';
+            const COVER_KEY = 'g_cover', DIARY_KEY = 'g_diary', AUTH_KEY = 'g_admin';
 
-            // DOM 元素
+            // DOM
             const homeScreen = document.getElementById('homeScreen');
             const diaryScreen = document.getElementById('diaryScreen');
-            const coverContainer = document.getElementById('coverContainer');
-            const coverPlaceholder = document.getElementById('coverPlaceholder');
-            const changeCoverBtn = document.getElementById('changeCoverBtn');
-            const coverFileInput = document.getElementById('coverFileInput');
+            const homeTopRight = document.getElementById('homeTopRight');
+            const diaryTopRight = document.getElementById('diaryTopRight');
             const enterDiaryBtn = document.getElementById('enterDiaryBtn');
             const backToHomeBtn = document.getElementById('backToHomeBtn');
             const diaryListEl = document.getElementById('diaryList');
-            const rightPanel = document.getElementById('rightPanel');
             const emptyState = document.getElementById('emptyState');
             const editorContainer = document.getElementById('editorContainer');
             const diaryTitle = document.getElementById('diaryTitle');
@@ -457,7 +397,9 @@
             const newDiaryBtn = document.getElementById('newDiaryBtn');
             const insertImageBtn = document.getElementById('insertImageBtn');
             const imageFileInput = document.getElementById('imageFileInput');
-            const loginArea = document.getElementById('loginArea');
+            const coverFileInput = document.getElementById('coverFileInput');
+            const coverContainer = document.getElementById('coverContainer');
+            const coverPlaceholder = document.getElementById('coverPlaceholder');
             const loginModal = document.getElementById('loginModal');
             const loginUsername = document.getElementById('loginUsername');
             const loginPassword = document.getElementById('loginPassword');
@@ -465,56 +407,63 @@
             const loginSubmitBtn = document.getElementById('loginSubmitBtn');
             const cancelLoginBtn = document.getElementById('cancelLoginBtn');
 
-            let entries = [];
-            let currentId = null;
-            let isAdmin = false;
+            let entries = [], currentId = null, isAdmin = false;
 
-            // ---------- 登录管理 ----------
-            function checkAuth() {
-                return localStorage.getItem(AUTH_KEY) === 'true';
+            function checkAuth() { return localStorage.getItem(AUTH_KEY) === 'true'; }
+            function setAuth(val) {
+                if (val) localStorage.setItem(AUTH_KEY, 'true');
+                else localStorage.removeItem(AUTH_KEY);
+                isAdmin = val;
+                updateAllUI();
             }
 
-            function setAuth(value) {
-                if (value) {
-                    localStorage.setItem(AUTH_KEY, 'true');
+            function updateAllUI() {
+                // 封面页右上角
+                homeTopRight.innerHTML = '';
+                if (isAdmin) {
+                    const changeBtn = document.createElement('button');
+                    changeBtn.className = 'cover-change-btn visible';
+                    changeBtn.innerHTML = '🖼️ 更换封面';
+                    changeBtn.onclick = () => coverFileInput.click();
+                    homeTopRight.appendChild(changeBtn);
+
+                    const logoutBtn = document.createElement('button');
+                    logoutBtn.className = 'logout-btn';
+                    logoutBtn.textContent = '退出';
+                    logoutBtn.onclick = () => setAuth(false);
+                    homeTopRight.appendChild(logoutBtn);
                 } else {
-                    localStorage.removeItem(AUTH_KEY);
+                    const loginBtn = document.createElement('button');
+                    loginBtn.className = 'login-btn';
+                    loginBtn.textContent = '登录';
+                    loginBtn.onclick = showLoginModal;
+                    homeTopRight.appendChild(loginBtn);
                 }
-                isAdmin = value;
-                updateUIForAuth();
-            }
 
-            function updateUIForAuth() {
-                // 封面页更换按钮
-                changeCoverBtn.classList.toggle('visible', isAdmin);
+                // 日记界面右上角
+                diaryTopRight.innerHTML = '';
+                if (isAdmin) {
+                    diaryTopRight.innerHTML = '<span style="color:var(--text-secondary);font-size:13px;">👤 管理员</span>';
+                    const logoutBtn = document.createElement('button');
+                    logoutBtn.className = 'logout-btn';
+                    logoutBtn.textContent = '退出';
+                    logoutBtn.onclick = () => setAuth(false);
+                    diaryTopRight.appendChild(logoutBtn);
+                } else {
+                    const loginBtn = document.createElement('button');
+                    loginBtn.className = 'login-btn';
+                    loginBtn.textContent = '登录';
+                    loginBtn.onclick = showLoginModal;
+                    diaryTopRight.appendChild(loginBtn);
+                }
 
-                // 日记编辑控件
+                // 编辑控件显示
                 newDiaryBtn.style.display = isAdmin ? 'flex' : 'none';
                 saveDiaryBtn.style.display = isAdmin ? 'inline-block' : 'none';
                 insertImageBtn.style.display = isAdmin ? 'flex' : 'none';
                 diaryTitle.readOnly = !isAdmin;
                 diaryContent.contentEditable = isAdmin ? 'true' : 'false';
-
-                if (currentId && isAdmin) {
-                    deleteDiaryBtn.style.display = 'inline-block';
-                } else {
-                    deleteDiaryBtn.style.display = 'none';
-                }
-
-                // 登录区域
-                if (isAdmin) {
-                    loginArea.innerHTML = `
-                        <span class="admin-badge">👤 管理员</span>
-                        <span class="logout-link" id="logoutLink">退出</span>
-                    `;
-                    document.getElementById('logoutLink')?.addEventListener('click', () => {
-                        setAuth(false);
-                        if (currentId) loadEditor(currentId);
-                    });
-                } else {
-                    loginArea.innerHTML = `<span class="login-link" id="loginLink">登录</span>`;
-                    document.getElementById('loginLink')?.addEventListener('click', showLoginModal);
-                }
+                deleteDiaryBtn.style.display = (isAdmin && currentId) ? 'inline-block' : 'none';
             }
 
             function showLoginModal() {
@@ -524,11 +473,7 @@
                 loginError.style.display = 'none';
                 loginUsername.focus();
             }
-
-            function hideLoginModal() {
-                loginModal.classList.remove('active');
-            }
-
+            function hideLoginModal() { loginModal.classList.remove('active'); }
             function attemptLogin() {
                 if (loginUsername.value.trim() === ADMIN_USER && loginPassword.value === ADMIN_PASS) {
                     setAuth(true);
@@ -540,17 +485,16 @@
                     loginPassword.focus();
                 }
             }
-
-            loginSubmitBtn.addEventListener('click', attemptLogin);
-            cancelLoginBtn.addEventListener('click', hideLoginModal);
+            loginSubmitBtn.onclick = attemptLogin;
+            cancelLoginBtn.onclick = hideLoginModal;
             loginPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
             loginModal.addEventListener('click', (e) => { if (e.target === loginModal) hideLoginModal(); });
 
-            // ---------- 封面处理 ----------
+            // 封面图片
             function loadCover() {
                 const saved = localStorage.getItem(COVER_KEY);
-                const existingImg = coverContainer.querySelector('.cover-img');
-                if (existingImg) existingImg.remove();
+                const oldImg = coverContainer.querySelector('.cover-img');
+                if (oldImg) oldImg.remove();
                 if (saved) {
                     coverPlaceholder.style.display = 'none';
                     const img = document.createElement('img');
@@ -562,11 +506,6 @@
                     coverPlaceholder.style.display = 'flex';
                 }
             }
-
-            changeCoverBtn.addEventListener('click', () => {
-                if (!isAdmin) return;
-                coverFileInput.click();
-            });
             coverFileInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -579,24 +518,23 @@
                 coverFileInput.value = '';
             });
 
-            // ---------- 日记数据 ----------
+            // 日记数据
             function loadEntries() {
                 const stored = localStorage.getItem(DIARY_KEY);
                 entries = stored ? JSON.parse(stored) : [];
             }
-            function saveEntries() {
-                localStorage.setItem(DIARY_KEY, JSON.stringify(entries));
-            }
+            function saveEntries() { localStorage.setItem(DIARY_KEY, JSON.stringify(entries)); }
             function formatDate(iso) {
                 const d = new Date(iso);
-                const month = d.getMonth() + 1;
-                const day = d.getDate();
-                return `${month}月${day}日`;
+                return `${d.getMonth()+1}月${d.getDate()}日`;
             }
             function stripHtml(html) {
                 const tmp = document.createElement('div');
                 tmp.innerHTML = html;
                 return tmp.textContent || '';
+            }
+            function escapeHtml(s) {
+                return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
             }
 
             function renderList() {
@@ -605,22 +543,12 @@
                     return;
                 }
                 const sorted = [...entries].sort((a,b) => new Date(b.date) - new Date(a.date));
-                let html = '';
-                sorted.forEach(e => {
-                    const active = e.id === currentId ? ' active' : '';
-                    const preview = stripHtml(e.content).substring(0, 30);
-                    html += `
-                        <div class="list-item${active}" data-id="${e.id}">
-                            <div class="list-item-date">${formatDate(e.date)}</div>
-                            <div class="list-item-title">${escapeHtml(e.title || '无标题')}</div>
-                            <div class="list-item-preview">${escapeHtml(preview)}</div>
-                        </div>`;
-                });
-                diaryListEl.innerHTML = html;
-            }
-
-            function escapeHtml(str) {
-                return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                diaryListEl.innerHTML = sorted.map(e => `
+                    <div class="list-item${e.id === currentId ? ' active' : ''}" data-id="${e.id}">
+                        <div class="list-item-date">${formatDate(e.date)}</div>
+                        <div class="list-item-title">${escapeHtml(e.title || '无标题')}</div>
+                        <div class="list-item-preview">${escapeHtml(stripHtml(e.content).substring(0, 30))}</div>
+                    </div>`).join('');
             }
 
             function clearEditor() {
@@ -643,10 +571,7 @@
                 deleteDiaryBtn.style.display = isAdmin ? 'inline-block' : 'none';
             }
 
-            function selectDiary(id) {
-                loadEditor(id);
-                renderList();
-            }
+            function selectDiary(id) { loadEditor(id); renderList(); }
 
             function saveCurrent() {
                 if (!isAdmin) return alert('请先登录');
@@ -657,11 +582,7 @@
                     const entry = entries.find(e => e.id === currentId);
                     if (entry) { entry.title = title; entry.content = content; }
                 } else {
-                    const newEntry = {
-                        id: Date.now(),
-                        date: new Date().toISOString(),
-                        title, content
-                    };
+                    const newEntry = { id: Date.now(), date: new Date().toISOString(), title, content };
                     entries.push(newEntry);
                     currentId = newEntry.id;
                 }
@@ -680,10 +601,7 @@
             }
 
             // 图片插入
-            insertImageBtn.addEventListener('click', () => {
-                if (!isAdmin) return;
-                imageFileInput.click();
-            });
+            insertImageBtn.onclick = () => { if (isAdmin) imageFileInput.click(); };
             imageFileInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -701,9 +619,7 @@
                         range.collapse(true);
                         sel.removeAllRanges();
                         sel.addRange(range);
-                    } else {
-                        diaryContent.appendChild(img);
-                    }
+                    } else diaryContent.appendChild(img);
                 };
                 reader.readAsDataURL(file);
                 imageFileInput.value = '';
@@ -730,9 +646,7 @@
                                 range.collapse(true);
                                 sel.removeAllRanges();
                                 sel.addRange(range);
-                            } else {
-                                diaryContent.appendChild(img);
-                            }
+                            } else diaryContent.appendChild(img);
                         };
                         reader.readAsDataURL(file);
                     }
@@ -740,30 +654,25 @@
             });
 
             // 视图切换
-            enterDiaryBtn.addEventListener('click', () => {
+            enterDiaryBtn.onclick = () => {
                 homeScreen.classList.add('hidden');
                 diaryScreen.classList.add('active');
                 renderList();
                 if (entries.length) {
                     const sorted = [...entries].sort((a,b) => new Date(b.date) - new Date(a.date));
                     selectDiary(sorted[0].id);
-                } else {
-                    clearEditor();
-                }
-            });
-            backToHomeBtn.addEventListener('click', () => {
+                } else clearEditor();
+            };
+            backToHomeBtn.onclick = () => {
                 diaryScreen.classList.remove('active');
                 homeScreen.classList.remove('hidden');
-            });
+            };
 
-            // 列表点击
             diaryListEl.addEventListener('click', (e) => {
                 const item = e.target.closest('.list-item');
-                if (!item) return;
-                selectDiary(Number(item.dataset.id));
+                if (item) selectDiary(Number(item.dataset.id));
             });
-
-            newDiaryBtn.addEventListener('click', () => {
+            newDiaryBtn.onclick = () => {
                 clearEditor();
                 editorContainer.style.display = 'flex';
                 emptyState.style.display = 'none';
@@ -772,10 +681,9 @@
                 currentId = null;
                 renderList();
                 diaryTitle.focus();
-            });
-
-            saveDiaryBtn.addEventListener('click', saveCurrent);
-            deleteDiaryBtn.addEventListener('click', deleteCurrent);
+            };
+            saveDiaryBtn.onclick = saveCurrent;
+            deleteDiaryBtn.onclick = deleteCurrent;
 
             document.addEventListener('keydown', (e) => {
                 if ((e.ctrlKey || e.metaKey) && e.key === 's') {
@@ -788,7 +696,7 @@
             isAdmin = checkAuth();
             loadCover();
             loadEntries();
-            updateUIForAuth();
+            updateAllUI();
             homeScreen.classList.remove('hidden');
             diaryScreen.classList.remove('active');
         })();
