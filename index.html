@@ -10,131 +10,129 @@
             --google-blue-hover: #1669d0;
             --google-red: #ea4335;
             --bg-white: #fff;
+            --bg-gray: #f1f3f4;
             --text-primary: #202124;
             --text-secondary: #5f6368;
             --border-color: #dadce0;
         }
         * { margin:0; padding:0; box-sizing:border-box; }
 
-        @keyframes liquidGlassText {
+        @keyframes liquidText {
             0% { text-shadow: 0 0 8px rgba(255,255,255,0.4), 0 2px 8px rgba(26,115,232,0.3); }
             50% { text-shadow: 0 4px 16px rgba(255,255,255,0.6), 0 6px 16px rgba(26,115,232,0.5); }
             100% { text-shadow: 0 0 8px rgba(255,255,255,0.4), 0 2px 8px rgba(26,115,232,0.3); }
         }
-        @keyframes liquidGlassBox {
+        @keyframes liquidBox {
             0% { box-shadow: 0 4px 12px rgba(26,115,232,0.15), 0 1px 4px rgba(0,0,0,0.08); }
             50% { box-shadow: 0 8px 24px rgba(26,115,232,0.25), 0 2px 8px rgba(0,0,0,0.12); }
             100% { box-shadow: 0 4px 12px rgba(26,115,232,0.15), 0 1px 4px rgba(0,0,0,0.08); }
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background: #fff; color: var(--text-primary); height: 100vh; overflow: hidden;
-            animation: liquidGlassText 4s infinite ease-in-out;
+            animation: liquidText 4s infinite ease-in-out;
         }
 
-        .home-screen { width:100%; height:100vh; display:flex; flex-direction:column; background: #fff; position: relative; }
+        .home-screen { width:100%; height:100vh; display:flex; flex-direction:column; position: relative; }
         .home-screen.hidden { display:none; }
-        .top-bar { display:flex; align-items:center; justify-content:space-between; padding:12px 24px; height:60px; z-index:10; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); }
+        .top-bar { display:flex; align-items:center; justify-content:space-between; padding:12px 24px; height:60px; z-index:10; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); }
         .brand-link { text-decoration:none; color:var(--text-primary); font-size:14px; font-weight:500; padding:8px 12px; border-radius:20px; cursor:pointer; transition:background 0.2s; }
         .brand-link:hover { background:rgba(60,64,67,0.08); }
         .top-right { display:flex; gap:12px; align-items:center; }
-        .btn-login, .btn-logout {
-            background:var(--google-blue); color:white; border:none; font-size:14px; font-weight:500;
-            padding:8px 22px; border-radius:4px; cursor:pointer; transition:background 0.2s;
-            animation: liquidGlassBox 4s infinite ease-in-out;
+        .btn {
+            border:none; font-size:14px; font-weight:500; padding:8px 22px; border-radius:4px; cursor:pointer;
+            transition:background 0.2s; animation: liquidBox 4s infinite ease-in-out;
         }
-        .btn-logout { background:transparent; color:var(--google-blue); border:1px solid var(--border-color); }
+        .btn-blue { background:var(--google-blue); color:white; }
+        .btn-blue:hover { background:var(--google-blue-hover); }
+        .btn-outline { background:transparent; color:var(--google-blue); border:1px solid var(--border-color); }
+        .btn-outline:hover { background:rgba(26,115,232,0.08); }
         .cover-change-btn {
             background:transparent; border:1px solid var(--border-color); color:var(--text-secondary);
-            padding:7px 16px; border-radius:4px; cursor:pointer; display:flex; align-items:center; gap:6px;
-            visibility:hidden; font-size:13px; animation: liquidGlassBox 4s infinite ease-in-out;
+            padding:7px 16px; border-radius:4px; cursor:pointer; display:none; align-items:center; gap:6px; font-size:13px;
         }
-        .cover-change-btn.visible { visibility:visible; }
+        .cover-change-btn.show { display:flex; }
         .save-cover-btn {
-            background: var(--google-blue); color: white; border: none; padding: 6px 16px;
-            border-radius: 4px; cursor: pointer; display: none; margin-left: 8px; font-size: 13px;
-            animation: liquidGlassBox 4s infinite ease-in-out;
+            background:var(--google-blue); color:white; border:none; padding:6px 16px; border-radius:4px;
+            cursor:pointer; display:none; margin-left:8px; font-size:13px;
         }
-        .save-cover-btn.show { display: inline-block; }
+        .save-cover-btn.show { display:inline-block; }
 
-        /* 封面容器 */
+        /* 封面 */
         .cover-wrapper {
             flex:1; position:relative; margin:0 24px 24px; border-radius:28px; overflow:hidden;
             background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 50%, #fce4ec 100%);
             display:flex; align-items:center; justify-content:center;
         }
         .image-container {
-            position: relative; z-index: 2;
-            width: 100%; height: 100%;
-            display: flex; align-items: center; justify-content: center;
+            position: relative; z-index:2; width:100%; height:100%;
+            display:flex; align-items:center; justify-content:center;
         }
         .cover-img {
-            max-width: 100%; max-height: 100%;
-            object-fit: contain;
-            border-radius: 24px;
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.9), 0 0 60px rgba(255, 192, 203, 0.6), 0 10px 40px rgba(0,0,0,0.1);
-        }
-        .image-container::after {
-            content: '';
-            position: absolute; inset: -20px;
-            background: radial-gradient(ellipse at center, transparent 40%, rgba(252,228,236,0.7) 100%);
-            pointer-events: none; border-radius: 50%; z-index: -1;
+            max-width:100%; max-height:100%; object-fit:contain; border-radius:24px;
+            box-shadow: 0 0 30px rgba(255,255,255,0.9), 0 0 60px rgba(255,192,203,0.6), 0 10px 40px rgba(0,0,0,0.1);
         }
         .cover-placeholder {
             font-size:6rem; color:#f48fb1; opacity:0.6; z-index:2;
-            animation: liquidGlassText 4s infinite ease-in-out;
         }
-
         .floating-elements { position:absolute; inset:0; pointer-events:none; z-index:1; overflow:hidden; }
-        .floating-elements .bg-float {
-            position: absolute; opacity: 0.5;
-            animation: bgFloat 8s infinite ease-in-out;
+        .bg-float {
+            position: absolute; opacity:0.5;
+            animation: floatAnim 8s infinite ease-in-out;
         }
-        @keyframes bgFloat {
+        @keyframes floatAnim {
             0% { transform: translateY(0px) rotate(0deg); opacity:0.5; }
             50% { transform: translateY(-20px) rotate(5deg); opacity:0.9; }
             100% { transform: translateY(0px) rotate(0deg); opacity:0.5; }
         }
-
-        .surround-elements { position:absolute; inset:0; pointer-events:none; z-index:3; overflow:visible; }
+        .surround-elements { position:absolute; inset:0; pointer-events:none; z-index:3; }
         .surround-elements span {
-            position: absolute; font-size: 22px;
+            position: absolute; font-size:22px;
             filter: drop-shadow(0 0 6px rgba(255,255,255,0.9));
-            animation: floatSurround 4s infinite alternate ease-in-out;
+            animation: surroundFloat 4s infinite alternate ease-in-out;
         }
-        @keyframes floatSurround {
+        @keyframes surroundFloat {
             from { transform: translate(0,0) scale(1); }
             to { transform: translate(5px,-10px) scale(1.15); }
         }
 
-        /* 日记界面 */
+        /* 日记界面 (Gmail风格) */
         .diary-screen { display:none; flex-direction:column; height:100vh; background:var(--bg-white); }
         .diary-screen.active { display:flex; }
-        .gmail-header { height:64px; display:flex; align-items:center; padding:0 16px; border-bottom:1px solid var(--border-color); gap:12px; animation: liquidGlassBox 4s infinite ease-in-out; }
+        .gmail-header {
+            height:64px; display:flex; align-items:center; padding:0 16px;
+            border-bottom:1px solid var(--border-color); gap:12px; animation: liquidBox 4s infinite ease-in-out;
+        }
         .gmail-menu-btn { width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:50%; cursor:pointer; font-size:20px; }
         .gmail-logo { font-size:22px; display:flex; align-items:center; gap:8px; }
         .gmail-logo span { color:var(--google-blue); }
         .gmail-actions { margin-left:auto; display:flex; gap:12px; align-items:center; }
         .gmail-body { display:flex; flex:1; overflow:hidden; }
-        .sidebar-left { width:240px; border-right:1px solid var(--border-color); display:flex; flex-direction:column; padding:8px 0; }
-        .compose-btn { margin:8px 16px; background:var(--google-blue); color:white; border:none; border-radius:16px; padding:12px 24px; font-size:14px; cursor:pointer; display:flex; align-items:center; gap:8px; }
-        .compose-btn:hover { background:var(--google-blue-hover); }
+        .sidebar { width:240px; border-right:1px solid var(--border-color); padding:8px 0; }
+        .compose-btn {
+            margin:8px 16px; background:var(--google-blue); color:white; border:none;
+            border-radius:16px; padding:12px 24px; font-size:14px; cursor:pointer; display:none; align-items:center; gap:8px;
+        }
+        .compose-btn.show { display:flex; }
         .middle-list { width:360px; border-right:1px solid var(--border-color); overflow-y:auto; }
         .list-item { padding:14px 16px; border-bottom:1px solid var(--border-color); cursor:pointer; }
         .list-item.active { background:#e8f0fe; }
         .right-panel { flex:1; overflow-y:auto; display:flex; flex-direction:column; }
         .editor-container { display:none; flex-direction:column; height:100%; }
+        .editor-container.show { display:flex; }
         .editor-header { padding:20px 24px 12px; border-bottom:1px solid var(--border-color); }
         .title-input { border:none; font-size:22px; width:100%; outline:none; background:transparent; }
         .editor-body { flex:1; padding:16px 24px; overflow-y:auto; }
         .content-editable { min-height:300px; outline:none; font-size:15px; line-height:1.6; }
         .content-editable img { max-width:100%; border-radius:8px; margin:8px 0; }
-        .content-editable a { color:var(--google-blue); }
-        .editor-footer { padding:12px 24px; border-top:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; }
-        .save-btn { background:var(--google-blue); color:white; border:none; padding:8px 24px; border-radius:4px; cursor:pointer; }
-        .delete-btn { color:var(--google-red); background:none; border:1px solid var(--border-color); padding:8px 16px; border-radius:4px; cursor:pointer; }
-        .file-upload-btn { background:none; border:1px solid var(--border-color); padding:8px 16px; border-radius:4px; cursor:pointer; }
+        .editor-footer { padding:12px 24px; border-top:1px solid var(--border-color); display:flex; justify-content:space-between; }
+        .file-upload-btn { background:none; border:1px solid var(--border-color); padding:8px 16px; border-radius:4px; cursor:pointer; display:none; }
+        .file-upload-btn.show { display:inline-block; }
+        .delete-btn { color:var(--google-red); background:none; border:1px solid var(--border-color); padding:8px 16px; border-radius:4px; cursor:pointer; display:none; }
+        .delete-btn.show { display:inline-block; }
+        .save-btn { background:var(--google-blue); color:white; border:none; padding:8px 24px; border-radius:4px; cursor:pointer; display:none; }
+        .save-btn.show { display:inline-block; }
 
         .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:100; opacity:0; pointer-events:none; transition: opacity 0.2s; }
         .modal-overlay.active { opacity:1; pointer-events:auto; }
@@ -142,11 +140,11 @@
         .modal-card h2 { font-size:24px; margin-bottom:24px; font-weight:400; }
         .input-field { width:100%; padding:12px; margin-bottom:16px; border:1px solid var(--border-color); border-radius:4px; font-size:14px; outline:none; }
         .modal-actions { display:flex; justify-content:flex-end; gap:12px; margin-top:24px; }
-        .btn-cancel { background:none; border:none; color:var(--text-secondary); padding:10px 16px; cursor:pointer; font-weight:500; }
         .error-text { color:var(--google-red); font-size:13px; display:none; margin-bottom:12px; }
     </style>
 </head>
 <body>
+    <!-- 封面页 -->
     <div class="home-screen" id="homeScreen">
         <div class="top-bar">
             <div class="brand-link" id="enterDiaryBtn">乖宝和溪溪的快乐生活</div>
@@ -159,11 +157,12 @@
             </div>
             <div class="surround-elements" id="surroundElements"></div>
         </div>
-        <div style="text-align:center; padding: 8px;">
+        <div style="text-align:center; padding:8px;">
             <button class="save-cover-btn" id="saveCoverBtn">保存封面</button>
         </div>
     </div>
 
+    <!-- 日记页 -->
     <div class="diary-screen" id="diaryScreen">
         <div class="gmail-header">
             <div class="gmail-menu-btn" id="backHomeBtn">←</div>
@@ -171,14 +170,14 @@
             <div class="gmail-actions" id="diaryTopRight"></div>
         </div>
         <div class="gmail-body">
-            <div class="sidebar-left">
-                <button class="compose-btn" id="newDiaryBtn" style="display:none;">✏️ 写日记</button>
+            <div class="sidebar">
+                <button class="compose-btn" id="newDiaryBtn">✏️ 写日记</button>
                 <div class="nav-item active">📋 所有日记</div>
             </div>
             <div class="middle-list" id="diaryList"><div style="padding:20px;text-align:center;color:var(--text-secondary);">暂无日记</div></div>
-            <div class="right-panel" id="rightPanel">
+            <div class="right-panel">
                 <div id="emptyState" style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-secondary);">选择一篇日记查看</div>
-                <div class="editor-container" id="editorContainer" style="display:none;">
+                <div class="editor-container" id="editorContainer">
                     <div class="editor-header">
                         <input type="text" class="title-input" id="diaryTitle" placeholder="标题">
                     </div>
@@ -187,14 +186,14 @@
                     </div>
                     <div class="editor-footer">
                         <div>
-                            <button class="file-upload-btn" id="attachFileBtn" style="display:none;">📎 上传附件</button>
-                            <button class="file-upload-btn" id="insertImageBtn" style="display:none;">🖼️ 插入图片</button>
+                            <button class="file-upload-btn" id="attachFileBtn">📎 附件</button>
+                            <button class="file-upload-btn" id="insertImageBtn">🖼️ 图片</button>
                             <input type="file" id="imageInput" accept="image/*" style="display:none;">
                             <input type="file" id="fileInput" style="display:none;">
                         </div>
                         <div>
-                            <button class="delete-btn" id="deleteDiaryBtn" style="display:none;">删除</button>
-                            <button class="save-btn" id="saveDiaryBtn" style="display:none;">保存</button>
+                            <button class="delete-btn" id="deleteDiaryBtn">删除</button>
+                            <button class="save-btn" id="saveDiaryBtn">保存</button>
                         </div>
                     </div>
                 </div>
@@ -202,6 +201,7 @@
         </div>
     </div>
 
+    <!-- 登录弹窗 -->
     <div class="modal-overlay" id="loginModal">
         <div class="modal-card">
             <h2>管理员登录</h2>
@@ -209,8 +209,8 @@
             <input type="password" class="input-field" id="password" placeholder="密码">
             <div class="error-text" id="loginError">用户名或密码错误</div>
             <div class="modal-actions">
-                <button class="btn-cancel" id="cancelLogin">取消</button>
-                <button class="btn-login" id="loginSubmit">登录</button>
+                <button class="btn btn-outline" id="cancelLogin">取消</button>
+                <button class="btn btn-blue" id="loginSubmit">登录</button>
             </div>
         </div>
     </div>
@@ -218,318 +218,484 @@
     <input type="file" id="coverFileInput" accept="image/*" style="display:none;">
 
     <script>
-        (function() {
+        (() => {
             const ADMIN = { user: 'XX', pass: 'YY' };
-            const STORAGE = {
-                diary: 'g_diary',
-                auth: 'g_admin',
-                coverDB: 'CoverDB',
-                coverStore: 'covers',
-                coverKey: 'main_cover',
-                attachDB: 'AttachDB',
-                attachStore: 'attachments'
-            };
+            const DB_NAME = 'MyDiaryDB';
+            const STORE_COVER = 'cover';
+            const STORE_ATTACH = 'attachments';
+            const COVER_KEY = 'main';
+            const DIARY_KEY = 'diary_entries';
+            const AUTH_KEY = 'admin_auth';
 
-            const $ = id => document.getElementById(id);
-            const homeScreen = $('homeScreen'), diaryScreen = $('diaryScreen'),
-                homeTopRight = $('homeTopRight'), diaryTopRight = $('diaryTopRight'),
-                enterDiaryBtn = $('enterDiaryBtn'), backHomeBtn = $('backHomeBtn'),
-                diaryList = $('diaryList'), emptyState = $('emptyState'),
-                editorContainer = $('editorContainer'), diaryTitle = $('diaryTitle'),
-                diaryContent = $('diaryContent'), saveBtn = $('saveDiaryBtn'),
-                deleteBtn = $('deleteDiaryBtn'), newBtn = $('newDiaryBtn'),
-                insertImageBtn = $('insertImageBtn'), attachFileBtn = $('attachFileBtn'),
-                imageInput = $('imageInput'), fileInput = $('fileInput'),
-                coverFileInput = $('coverFileInput'), coverWrapper = $('coverWrapper'),
-                coverPlaceholder = $('coverPlaceholder'), floatingEls = $('floatingElements'),
-                imageContainer = $('imageContainer'), surroundEls = $('surroundElements'),
-                saveCoverBtn = $('saveCoverBtn'),
-                loginModal = $('loginModal'), uname = $('username'), pwd = $('password'),
-                loginError = $('loginError'), loginSubmit = $('loginSubmit'), cancelLogin = $('cancelLogin');
+            // DOM元素
+            const $ = (id) => document.getElementById(id);
+            const homeScreen = $('homeScreen'), diaryScreen = $('diaryScreen');
+            const homeTopRight = $('homeTopRight'), diaryTopRight = $('diaryTopRight');
+            const enterDiaryBtn = $('enterDiaryBtn'), backHomeBtn = $('backHomeBtn');
+            const diaryList = $('diaryList'), emptyState = $('emptyState');
+            const editorContainer = $('editorContainer'), diaryTitle = $('diaryTitle');
+            const diaryContent = $('diaryContent'), saveDiaryBtn = $('saveDiaryBtn');
+            const deleteDiaryBtn = $('deleteDiaryBtn'), newDiaryBtn = $('newDiaryBtn');
+            const insertImageBtn = $('insertImageBtn'), attachFileBtn = $('attachFileBtn');
+            const imageInput = $('imageInput'), fileInput = $('fileInput');
+            const coverFileInput = $('coverFileInput'), coverWrapper = $('coverWrapper');
+            const coverPlaceholder = $('coverPlaceholder'), floatingEls = $('floatingElements');
+            const imageContainer = $('imageContainer'), surroundEls = $('surroundElements');
+            const saveCoverBtn = $('saveCoverBtn');
+            const loginModal = $('loginModal'), uname = $('username'), pwd = $('password');
+            const loginError = $('loginError'), loginSubmitBtn = $('loginSubmit'), cancelLoginBtn = $('cancelLogin');
 
-            let entries = [], currentId = null, isAdmin = false;
-            let coverDB = null, attachDB = null;
-            let pendingCoverBuffer = null; // ArrayBuffer 暂存
+            let db = null;
+            let entries = [], currentId = null;
+            let isAdmin = false;
+            let pendingCoverDataUrl = null;
 
-            // ========= IndexedDB =========
-            function openDB(name, version, storeName) {
+            // ---------- 数据库 ----------
+            function openDB() {
                 return new Promise((resolve, reject) => {
-                    const req = indexedDB.open(name, version);
+                    const req = indexedDB.open(DB_NAME, 1);
                     req.onupgradeneeded = (e) => {
-                        const db = e.target.result;
-                        if (!db.objectStoreNames.contains(storeName)) db.createObjectStore(storeName);
+                        const database = e.target.result;
+                        if (!database.objectStoreNames.contains(STORE_COVER)) database.createObjectStore(STORE_COVER);
+                        if (!database.objectStoreNames.contains(STORE_ATTACH)) database.createObjectStore(STORE_ATTACH);
                     };
                     req.onsuccess = () => resolve(req.result);
                     req.onerror = () => reject(req.error);
                 });
             }
 
-            function idbPut(db, store, key, value) {
+            function dbPut(storeName, key, value) {
                 return new Promise((resolve, reject) => {
-                    const tx = db.transaction(store, 'readwrite');
-                    tx.objectStore(store).put(value, key);
-                    tx.oncomplete = () => resolve();
-                    tx.onerror = (e) => reject(e.target.error);
+                    const tx = db.transaction(storeName, 'readwrite');
+                    tx.objectStore(storeName).put(value, key);
+                    tx.oncomplete = resolve;
+                    tx.onerror = () => reject(tx.error);
                 });
             }
 
-            function idbGet(db, store, key) {
+            function dbGet(storeName, key) {
                 return new Promise((resolve, reject) => {
-                    const tx = db.transaction(store, 'readonly');
-                    const req = tx.objectStore(store).get(key);
+                    const tx = db.transaction(storeName, 'readonly');
+                    const req = tx.objectStore(storeName).get(key);
                     req.onsuccess = () => resolve(req.result);
                     req.onerror = () => reject(req.error);
                 });
             }
 
-            // 读取文件为 ArrayBuffer
-            function readFileAsArrayBuffer(file) {
+            function dbDelete(storeName, key) {
                 return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsArrayBuffer(file);
+                    const tx = db.transaction(storeName, 'readwrite');
+                    tx.objectStore(storeName).delete(key);
+                    tx.oncomplete = resolve;
+                    tx.onerror = () => reject(tx.error);
                 });
             }
 
-            // 封面加载 (ArrayBuffer -> Blob -> Object URL)
-            async function loadCoverDisplay() {
-                // 清除旧图片
+            // ---------- 封面 ----------
+            async function loadCover() {
                 const oldImg = imageContainer.querySelector('.cover-img');
                 if (oldImg) oldImg.remove();
-
                 try {
-                    const buffer = await idbGet(coverDB, STORAGE.coverStore, STORAGE.coverKey);
-                    if (buffer && buffer instanceof ArrayBuffer) {
+                    const dataUrl = await dbGet(STORE_COVER, COVER_KEY);
+                    if (dataUrl && typeof dataUrl === 'string') {
                         coverPlaceholder.style.display = 'none';
-                        const blob = new Blob([buffer]); // 不指定 type，浏览器自动识别
-                        const url = URL.createObjectURL(blob);
                         const img = document.createElement('img');
                         img.className = 'cover-img';
-                        img.src = url;
-                        img.onload = () => {
-                            updateSurroundDecorations();
-                            URL.revokeObjectURL(url); // 图片加载后释放 URL
-                        };
-                        img.onerror = () => {
-                            coverPlaceholder.style.display = 'block';
-                            img.remove();
-                            alert('封面图片无法显示，可能是浏览器限制。请重新上传。');
-                        };
+                        img.src = dataUrl;
+                        img.onload = () => updateSurround();
+                        img.onerror = () => { img.remove(); coverPlaceholder.style.display = 'block'; };
                         imageContainer.appendChild(img);
                     } else {
                         coverPlaceholder.style.display = 'block';
                     }
                 } catch (e) {
-                    console.error('封面加载失败:', e);
                     coverPlaceholder.style.display = 'block';
                 }
             }
 
-            // 预览封面 (直接使用文件生成 Object URL)
-            function previewCoverFile(file) {
-                const oldImg = imageContainer.querySelector('.cover-img');
-                if (oldImg) oldImg.remove();
-                const url = URL.createObjectURL(file);
-                const img = document.createElement('img');
-                img.className = 'cover-img';
-                img.src = url;
-                img.onload = () => {
-                    updateSurroundDecorations();
-                    URL.revokeObjectURL(url);
+            function previewCover(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    pendingCoverDataUrl = e.target.result;
+                    const oldImg = imageContainer.querySelector('.cover-img');
+                    if (oldImg) oldImg.remove();
+                    const img = document.createElement('img');
+                    img.className = 'cover-img';
+                    img.src = pendingCoverDataUrl;
+                    imageContainer.appendChild(img);
+                    coverPlaceholder.style.display = 'none';
+                    saveCoverBtn.classList.add('show');
+                    updateSurround();
                 };
-                imageContainer.appendChild(img);
-                coverPlaceholder.style.display = 'none';
+                reader.readAsDataURL(file);
             }
 
-            // 保存封面到 IndexedDB
-            async function saveCoverToDB() {
-                if (!pendingCoverBuffer) {
-                    alert('请先选择一张封面图片');
-                    return;
-                }
+            async function saveCover() {
+                if (!pendingCoverDataUrl) return;
                 try {
-                    await idbPut(coverDB, STORAGE.coverStore, STORAGE.coverKey, pendingCoverBuffer);
-                    pendingCoverBuffer = null;
+                    await dbPut(STORE_COVER, COVER_KEY, pendingCoverDataUrl);
+                    pendingCoverDataUrl = null;
                     saveCoverBtn.classList.remove('show');
-                    alert('封面已保存！刷新后仍然可见。');
+                    alert('封面已保存');
                 } catch (e) {
-                    if (e.name === 'QuotaExceededError') {
-                        alert('存储空间不足，请使用更小的图片（建议小于 5MB）。');
-                    } else {
-                        alert('封面保存失败: ' + e.message);
-                    }
+                    alert('保存失败，可能是存储空间不足');
                 }
             }
 
-            // 动态背景
-            function createFloatingBg() {
-                floatingEls.innerHTML = '';
-                const emojis = ['🌸', '✨', '🪶', '💮', '🌺', '⭐', '❀', '✿'];
-                for (let i = 0; i < 24; i++) {
-                    const span = document.createElement('span');
-                    span.className = 'bg-float';
-                    span.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-                    span.style.left = Math.random()*100 + '%';
-                    span.style.top = Math.random()*100 + '%';
-                    span.style.fontSize = (20 + Math.random()*24) + 'px';
-                    span.style.animationDelay = Math.random()*5 + 's';
-                    span.style.animationDuration = (6 + Math.random()*8) + 's';
-                    floatingEls.appendChild(span);
-                }
-            }
-
-            function updateSurroundDecorations() {
+            function updateSurround() {
                 surroundEls.innerHTML = '';
-                const imgEl = imageContainer.querySelector('.cover-img');
-                if (!imgEl || imgEl.naturalWidth === 0) return;
+                const img = imageContainer.querySelector('.cover-img');
+                if (!img || !img.complete) return;
                 const wrapperRect = coverWrapper.getBoundingClientRect();
-                const imgRect = imgEl.getBoundingClientRect();
-                const imgLeft = imgRect.left - wrapperRect.left;
-                const imgTop = imgRect.top - wrapperRect.top;
-                const imgWidth = imgRect.width;
-                const imgHeight = imgRect.height;
-
-                const decorations = ['🌸', '✨', '💮', '🌺', '⭐', '🪶', '💖', '🎀'];
+                const imgRect = img.getBoundingClientRect();
+                const left = imgRect.left - wrapperRect.left;
+                const top = imgRect.top - wrapperRect.top;
+                const w = imgRect.width, h = imgRect.height;
+                const emojis = ['🌸','✨','💮','🌺','⭐','🪶','💖','🎀'];
                 const positions = [
-                    { x: imgLeft - 18, y: imgTop - 18 },
-                    { x: imgLeft + imgWidth/2 - 20, y: imgTop - 22 },
-                    { x: imgLeft + imgWidth - 15, y: imgTop - 15 },
-                    { x: imgLeft + imgWidth - 5, y: imgTop + imgHeight/2 - 20 },
-                    { x: imgLeft + imgWidth - 20, y: imgTop + imgHeight - 15 },
-                    { x: imgLeft + imgWidth/2 - 25, y: imgTop + imgHeight - 5 },
-                    { x: imgLeft - 18, y: imgTop + imgHeight - 18 },
-                    { x: imgLeft - 22, y: imgTop + imgHeight/2 - 20 },
-                    { x: imgLeft - 8, y: imgTop + 24 },
-                    { x: imgLeft + imgWidth - 24, y: imgTop + 24 },
-                    { x: imgLeft + 24, y: imgTop - 24 },
-                    { x: imgLeft + imgWidth - 32, y: imgTop + imgHeight - 20 },
+                    {x:left-18,y:top-18},{x:left+w/2-20,y:top-22},{x:left+w-15,y:top-15},
+                    {x:left+w-5,y:top+h/2-20},{x:left+w-20,y:top+h-15},{x:left+w/2-25,y:top+h-5},
+                    {x:left-18,y:top+h-18},{x:left-22,y:top+h/2-20},{x:left-8,y:top+24},
+                    {x:left+w-24,y:top+24},{x:left+24,y:top-24},{x:left+w-32,y:top+h-20}
                 ];
-                positions.forEach((pos, i) => {
+                positions.forEach((p,i) => {
                     const span = document.createElement('span');
-                    span.textContent = decorations[i % decorations.length];
-                    span.style.left = pos.x + 'px';
-                    span.style.top = pos.y + 'px';
-                    span.style.animationDelay = (Math.random() * 1.5) + 's';
+                    span.textContent = emojis[i%emojis.length];
+                    span.style.left = p.x+'px';
+                    span.style.top = p.y+'px';
                     surroundEls.appendChild(span);
                 });
             }
 
-            window.addEventListener('resize', () => {
-                if (!homeScreen.classList.contains('hidden')) updateSurroundDecorations();
-            });
-
-            // ========= 日记功能（保持不变，略） =========
-            // ... (日记加载、保存、附件等函数同之前完整代码，此处因篇幅省略，但实际需保留)
-            // 注意：实际部署时必须包含完整的日记功能代码，否则日记无法使用。
-            // 这里为了简洁展示封面修复，日记功能沿用之前完整版本。
-
-            // 登录与UI
-            function checkAuth() { isAdmin = localStorage.getItem(STORAGE.auth) === 'true'; }
-            function setAuth(v) {
-                if (v) localStorage.setItem(STORAGE.auth, 'true');
-                else localStorage.removeItem(STORAGE.auth);
-                isAdmin = v;
-                updateUI();
+            // 浮动背景
+            function initFloating() {
+                floatingEls.innerHTML = '';
+                const emojis = ['🌸','✨','🪶','💮','🌺','⭐','❀','✿'];
+                for (let i=0;i<24;i++) {
+                    const span = document.createElement('span');
+                    span.className = 'bg-float';
+                    span.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+                    span.style.left = Math.random()*100+'%';
+                    span.style.top = Math.random()*100+'%';
+                    span.style.fontSize = (20+Math.random()*24)+'px';
+                    span.style.animationDelay = Math.random()*5+'s';
+                    floatingEls.appendChild(span);
+                }
             }
 
+            // 日记功能
+            function loadEntries() {
+                const stored = localStorage.getItem(DIARY_KEY);
+                entries = stored ? JSON.parse(stored) : [];
+            }
+            function saveEntries() { localStorage.setItem(DIARY_KEY, JSON.stringify(entries)); }
+
+            function renderList() {
+                if (!entries.length) {
+                    diaryList.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-secondary);">暂无日记</div>';
+                    return;
+                }
+                const sorted = [...entries].sort((a,b)=> b.date - a.date);
+                diaryList.innerHTML = sorted.map(e => `
+                    <div class="list-item${e.id===currentId?' active':''}" data-id="${e.id}">
+                        <div style="font-size:12px;color:var(--text-secondary);">${new Date(e.date).toLocaleDateString()}</div>
+                        <div style="font-weight:500;">${escapeHtml(e.title||'无标题')}</div>
+                    </div>`).join('');
+            }
+
+            function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+            async function saveAttachment(id, blob, name) {
+                const attId = `att_${id}_${Date.now()}`;
+                await dbPut(STORE_ATTACH, attId, { blob, name });
+                return attId;
+            }
+
+            async function getAttachment(attId) {
+                return await dbGet(STORE_ATTACH, attId);
+            }
+
+            function serializeContent() {
+                const clone = diaryContent.cloneNode(true);
+                clone.querySelectorAll('[data-attachment-id]').forEach(el => {
+                    const attId = el.getAttribute('data-attachment-id');
+                    if (el.tagName === 'IMG') {
+                        const span = document.createElement('span');
+                        span.setAttribute('data-attachment-id', attId);
+                        span.setAttribute('data-type', 'image');
+                        el.replaceWith(span);
+                    } else if (el.tagName === 'A') {
+                        const span = document.createElement('span');
+                        span.setAttribute('data-attachment-id', attId);
+                        span.setAttribute('data-type', 'file');
+                        span.textContent = el.textContent;
+                        el.replaceWith(span);
+                    }
+                });
+                return clone.innerHTML;
+            }
+
+            async function deserializeContent(html) {
+                const div = document.createElement('div');
+                div.innerHTML = html;
+                const placeholders = div.querySelectorAll('[data-attachment-id]');
+                for (const el of placeholders) {
+                    const attId = el.getAttribute('data-attachment-id');
+                    const type = el.getAttribute('data-type');
+                    try {
+                        const data = await getAttachment(attId);
+                        if (data && data.blob) {
+                            const url = URL.createObjectURL(data.blob);
+                            if (type === 'image') {
+                                const img = document.createElement('img');
+                                img.src = url;
+                                img.setAttribute('data-attachment-id', attId);
+                                el.replaceWith(img);
+                            } else {
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = data.name;
+                                a.textContent = data.name;
+                                a.setAttribute('data-attachment-id', attId);
+                                a.onclick = (e) => {
+                                    e.preventDefault();
+                                    const a2 = document.createElement('a');
+                                    a2.href = url;
+                                    a2.download = data.name;
+                                    a2.click();
+                                };
+                                el.replaceWith(a);
+                            }
+                        }
+                    } catch(e) {
+                        el.replaceWith(document.createTextNode('[附件丢失]'));
+                    }
+                }
+                return div.innerHTML;
+            }
+
+            async function loadEditor(id) {
+                const entry = entries.find(e => e.id === id);
+                if (!entry) { clearEditor(); return; }
+                currentId = id;
+                diaryTitle.value = entry.title || '';
+                diaryContent.innerHTML = await deserializeContent(entry.content || '');
+                editorContainer.classList.add('show');
+                emptyState.style.display = 'none';
+                deleteDiaryBtn.classList.toggle('show', isAdmin);
+            }
+
+            function clearEditor() {
+                currentId = null;
+                diaryTitle.value = '';
+                diaryContent.innerHTML = '';
+                editorContainer.classList.remove('show');
+                emptyState.style.display = 'flex';
+                deleteDiaryBtn.classList.remove('show');
+            }
+
+            async function saveDiary() {
+                if (!isAdmin) return;
+                const title = diaryTitle.value.trim();
+                const html = serializeContent();
+                if (!title && !html) return alert('内容不能为空');
+                const now = Date.now();
+                if (currentId) {
+                    const entry = entries.find(e => e.id === currentId);
+                    if (entry) { entry.title = title; entry.content = html; entry.date = now; }
+                } else {
+                    currentId = now;
+                    entries.push({ id: now, date: now, title, content: html });
+                }
+                saveEntries();
+                renderList();
+                await loadEditor(currentId);
+            }
+
+            async function deleteDiary() {
+                if (!isAdmin || !currentId) return;
+                if (!confirm('确认删除？')) return;
+                entries = entries.filter(e => e.id !== currentId);
+                saveEntries();
+                clearEditor();
+                renderList();
+            }
+
+            async function insertImage(file) {
+                if (!isAdmin) return;
+                const attId = await saveAttachment(currentId||0, file, file.name);
+                const url = URL.createObjectURL(file);
+                const img = document.createElement('img');
+                img.src = url;
+                img.setAttribute('data-attachment-id', attId);
+                diaryContent.focus();
+                document.execCommand('insertHTML', false, img.outerHTML);
+            }
+
+            async function insertFile(file) {
+                if (!isAdmin) return;
+                const attId = await saveAttachment(currentId||0, file, file.name);
+                const a = document.createElement('a');
+                a.href = '#';
+                a.textContent = file.name;
+                a.setAttribute('data-attachment-id', attId);
+                a.onclick = (e) => {
+                    e.preventDefault();
+                    getAttachment(attId).then(data => {
+                        const url = URL.createObjectURL(data.blob);
+                        const temp = document.createElement('a');
+                        temp.href = url;
+                        temp.download = data.name;
+                        temp.click();
+                    });
+                };
+                diaryContent.focus();
+                document.execCommand('insertHTML', false, a.outerHTML);
+            }
+
+            // 登录与UI
             function updateUI() {
+                const isAdminNow = localStorage.getItem(AUTH_KEY) === 'true';
+                isAdmin = isAdminNow;
+
                 homeTopRight.innerHTML = '';
                 if (isAdmin) {
                     const changeBtn = document.createElement('button');
-                    changeBtn.className = 'cover-change-btn visible';
+                    changeBtn.className = 'cover-change-btn show';
                     changeBtn.textContent = '🖼️ 更换封面';
                     changeBtn.onclick = () => coverFileInput.click();
                     homeTopRight.appendChild(changeBtn);
                     const logoutBtn = document.createElement('button');
-                    logoutBtn.className = 'btn-logout';
+                    logoutBtn.className = 'btn btn-outline';
                     logoutBtn.textContent = '退出';
-                    logoutBtn.onclick = () => setAuth(false);
+                    logoutBtn.onclick = () => { localStorage.removeItem(AUTH_KEY); updateUI(); };
                     homeTopRight.appendChild(logoutBtn);
                 } else {
                     const loginBtn = document.createElement('button');
-                    loginBtn.className = 'btn-login';
+                    loginBtn.className = 'btn btn-blue';
                     loginBtn.textContent = '登录';
-                    loginBtn.onclick = showLogin;
+                    loginBtn.onclick = () => loginModal.classList.add('active');
                     homeTopRight.appendChild(loginBtn);
                 }
 
-                diaryTopRight.innerHTML = '';
+                diaryTopRight.innerHTML = isAdmin ? '<button class="btn btn-outline" id="diaryLogout">退出</button>' : '';
                 if (isAdmin) {
-                    const logoutBtn = document.createElement('button');
-                    logoutBtn.className = 'btn-logout';
-                    logoutBtn.textContent = '退出';
-                    logoutBtn.onclick = () => {
-                        setAuth(false);
+                    $('diaryLogout').onclick = () => {
+                        localStorage.removeItem(AUTH_KEY);
+                        updateUI();
                         diaryScreen.classList.remove('active');
                         homeScreen.classList.remove('hidden');
                     };
-                    diaryTopRight.appendChild(logoutBtn);
                 }
+
+                const adminBtns = [newDiaryBtn, saveDiaryBtn, insertImageBtn, attachFileBtn, deleteDiaryBtn];
+                adminBtns.forEach(b => b.classList.toggle('show', isAdmin));
+                diaryTitle.readOnly = !isAdmin;
+                diaryContent.contentEditable = isAdmin ? 'true' : 'false';
             }
 
-            function showLogin() { loginModal.classList.add('active'); uname.focus(); }
-            function hideLogin() { loginModal.classList.remove('active'); }
-            loginSubmit.onclick = () => {
+            loginSubmitBtn.onclick = () => {
                 if (uname.value === ADMIN.user && pwd.value === ADMIN.pass) {
-                    setAuth(true);
-                    hideLogin();
+                    localStorage.setItem(AUTH_KEY, 'true');
+                    loginModal.classList.remove('active');
+                    updateUI();
                     if (!diaryScreen.classList.contains('active')) enterDiary();
-                } else { loginError.style.display = 'block'; pwd.value = ''; }
+                } else {
+                    loginError.style.display = 'block';
+                }
             };
-            cancelLogin.onclick = hideLogin;
+            cancelLoginBtn.onclick = () => loginModal.classList.remove('active');
+            uname.addEventListener('keydown', e => e.key==='Enter' && pwd.focus());
+            pwd.addEventListener('keydown', e => e.key==='Enter' && loginSubmitBtn.click());
+
             function enterDiary() {
-                if (!isAdmin) { showLogin(); return; }
+                if (!isAdmin) { loginModal.classList.add('active'); return; }
                 homeScreen.classList.add('hidden');
                 diaryScreen.classList.add('active');
-                // renderList() 等
+                renderList();
+                if (entries.length) loadEditor(entries.sort((a,b)=>b.date-a.date)[0].id);
+                else clearEditor();
             }
 
             enterDiaryBtn.onclick = enterDiary;
             backHomeBtn.onclick = () => {
                 diaryScreen.classList.remove('active');
                 homeScreen.classList.remove('hidden');
-                updateSurroundDecorations();
+                updateSurround();
             };
 
-            // 封面选择事件
-            coverFileInput.addEventListener('change', async () => {
+            // 封面事件
+            coverFileInput.onchange = () => {
                 const file = coverFileInput.files[0];
                 if (!file) return;
-                if (file.size > 10 * 1024 * 1024) {
-                    alert('封面图片不能超过 10MB');
-                    coverFileInput.value = '';
-                    return;
-                }
-                // 预览
-                previewCoverFile(file);
-                // 读取 ArrayBuffer 暂存
-                try {
-                    pendingCoverBuffer = await readFileAsArrayBuffer(file);
-                    saveCoverBtn.classList.add('show');
-                } catch (e) {
-                    alert('读取图片失败，请重试');
-                }
+                if (file.size > 10*1024*1024) return alert('图片不能超过10MB');
+                previewCover(file);
                 coverFileInput.value = '';
+            };
+            saveCoverBtn.onclick = saveCover;
+
+            // 日记事件
+            diaryList.onclick = (e) => {
+                const item = e.target.closest('.list-item');
+                if (item) loadEditor(Number(item.dataset.id));
+            };
+            newDiaryBtn.onclick = () => {
+                clearEditor();
+                editorContainer.classList.add('show');
+                emptyState.style.display = 'none';
+                diaryTitle.focus();
+            };
+            saveDiaryBtn.onclick = saveDiary;
+            deleteDiaryBtn.onclick = deleteDiary;
+            insertImageBtn.onclick = () => imageInput.click();
+            imageInput.onchange = () => {
+                const file = imageInput.files[0];
+                if (file) insertImage(file);
+                imageInput.value = '';
+            };
+            attachFileBtn.onclick = () => fileInput.click();
+            fileInput.onchange = () => {
+                const file = fileInput.files[0];
+                if (file) insertFile(file);
+                fileInput.value = '';
+            };
+            diaryContent.addEventListener('paste', (e) => {
+                if (!isAdmin) return;
+                const items = e.clipboardData.items;
+                for (const item of items) {
+                    if (item.type.startsWith('image/')) {
+                        e.preventDefault();
+                        insertImage(item.getAsFile());
+                        break;
+                    }
+                }
             });
-            saveCoverBtn.addEventListener('click', saveCoverToDB);
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    if (diaryScreen.classList.contains('active') && isAdmin) saveDiary();
+                }
+            });
+
+            window.addEventListener('resize', () => {
+                if (!homeScreen.classList.contains('hidden')) updateSurround();
+            });
 
             // 初始化
-            async function init() {
+            (async () => {
                 try {
-                    coverDB = await openDB(STORAGE.coverDB, 1, STORAGE.coverStore);
-                    attachDB = await openDB(STORAGE.attachDB, 1, STORAGE.attachStore);
+                    db = await openDB();
                 } catch (e) {
-                    alert('浏览器不支持本地存储，部分功能无法使用。');
+                    alert('浏览器不支持本地数据库，请使用现代浏览器');
+                    return;
                 }
-                await loadCoverDisplay();
-                createFloatingBg();
-                checkAuth();
+                await loadCover();
+                initFloating();
+                loadEntries();
                 updateUI();
                 homeScreen.classList.remove('hidden');
                 diaryScreen.classList.remove('active');
-            }
-            init();
+            })();
         })();
     </script>
 </body>
