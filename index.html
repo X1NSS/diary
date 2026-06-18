@@ -35,14 +35,8 @@
 
         .home-screen { width:100%; height:100vh; display:flex; flex-direction:column; background: #fff; position: relative; }
         .home-screen.hidden { display:none; }
-        .top-bar {
-            display:flex; align-items:center; justify-content:space-between; padding:12px 24px;
-            height:60px; z-index:10; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px);
-        }
-        .brand-link {
-            text-decoration:none; color:var(--text-primary); font-size:14px; font-weight:500;
-            padding:8px 12px; border-radius:20px; cursor:pointer; transition:background 0.2s;
-        }
+        .top-bar { display:flex; align-items:center; justify-content:space-between; padding:12px 24px; height:60px; z-index:10; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); }
+        .brand-link { text-decoration:none; color:var(--text-primary); font-size:14px; font-weight:500; padding:8px 12px; border-radius:20px; cursor:pointer; transition:background 0.2s; }
         .brand-link:hover { background:rgba(60,64,67,0.08); }
         .top-right { display:flex; gap:12px; align-items:center; }
         .btn-login, .btn-logout {
@@ -117,23 +111,14 @@
         /* 日记界面 */
         .diary-screen { display:none; flex-direction:column; height:100vh; background:var(--bg-white); }
         .diary-screen.active { display:flex; }
-        .gmail-header {
-            height:64px; display:flex; align-items:center; padding:0 16px;
-            border-bottom:1px solid var(--border-color); gap:12px; animation: liquidGlassBox 4s infinite ease-in-out;
-        }
-        .gmail-menu-btn {
-            width:40px; height:40px; display:flex; align-items:center; justify-content:center;
-            border-radius:50%; cursor:pointer; font-size:20px;
-        }
+        .gmail-header { height:64px; display:flex; align-items:center; padding:0 16px; border-bottom:1px solid var(--border-color); gap:12px; animation: liquidGlassBox 4s infinite ease-in-out; }
+        .gmail-menu-btn { width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:50%; cursor:pointer; font-size:20px; }
         .gmail-logo { font-size:22px; display:flex; align-items:center; gap:8px; }
         .gmail-logo span { color:var(--google-blue); }
         .gmail-actions { margin-left:auto; display:flex; gap:12px; align-items:center; }
         .gmail-body { display:flex; flex:1; overflow:hidden; }
         .sidebar-left { width:240px; border-right:1px solid var(--border-color); display:flex; flex-direction:column; padding:8px 0; }
-        .compose-btn {
-            margin:8px 16px; background:var(--google-blue); color:white; border:none;
-            border-radius:16px; padding:12px 24px; font-size:14px; cursor:pointer; display:flex; align-items:center; gap:8px;
-        }
+        .compose-btn { margin:8px 16px; background:var(--google-blue); color:white; border:none; border-radius:16px; padding:12px 24px; font-size:14px; cursor:pointer; display:flex; align-items:center; gap:8px; }
         .compose-btn:hover { background:var(--google-blue-hover); }
         .middle-list { width:360px; border-right:1px solid var(--border-color); overflow-y:auto; }
         .list-item { padding:14px 16px; border-bottom:1px solid var(--border-color); cursor:pointer; }
@@ -146,19 +131,12 @@
         .content-editable { min-height:300px; outline:none; font-size:15px; line-height:1.6; }
         .content-editable img { max-width:100%; border-radius:8px; margin:8px 0; }
         .content-editable a { color:var(--google-blue); }
-        .editor-footer {
-            padding:12px 24px; border-top:1px solid var(--border-color);
-            display:flex; justify-content:space-between; align-items:center;
-        }
+        .editor-footer { padding:12px 24px; border-top:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; }
         .save-btn { background:var(--google-blue); color:white; border:none; padding:8px 24px; border-radius:4px; cursor:pointer; }
         .delete-btn { color:var(--google-red); background:none; border:1px solid var(--border-color); padding:8px 16px; border-radius:4px; cursor:pointer; }
         .file-upload-btn { background:none; border:1px solid var(--border-color); padding:8px 16px; border-radius:4px; cursor:pointer; }
 
-        .modal-overlay {
-            position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex;
-            align-items:center; justify-content:center; z-index:100; opacity:0;
-            pointer-events:none; transition: opacity 0.2s;
-        }
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:100; opacity:0; pointer-events:none; transition: opacity 0.2s; }
         .modal-overlay.active { opacity:1; pointer-events:auto; }
         .modal-card { background:white; border-radius:8px; padding:40px 32px; width:400px; box-shadow:0 24px 38px rgba(0,0,0,0.2); }
         .modal-card h2 { font-size:24px; margin-bottom:24px; font-weight:400; }
@@ -271,8 +249,7 @@
 
             let entries = [], currentId = null, isAdmin = false;
             let coverDB = null, attachDB = null;
-            let currentObjectURLs = [];
-            let pendingCoverFile = null;
+            let pendingCoverDataUrl = null;
 
             // ========= IndexedDB =========
             function openDB(name, version, storeName) {
@@ -305,52 +282,34 @@
                 });
             }
 
-            function idbDelete(db, store, key) {
-                return new Promise((resolve, reject) => {
-                    const tx = db.transaction(store, 'readwrite');
-                    tx.objectStore(store).delete(key);
-                    tx.oncomplete = () => resolve();
-                    tx.onerror = () => reject(tx.error);
-                });
-            }
-
-            function revokeURLs() {
-                currentObjectURLs.forEach(url => URL.revokeObjectURL(url));
-                currentObjectURLs = [];
-            }
-
-            // 将 File/Blob 转换为 ArrayBuffer
-            function readFileAsArrayBuffer(file) {
+            // 将文件读取为 Data URL
+            function readFileAsDataURL(file) {
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
                     reader.onload = () => resolve(reader.result);
                     reader.onerror = reject;
-                    reader.readAsArrayBuffer(file);
+                    reader.readAsDataURL(file);
                 });
             }
 
-            // 封面加载（使用 ArrayBuffer 重建 Blob，兼容移动端）
+            // 封面加载 (直接使用 Data URL)
             async function loadCoverDisplay() {
-                revokeURLs();
                 const oldImg = imageContainer.querySelector('.cover-img');
                 if (oldImg) oldImg.remove();
 
                 try {
-                    const arrayBuffer = await idbGet(coverDB, STORAGE.coverStore, STORAGE.coverKey);
-                    if (arrayBuffer) {
+                    const dataUrl = await idbGet(coverDB, STORAGE.coverStore, STORAGE.coverKey);
+                    if (dataUrl && typeof dataUrl === 'string' && dataUrl.startsWith('data:image/')) {
                         coverPlaceholder.style.display = 'none';
-                        const blob = new Blob([arrayBuffer], { type: 'image/jpeg' }); // 类型可动态获取，这里先用通用
-                        const url = URL.createObjectURL(blob);
-                        currentObjectURLs.push(url);
                         const img = document.createElement('img');
                         img.className = 'cover-img';
                         img.alt = '封面';
+                        img.src = dataUrl;
                         img.onload = () => updateSurroundDecorations();
                         img.onerror = () => {
                             coverPlaceholder.style.display = 'block';
                             img.remove();
                         };
-                        img.src = url;
                         imageContainer.appendChild(img);
                     } else {
                         coverPlaceholder.style.display = 'block';
@@ -362,27 +321,25 @@
             }
 
             function previewCoverFile(file) {
-                const oldImg = imageContainer.querySelector('.cover-img');
-                if (oldImg) oldImg.remove();
-                const url = URL.createObjectURL(file);
-                currentObjectURLs.push(url);
-                const img = document.createElement('img');
-                img.className = 'cover-img';
-                img.alt = '预览';
-                img.onload = () => updateSurroundDecorations();
-                img.src = url;
-                imageContainer.appendChild(img);
-                coverPlaceholder.style.display = 'none';
+                readFileAsDataURL(file).then(dataUrl => {
+                    const oldImg = imageContainer.querySelector('.cover-img');
+                    if (oldImg) oldImg.remove();
+                    const img = document.createElement('img');
+                    img.className = 'cover-img';
+                    img.src = dataUrl;
+                    img.onload = () => updateSurroundDecorations();
+                    imageContainer.appendChild(img);
+                    coverPlaceholder.style.display = 'none';
+                    pendingCoverDataUrl = dataUrl; // 暂存待保存
+                });
             }
 
             async function saveCoverToDB() {
-                if (!pendingCoverFile) return;
+                if (!pendingCoverDataUrl) return;
                 try {
-                    const arrayBuffer = await readFileAsArrayBuffer(pendingCoverFile);
-                    await idbPut(coverDB, STORAGE.coverStore, STORAGE.coverKey, arrayBuffer);
-                    pendingCoverFile = null;
+                    await idbPut(coverDB, STORAGE.coverStore, STORAGE.coverKey, pendingCoverDataUrl);
+                    pendingCoverDataUrl = null;
                     saveCoverBtn.classList.remove('show');
-                    await loadCoverDisplay();
                     alert('封面已保存！');
                 } catch (e) {
                     alert('封面保存失败：' + e.message);
@@ -445,7 +402,7 @@
                 if (!homeScreen.classList.contains('hidden')) updateSurroundDecorations();
             });
 
-            // 日记功能（不变）
+            // ========= 日记功能（不变） =========
             function loadEntries() { entries = JSON.parse(localStorage.getItem(STORAGE.diary) || '[]'); }
             function saveEntries() { localStorage.setItem(STORAGE.diary, JSON.stringify(entries)); }
 
@@ -520,7 +477,6 @@
                         const data = await getAttachment(id);
                         if (data && data.blob) {
                             const url = URL.createObjectURL(data.blob);
-                            currentObjectURLs.push(url);
                             if (type === 'image') {
                                 const img = document.createElement('img');
                                 img.src = url;
@@ -552,7 +508,6 @@
             }
 
             async function loadEditor(id) {
-                revokeURLs();
                 const entry = entries.find(e => e.id === id);
                 if (!entry) { clearEditor(); return; }
                 currentId = id;
@@ -570,7 +525,6 @@
                 editorContainer.style.display = 'none';
                 emptyState.style.display = 'flex';
                 deleteBtn.style.display = 'none';
-                revokeURLs();
             }
 
             async function saveCurrentDiary() {
@@ -607,7 +561,6 @@
                 const diaryId = currentId || 0;
                 const id = await saveAttachment(diaryId, file, file.name);
                 const url = URL.createObjectURL(file);
-                currentObjectURLs.push(url);
                 const img = document.createElement('img');
                 img.src = url;
                 img.setAttribute('data-attachment-id', id);
@@ -720,7 +673,6 @@
                 const file = coverFileInput.files[0];
                 if (!file) return;
                 if (file.size > 10*1024*1024) { alert('图片不超过10MB'); return; }
-                pendingCoverFile = file;
                 previewCoverFile(file);
                 saveCoverBtn.classList.add('show');
                 coverFileInput.value = '';
@@ -732,7 +684,6 @@
                 if (item) loadEditor(Number(item.dataset.id));
             });
             newBtn.onclick = () => {
-                revokeURLs();
                 currentId = null;
                 diaryTitle.value = '';
                 diaryContent.innerHTML = '';
