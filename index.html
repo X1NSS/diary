@@ -5,485 +5,451 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>乖宝和溪溪的快乐生活</title>
     <style>
+        /* Google 风格全局变量 */
         :root {
-            --bg: #f5f5f7;
-            --card: #ffffff;
-            --text: #1d1d1f;
-            --text-secondary: #86868b;
-            --accent: #0071e3;
-            --accent-hover: #0077ed;
-            --border: #d2d2d7;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-            --radius: 18px;
-            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --google-blue: #1a73e8;
+            --google-blue-hover: #1765cc;
+            --google-red: #ea4335;
+            --google-green: #34a853;
+            --google-yellow: #fbbc04;
+            --bg-white: #ffffff;
+            --bg-gray-50: #f8f9fa;
+            --bg-gray-100: #f1f3f4;
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
+            --border-color: #dadce0;
+            --shadow-1: 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
+            --shadow-2: 0 1px 3px 0 rgba(60,64,67,.3), 0 4px 8px 3px rgba(60,64,67,.15);
+            --radius-1: 8px;
+            --radius-2: 16px;
+            --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
-            background: #fbfbfd;
-            color: var(--text);
+            font-family: 'Google Sans', Roboto, Arial, sans-serif;
+            background: #fff;
+            color: var(--text-primary);
             height: 100vh;
             overflow: hidden;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* 页面容器 */
-        .app {
-            width: 100%;
-            height: 100vh;
-            position: relative;
-        }
-
-        /* ===== 首页 ===== */
+        /* ========== 封面页 (Google 风格) ========== */
         .home-screen {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: #000;
-            transition: opacity 0.4s ease;
-            z-index: 2;
-        }
-
-        .home-screen.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .cover-wrapper {
-            position: absolute;
-            inset: 0;
-            overflow: hidden;
-        }
-
-        .cover-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: brightness(0.75);
-            transition: filter 0.5s;
-        }
-
-        .cover-placeholder {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #2c2c2e 0%, #1c1c1e 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: rgba(255,255,255,0.4);
-            font-size: 3rem;
-        }
-
-        .cover-change-hint {
-            position: absolute;
-            bottom: 30px;
-            right: 30px;
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(10px);
-            color: white;
-            border-radius: 20px;
-            padding: 8px 16px;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            transition: background 0.2s;
-            border: none;
-        }
-
-        .cover-change-hint:hover {
-            background: rgba(0,0,0,0.7);
-        }
-
-        .home-content {
             position: relative;
-            z-index: 3;
-            text-align: center;
-            color: white;
+            width: 100%; height: 100vh;
+            display: flex; flex-direction: column;
+            background: #fff;
         }
+        .home-screen.hidden { display: none; }
 
-        .home-btn {
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.25);
-            color: white;
-            font-size: 1.25rem;
+        /* 顶部导航条 */
+        .top-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 24px;
+            height: 60px;
+            box-sizing: border-box;
+        }
+        .top-bar-left {
+            display: flex; align-items: center; gap: 24px;
+        }
+        .brand-link {
+            text-decoration: none;
+            color: var(--text-primary);
+            font-size: 14px;
             font-weight: 500;
-            padding: 14px 36px;
-            border-radius: 50px;
-            cursor: pointer;
-            letter-spacing: 0.5px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            white-space: nowrap;
-        }
-
-        .home-btn:hover {
-            background: rgba(255,255,255,0.3);
-            border-color: rgba(255,255,255,0.5);
-            transform: scale(1.03);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-        }
-
-        /* ===== 日记界面 ===== */
-        .diary-screen {
-            position: absolute;
-            inset: 0;
-            background: var(--bg);
-            display: flex;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.4s ease;
-            z-index: 1;
-        }
-
-        .diary-screen.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        /* 侧边栏 */
-        .sidebar {
-            width: 320px;
-            background: rgba(255,255,255,0.8);
-            backdrop-filter: blur(30px);
-            border-right: 1px solid rgba(0,0,0,0.08);
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-            z-index: 10;
-        }
-
-        .sidebar-header {
-            padding: 28px 20px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .sidebar-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            letter-spacing: -0.3px;
-            color: var(--text);
-        }
-
-        .btn-new {
-            background: var(--accent);
-            border: none;
-            color: white;
-            font-size: 0.95rem;
-            font-weight: 500;
-            padding: 8px 18px;
+            letter-spacing: 0.2px;
+            padding: 8px 12px;
             border-radius: 20px;
-            cursor: pointer;
-            transition: background var(--transition), transform 0.15s;
-        }
-
-        .btn-new:hover {
-            background: var(--accent-hover);
-            transform: scale(1.02);
-        }
-
-        .diary-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 12px 0;
-        }
-
-        .diary-item {
-            padding: 14px 20px;
-            cursor: pointer;
-            border-left: 3px solid transparent;
-            transition: background 0.15s, border-color 0.2s;
-        }
-
-        .diary-item:hover {
-            background: rgba(0,0,0,0.03);
-        }
-
-        .diary-item.active {
-            background: rgba(0,113,227,0.06);
-            border-left-color: var(--accent);
-        }
-
-        .diary-item .item-date {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-bottom: 4px;
-        }
-
-        .diary-item .item-title {
-            font-weight: 500;
-            font-size: 1rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .item-preview {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-top: 4px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            line-height: 1.4;
-        }
-
-        .empty-hint {
-            text-align: center;
-            color: var(--text-secondary);
-            padding: 40px 20px;
-            font-style: italic;
-        }
-
-        /* 主编辑区 */
-        .editor {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: white;
-            overflow: hidden;
-        }
-
-        .editor-toolbar {
-            padding: 16px 24px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(255,255,255,0.9);
-            backdrop-filter: blur(10px);
-        }
-
-        .tool-btn {
-            background: none;
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 7px 14px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.15s;
-        }
-
-        .tool-btn:hover {
-            background: #f0f0f5;
-            border-color: #b0b0b8;
-        }
-
-        .editor-body {
-            flex: 1;
-            padding: 24px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .title-input {
-            border: none;
-            font-size: 2rem;
-            font-weight: 600;
-            width: 100%;
-            padding: 0 0 12px 0;
-            outline: none;
-            background: transparent;
-            color: var(--text);
-            border-bottom: 1px solid transparent;
-            transition: border-color 0.2s;
-            margin-bottom: 16px;
-        }
-
-        .title-input:focus {
-            border-bottom-color: var(--accent);
-        }
-
-        .content-editable {
-            flex: 1;
-            border: none;
-            outline: none;
-            font-size: 1.1rem;
-            line-height: 1.7;
-            color: var(--text);
-            min-height: 200px;
-            word-break: break-word;
-        }
-
-        .content-editable img {
-            max-width: 100%;
-            border-radius: 12px;
-            margin: 16px 0;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .content-editable:empty::before {
-            content: "开始写今天的快乐...";
-            color: #c7c7cc;
-        }
-
-        .editor-footer {
-            padding: 16px 24px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: white;
-        }
-
-        .action-group {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-save {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 12px;
-            font-weight: 500;
-            cursor: pointer;
             transition: background 0.2s;
-        }
-
-        .btn-save:hover {
-            background: var(--accent-hover);
-        }
-
-        .btn-delete {
-            background: none;
-            border: 1px solid #c0c0c0;
-            color: #c0392b;
-            padding: 8px 16px;
-            border-radius: 8px;
             cursor: pointer;
+            white-space: nowrap;
         }
-
-        .btn-delete:hover {
-            background: rgba(192,57,43,0.05);
+        .brand-link:hover {
+            background: rgba(60,64,67,0.08);
         }
-
-        .back-home {
-            border: none;
+        .cover-change-btn {
             background: none;
+            border: 1px solid var(--border-color);
             color: var(--text-secondary);
-            font-size: 0.9rem;
+            font-size: 13px;
+            padding: 6px 16px;
+            border-radius: 4px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            padding: 4px;
+            display: flex; align-items: center; gap: 6px;
+            transition: all 0.2s;
+            visibility: hidden; /* 默认隐藏，管理员可见 */
+        }
+        .cover-change-btn.visible { visibility: visible; }
+        .cover-change-btn:hover {
+            background: rgba(60,64,67,0.04);
+            border-color: var(--google-blue);
         }
 
-        .back-home:hover {
-            color: var(--text);
+        /* 封面大图 */
+        .cover-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: #f8f9fa;
+            margin: 0 24px 24px;
+            border-radius: 28px;
+            box-shadow: var(--shadow-2);
+        }
+        .cover-img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+        .cover-placeholder {
+            width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #e8eaed 0%, #f1f3f4 100%);
+        }
+        .cover-placeholder-icon {
+            font-size: 6rem;
+            color: #9aa0a6;
+            opacity: 0.5;
         }
 
-        /* 响应式 */
-        @media (max-width: 768px) {
-            .diary-screen {
-                flex-direction: column;
-            }
-            .sidebar {
-                width: 100%;
-                height: 40%;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-            }
-            .editor {
-                height: 60%;
-            }
-            .home-btn {
-                font-size: 1rem;
-                padding: 12px 28px;
-            }
+        /* ========== 日记界面 (Gmail 风格) ========== */
+        .diary-screen {
+            width: 100%; height: 100vh;
+            display: none; flex-direction: column;
+            background: var(--bg-white);
+        }
+        .diary-screen.active { display: flex; }
+
+        /* Gmail 顶部栏 */
+        .gmail-header {
+            height: 64px;
+            display: flex; align-items: center; padding: 0 16px;
+            border-bottom: 1px solid var(--border-color);
+            background: #fff;
+            gap: 12px;
+        }
+        .gmail-menu-btn {
+            width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; cursor: pointer; transition: background 0.2s;
+            font-size: 20px;
+        }
+        .gmail-menu-btn:hover { background: rgba(60,64,67,0.08); }
+        .gmail-logo {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 22px; color: var(--text-primary); font-weight: 400;
+            letter-spacing: 0.2px;
+        }
+        .gmail-logo span { color: var(--google-blue); font-weight: 500; }
+        .gmail-search {
+            flex: 1; max-width: 600px; margin-left: 40px;
+            background: #f1f3f4; border-radius: 24px; height: 48px;
+            display: flex; align-items: center; padding: 0 16px;
+            color: var(--text-secondary);
+        }
+        .gmail-search input {
+            flex: 1; border: none; background: transparent;
+            outline: none; font-size: 14px; color: var(--text-primary);
+        }
+        .gmail-actions {
+            display: flex; align-items: center; gap: 12px; margin-left: auto;
+        }
+        .gmail-login-area {
+            display: flex; align-items: center; gap: 12px; font-size: 14px;
+        }
+        .login-link, .logout-link {
+            color: var(--google-blue); cursor: pointer; font-weight: 500;
+            padding: 8px 12px; border-radius: 4px; transition: background 0.2s;
+        }
+        .login-link:hover, .logout-link:hover { background: rgba(26,115,232,0.08); }
+        .admin-badge {
+            color: var(--text-secondary); font-size: 13px;
+            display: flex; align-items: center; gap: 4px;
+        }
+
+        /* Gmail 主体三栏布局 */
+        .gmail-body {
+            display: flex; flex: 1; overflow: hidden;
+        }
+
+        /* 左侧边栏 (写日记按钮 + 列表) */
+        .sidebar-left {
+            width: 240px; padding: 8px 0;
+            border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column;
+            overflow-y: auto;
+        }
+        .compose-btn {
+            margin: 8px 16px 16px;
+            background: var(--google-blue);
+            color: white; border: none; border-radius: 16px;
+            padding: 12px 24px; font-size: 14px; font-weight: 500;
+            display: flex; align-items: center; gap: 12px;
+            cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            transition: box-shadow 0.2s, background 0.2s;
+            white-space: nowrap;
+        }
+        .compose-btn:hover {
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            background: var(--google-blue-hover);
+        }
+        .nav-item {
+            display: flex; align-items: center; padding: 8px 16px;
+            font-size: 14px; color: var(--text-primary);
+            cursor: pointer; border-radius: 0 20px 20px 0;
+            margin-right: 8px;
+            transition: background 0.15s;
+        }
+        .nav-item.active {
+            background: #e8f0fe; color: var(--google-blue); font-weight: 500;
+        }
+        .nav-item:hover { background: #f1f3f4; }
+
+        /* 中间日记列表 */
+        .middle-list {
+            width: 360px; border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column;
+            overflow-y: auto;
+            background: #fff;
+        }
+        .list-item {
+            padding: 14px 16px; border-bottom: 1px solid var(--border-color);
+            cursor: pointer; transition: background 0.15s;
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .list-item:hover { background: #f6f8fc; }
+        .list-item.active { background: #e8f0fe; }
+        .list-item-date { font-size: 12px; color: var(--text-secondary); }
+        .list-item-title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+        .list-item-preview {
+            font-size: 13px; color: var(--text-secondary);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .empty-list {
+            text-align: center; color: var(--text-secondary); padding: 40px 16px;
+        }
+
+        /* 右侧阅读/编辑窗格 */
+        .right-panel {
+            flex: 1; display: flex; flex-direction: column;
+            background: #fff; overflow-y: auto;
+        }
+        .right-empty {
+            display: flex; align-items: center; justify-content: center;
+            height: 100%; color: var(--text-secondary); font-size: 16px;
+        }
+        .editor-container {
+            display: flex; flex-direction: column; height: 100%;
+        }
+        .editor-header {
+            padding: 20px 24px 12px; border-bottom: 1px solid var(--border-color);
+        }
+        .title-input {
+            border: none; font-size: 22px; font-weight: 400;
+            width: 100%; outline: none; background: transparent;
+            color: var(--text-primary);
+        }
+        .title-input:read-only { color: var(--text-primary); }
+        .editor-body {
+            flex: 1; padding: 16px 24px;
+            overflow-y: auto;
+        }
+        .content-editable {
+            border: none; outline: none; font-size: 15px;
+            line-height: 1.6; color: var(--text-primary);
+            min-height: 300px;
+        }
+        .content-editable img {
+            max-width: 100%; border-radius: 8px; margin: 12px 0;
+        }
+        .content-editable:empty::before {
+            content: "写下今天的快乐..."; color: #80868b;
+        }
+        .editor-footer {
+            padding: 12px 24px; border-top: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .editor-actions { display: flex; gap: 12px; align-items: center; }
+        .icon-btn {
+            background: none; border: none; color: var(--text-secondary);
+            width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s; font-size: 18px;
+        }
+        .icon-btn:hover { background: rgba(60,64,67,0.08); }
+        .save-btn {
+            background: var(--google-blue); color: white; border: none;
+            padding: 8px 24px; border-radius: 4px; font-weight: 500;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .save-btn:hover { background: var(--google-blue-hover); }
+        .delete-btn {
+            color: var(--google-red); background: none; border: 1px solid var(--border-color);
+            padding: 8px 16px; border-radius: 4px; cursor: pointer;
+        }
+        .delete-btn:hover { background: rgba(234,67,53,0.04); }
+
+        /* 登录弹窗 (Google 风格) */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-card {
+            background: white; border-radius: 8px; padding: 40px 32px;
+            width: 400px; box-shadow: 0 24px 38px rgba(0,0,0,0.2);
+        }
+        .modal-card h2 { font-weight: 400; font-size: 24px; margin-bottom: 24px; }
+        .input-field {
+            width: 100%; padding: 12px 14px; margin-bottom: 16px;
+            border: 1px solid var(--border-color); border-radius: 4px;
+            font-size: 14px; outline: none; transition: border-color 0.2s;
+        }
+        .input-field:focus { border-color: var(--google-blue); }
+        .modal-actions {
+            display: flex; justify-content: flex-end; gap: 12px;
+            margin-top: 24px;
+        }
+        .btn-cancel {
+            background: none; border: none; color: var(--text-secondary);
+            font-weight: 500; padding: 10px 16px; border-radius: 4px; cursor: pointer;
+        }
+        .btn-cancel:hover { background: rgba(0,0,0,0.04); }
+        .btn-login {
+            background: var(--google-blue); color: white; border: none;
+            font-weight: 500; padding: 10px 24px; border-radius: 4px; cursor: pointer;
+        }
+        .btn-login:hover { background: var(--google-blue-hover); }
+        .error-text { color: var(--google-red); font-size: 13px; margin-bottom: 12px; display: none; }
+
+        /* 响应式：小屏幕折叠 */
+        @media (max-width: 900px) {
+            .middle-list { width: 260px; }
+        }
+        @media (max-width: 700px) {
+            .gmail-body { flex-direction: column; }
+            .sidebar-left { width: 100%; flex-direction: row; overflow-x: auto; padding: 8px; }
+            .middle-list { width: 100%; flex: none; max-height: 200px; }
+            .right-panel { flex: 1; }
         }
     </style>
 </head>
 <body>
-    <div class="app">
-        <!-- 首页 -->
-        <div class="home-screen" id="homeScreen">
-            <div class="cover-wrapper" id="coverWrapper">
-                <!-- 封面图或占位符 -->
-                <div class="cover-placeholder" id="coverPlaceholder">📷</div>
+    <!-- ========== 封面页 ========== -->
+    <div class="home-screen" id="homeScreen">
+        <div class="top-bar">
+            <div class="top-bar-left">
+                <div class="brand-link" id="enterDiaryBtn">乖宝和溪溪的快乐生活</div>
             </div>
-            <button class="cover-change-hint" id="changeCoverBtn">
+            <button class="cover-change-btn" id="changeCoverBtn">
                 <span>🖼️</span> 更换封面
             </button>
             <input type="file" id="coverFileInput" accept="image/*" style="display:none;">
-            <div class="home-content">
-                <button class="home-btn" id="enterDiaryBtn">乖宝和溪溪的快乐生活</button>
+        </div>
+        <div class="cover-container" id="coverContainer">
+            <div class="cover-placeholder" id="coverPlaceholder">
+                <span class="cover-placeholder-icon">📷</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 日记界面 (Gmail 风格) ========== -->
+    <div class="diary-screen" id="diaryScreen">
+        <!-- 顶部栏 -->
+        <div class="gmail-header">
+            <div class="gmail-menu-btn" id="backToHomeBtn" title="返回封面">←</div>
+            <div class="gmail-logo">
+                <span style="color:var(--google-blue);">📒</span> 日记
+            </div>
+            <div class="gmail-search">
+                <span>🔍</span>
+                <input type="text" placeholder="搜索日记" disabled>
+            </div>
+            <div class="gmail-actions">
+                <div class="gmail-login-area" id="loginArea">
+                    <!-- 动态填充 -->
+                </div>
             </div>
         </div>
 
-        <!-- 日记界面 -->
-        <div class="diary-screen" id="diaryScreen">
-            <aside class="sidebar">
-                <div class="sidebar-header">
-                    <span class="sidebar-title">📒 日记本</span>
-                    <button class="btn-new" id="newDiaryBtn">新建</button>
-                </div>
-                <div class="diary-list" id="diaryList">
-                    <div class="empty-hint">还没有日记，写一篇吧</div>
-                </div>
-            </aside>
-            <main class="editor">
-                <div class="editor-toolbar">
-                    <button class="back-home" id="backHomeBtn">
-                        <span>←</span> 返回封面
-                    </button>
-                    <button class="tool-btn" id="insertImageBtn">
-                        <span>🖼️</span> 插入图片
-                    </button>
-                    <input type="file" id="imageFileInput" accept="image/*" style="display:none;">
-                </div>
-                <div class="editor-body">
-                    <input type="text" class="title-input" id="diaryTitle" placeholder="标题">
-                    <div class="content-editable" id="diaryContent" contenteditable="true"></div>
-                </div>
-                <div class="editor-footer">
-                    <div class="action-group">
-                        <button class="btn-delete" id="deleteDiaryBtn" style="display:none;">删除</button>
+        <!-- 三栏主体 -->
+        <div class="gmail-body">
+            <!-- 左侧边栏 -->
+            <div class="sidebar-left">
+                <button class="compose-btn" id="newDiaryBtn" style="display:none;">
+                    <span>✏️</span> 写日记
+                </button>
+                <div class="nav-item active" id="allDiariesNav">📋 所有日记</div>
+            </div>
+
+            <!-- 中间日记列表 -->
+            <div class="middle-list" id="diaryList">
+                <div class="empty-list">暂无日记</div>
+            </div>
+
+            <!-- 右侧编辑/阅读窗格 -->
+            <div class="right-panel" id="rightPanel">
+                <div class="right-empty" id="emptyState">选择一篇日记查看</div>
+                <div class="editor-container" id="editorContainer" style="display:none;">
+                    <div class="editor-header">
+                        <input type="text" class="title-input" id="diaryTitle" placeholder="标题" readonly>
                     </div>
-                    <button class="btn-save" id="saveDiaryBtn">保存</button>
+                    <div class="editor-body">
+                        <div class="content-editable" id="diaryContent" contenteditable="false"></div>
+                    </div>
+                    <div class="editor-footer">
+                        <div class="editor-actions">
+                            <button class="icon-btn" id="insertImageBtn" title="插入图片" style="display:none;">🖼️</button>
+                            <input type="file" id="imageFileInput" accept="image/*" style="display:none;">
+                            <button class="delete-btn" id="deleteDiaryBtn" style="display:none;">删除</button>
+                        </div>
+                        <button class="save-btn" id="saveDiaryBtn" style="display:none;">保存</button>
+                    </div>
                 </div>
-            </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- 登录弹窗 -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-card">
+            <h2>登录</h2>
+            <input type="text" class="input-field" id="loginUsername" placeholder="用户名" autocomplete="off">
+            <input type="password" class="input-field" id="loginPassword" placeholder="密码">
+            <div class="error-text" id="loginError">用户名或密码错误</div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="cancelLoginBtn">取消</button>
+                <button class="btn-login" id="loginSubmitBtn">登录</button>
+            </div>
         </div>
     </div>
 
     <script>
         (function() {
-            // 存储 key
-            const COVER_KEY = 'my_diary_cover';
-            const DIARY_KEY = 'my_diary_entries';
+            // 管理员账号
+            const ADMIN_USER = 'XX';
+            const ADMIN_PASS = 'YY';
 
-            // DOM
+            // 本地存储 key
+            const COVER_KEY = 'g_cover';
+            const DIARY_KEY = 'g_diary';
+            const AUTH_KEY = 'g_admin';
+
+            // DOM 元素
             const homeScreen = document.getElementById('homeScreen');
             const diaryScreen = document.getElementById('diaryScreen');
+            const coverContainer = document.getElementById('coverContainer');
             const coverPlaceholder = document.getElementById('coverPlaceholder');
-            const coverFileInput = document.getElementById('coverFileInput');
             const changeCoverBtn = document.getElementById('changeCoverBtn');
+            const coverFileInput = document.getElementById('coverFileInput');
             const enterDiaryBtn = document.getElementById('enterDiaryBtn');
-            const backHomeBtn = document.getElementById('backHomeBtn');
-            const diaryList = document.getElementById('diaryList');
+            const backToHomeBtn = document.getElementById('backToHomeBtn');
+            const diaryListEl = document.getElementById('diaryList');
+            const rightPanel = document.getElementById('rightPanel');
+            const emptyState = document.getElementById('emptyState');
+            const editorContainer = document.getElementById('editorContainer');
             const diaryTitle = document.getElementById('diaryTitle');
             const diaryContent = document.getElementById('diaryContent');
             const saveDiaryBtn = document.getElementById('saveDiaryBtn');
@@ -491,42 +457,123 @@
             const newDiaryBtn = document.getElementById('newDiaryBtn');
             const insertImageBtn = document.getElementById('insertImageBtn');
             const imageFileInput = document.getElementById('imageFileInput');
+            const loginArea = document.getElementById('loginArea');
+            const loginModal = document.getElementById('loginModal');
+            const loginUsername = document.getElementById('loginUsername');
+            const loginPassword = document.getElementById('loginPassword');
+            const loginError = document.getElementById('loginError');
+            const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+            const cancelLoginBtn = document.getElementById('cancelLoginBtn');
 
             let entries = [];
             let currentId = null;
+            let isAdmin = false;
 
-            // ---------- 封面图片处理 ----------
+            // ---------- 登录管理 ----------
+            function checkAuth() {
+                return localStorage.getItem(AUTH_KEY) === 'true';
+            }
+
+            function setAuth(value) {
+                if (value) {
+                    localStorage.setItem(AUTH_KEY, 'true');
+                } else {
+                    localStorage.removeItem(AUTH_KEY);
+                }
+                isAdmin = value;
+                updateUIForAuth();
+            }
+
+            function updateUIForAuth() {
+                // 封面页更换按钮
+                changeCoverBtn.classList.toggle('visible', isAdmin);
+
+                // 日记编辑控件
+                newDiaryBtn.style.display = isAdmin ? 'flex' : 'none';
+                saveDiaryBtn.style.display = isAdmin ? 'inline-block' : 'none';
+                insertImageBtn.style.display = isAdmin ? 'flex' : 'none';
+                diaryTitle.readOnly = !isAdmin;
+                diaryContent.contentEditable = isAdmin ? 'true' : 'false';
+
+                if (currentId && isAdmin) {
+                    deleteDiaryBtn.style.display = 'inline-block';
+                } else {
+                    deleteDiaryBtn.style.display = 'none';
+                }
+
+                // 登录区域
+                if (isAdmin) {
+                    loginArea.innerHTML = `
+                        <span class="admin-badge">👤 管理员</span>
+                        <span class="logout-link" id="logoutLink">退出</span>
+                    `;
+                    document.getElementById('logoutLink')?.addEventListener('click', () => {
+                        setAuth(false);
+                        if (currentId) loadEditor(currentId);
+                    });
+                } else {
+                    loginArea.innerHTML = `<span class="login-link" id="loginLink">登录</span>`;
+                    document.getElementById('loginLink')?.addEventListener('click', showLoginModal);
+                }
+            }
+
+            function showLoginModal() {
+                loginModal.classList.add('active');
+                loginUsername.value = '';
+                loginPassword.value = '';
+                loginError.style.display = 'none';
+                loginUsername.focus();
+            }
+
+            function hideLoginModal() {
+                loginModal.classList.remove('active');
+            }
+
+            function attemptLogin() {
+                if (loginUsername.value.trim() === ADMIN_USER && loginPassword.value === ADMIN_PASS) {
+                    setAuth(true);
+                    hideLoginModal();
+                    if (diaryScreen.classList.contains('active') && currentId) loadEditor(currentId);
+                } else {
+                    loginError.style.display = 'block';
+                    loginPassword.value = '';
+                    loginPassword.focus();
+                }
+            }
+
+            loginSubmitBtn.addEventListener('click', attemptLogin);
+            cancelLoginBtn.addEventListener('click', hideLoginModal);
+            loginPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
+            loginModal.addEventListener('click', (e) => { if (e.target === loginModal) hideLoginModal(); });
+
+            // ---------- 封面处理 ----------
             function loadCover() {
                 const saved = localStorage.getItem(COVER_KEY);
+                const existingImg = coverContainer.querySelector('.cover-img');
+                if (existingImg) existingImg.remove();
                 if (saved) {
-                    // 移除占位，放图片
-                    const existingImg = document.querySelector('.cover-img');
-                    if (existingImg) existingImg.remove();
                     coverPlaceholder.style.display = 'none';
                     const img = document.createElement('img');
                     img.className = 'cover-img';
                     img.src = saved;
-                    img.alt = '封面';
-                    document.getElementById('coverWrapper').prepend(img);
+                    img.style.display = 'block';
+                    coverContainer.prepend(img);
                 } else {
-                    // 显示占位
                     coverPlaceholder.style.display = 'flex';
                 }
             }
 
-            function setCover(base64) {
-                localStorage.setItem(COVER_KEY, base64);
-                loadCover();
-            }
-
-            changeCoverBtn.addEventListener('click', () => coverFileInput.click());
-
+            changeCoverBtn.addEventListener('click', () => {
+                if (!isAdmin) return;
+                coverFileInput.click();
+            });
             coverFileInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
                 const reader = new FileReader();
                 reader.onload = (ev) => {
-                    setCover(ev.target.result);
+                    localStorage.setItem(COVER_KEY, ev.target.result);
+                    loadCover();
                 };
                 reader.readAsDataURL(file);
                 coverFileInput.value = '';
@@ -535,46 +582,41 @@
             // ---------- 日记数据 ----------
             function loadEntries() {
                 const stored = localStorage.getItem(DIARY_KEY);
-                if (stored) {
-                    try { entries = JSON.parse(stored); } catch (e) { entries = []; }
-                } else {
-                    entries = [];
-                }
+                entries = stored ? JSON.parse(stored) : [];
             }
-
             function saveEntries() {
                 localStorage.setItem(DIARY_KEY, JSON.stringify(entries));
             }
-
             function formatDate(iso) {
                 const d = new Date(iso);
-                return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                const month = d.getMonth() + 1;
+                const day = d.getDate();
+                return `${month}月${day}日`;
             }
-
             function stripHtml(html) {
                 const tmp = document.createElement('div');
                 tmp.innerHTML = html;
-                return tmp.textContent || tmp.innerText || '';
+                return tmp.textContent || '';
             }
 
             function renderList() {
                 if (!entries.length) {
-                    diaryList.innerHTML = '<div class="empty-hint">还没有日记，写一篇吧</div>';
+                    diaryListEl.innerHTML = '<div class="empty-list">暂无日记</div>';
                     return;
                 }
                 const sorted = [...entries].sort((a,b) => new Date(b.date) - new Date(a.date));
                 let html = '';
                 sorted.forEach(e => {
                     const active = e.id === currentId ? ' active' : '';
-                    const preview = stripHtml(e.content).substring(0, 40);
+                    const preview = stripHtml(e.content).substring(0, 30);
                     html += `
-                        <div class="diary-item${active}" data-id="${e.id}">
-                            <div class="item-date">${formatDate(e.date)}</div>
-                            <div class="item-title">${escapeHtml(e.title || '无标题')}</div>
-                            <div class="item-preview">${escapeHtml(preview)}</div>
+                        <div class="list-item${active}" data-id="${e.id}">
+                            <div class="list-item-date">${formatDate(e.date)}</div>
+                            <div class="list-item-title">${escapeHtml(e.title || '无标题')}</div>
+                            <div class="list-item-preview">${escapeHtml(preview)}</div>
                         </div>`;
                 });
-                diaryList.innerHTML = html;
+                diaryListEl.innerHTML = html;
             }
 
             function escapeHtml(str) {
@@ -585,16 +627,20 @@
                 currentId = null;
                 diaryTitle.value = '';
                 diaryContent.innerHTML = '';
+                editorContainer.style.display = 'none';
+                emptyState.style.display = 'flex';
                 deleteDiaryBtn.style.display = 'none';
             }
 
             function loadEditor(id) {
                 const entry = entries.find(e => e.id === id);
-                if (!entry) return;
+                if (!entry) { clearEditor(); return; }
                 currentId = id;
                 diaryTitle.value = entry.title || '';
                 diaryContent.innerHTML = entry.content || '';
-                deleteDiaryBtn.style.display = 'inline-block';
+                editorContainer.style.display = 'flex';
+                emptyState.style.display = 'none';
+                deleteDiaryBtn.style.display = isAdmin ? 'inline-block' : 'none';
             }
 
             function selectDiary(id) {
@@ -603,24 +649,18 @@
             }
 
             function saveCurrent() {
+                if (!isAdmin) return alert('请先登录');
                 const title = diaryTitle.value.trim();
                 const content = diaryContent.innerHTML.trim();
-                if (!title && !content) {
-                    alert('标题和内容不能都为空');
-                    return;
-                }
+                if (!title && !content) return alert('标题和内容不能都为空');
                 if (currentId) {
                     const entry = entries.find(e => e.id === currentId);
-                    if (entry) {
-                        entry.title = title;
-                        entry.content = content;
-                    }
+                    if (entry) { entry.title = title; entry.content = content; }
                 } else {
                     const newEntry = {
                         id: Date.now(),
                         date: new Date().toISOString(),
-                        title: title,
-                        content: content
+                        title, content
                     };
                     entries.push(newEntry);
                     currentId = newEntry.id;
@@ -631,17 +671,19 @@
             }
 
             function deleteCurrent() {
-                if (!currentId) return;
-                if (!confirm('确定删除这篇日记吗？')) return;
+                if (!isAdmin || !currentId) return;
+                if (!confirm('确定删除这篇日记？')) return;
                 entries = entries.filter(e => e.id !== currentId);
                 saveEntries();
                 clearEditor();
                 renderList();
             }
 
-            // ---------- 图片插入 ----------
-            insertImageBtn.addEventListener('click', () => imageFileInput.click());
-
+            // 图片插入
+            insertImageBtn.addEventListener('click', () => {
+                if (!isAdmin) return;
+                imageFileInput.click();
+            });
             imageFileInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -650,13 +692,11 @@
                     const img = document.createElement('img');
                     img.src = ev.target.result;
                     diaryContent.focus();
-                    // 插入图片
                     const sel = window.getSelection();
                     if (sel.rangeCount) {
                         const range = sel.getRangeAt(0);
                         range.deleteContents();
                         range.insertNode(img);
-                        // 移动光标到图片后
                         range.setStartAfter(img);
                         range.collapse(true);
                         sel.removeAllRanges();
@@ -668,9 +708,8 @@
                 reader.readAsDataURL(file);
                 imageFileInput.value = '';
             });
-
-            // 支持粘贴图片
             diaryContent.addEventListener('paste', (e) => {
+                if (!isAdmin) return;
                 const items = e.clipboardData?.items;
                 if (!items) return;
                 for (let item of items) {
@@ -700,7 +739,7 @@
                 }
             });
 
-            // ---------- 视图切换 ----------
+            // 视图切换
             enterDiaryBtn.addEventListener('click', () => {
                 homeScreen.classList.add('hidden');
                 diaryScreen.classList.add('active');
@@ -712,22 +751,25 @@
                     clearEditor();
                 }
             });
-
-            backHomeBtn.addEventListener('click', () => {
+            backToHomeBtn.addEventListener('click', () => {
                 diaryScreen.classList.remove('active');
                 homeScreen.classList.remove('hidden');
             });
 
             // 列表点击
-            diaryList.addEventListener('click', (e) => {
-                const item = e.target.closest('.diary-item');
+            diaryListEl.addEventListener('click', (e) => {
+                const item = e.target.closest('.list-item');
                 if (!item) return;
-                const id = Number(item.dataset.id);
-                selectDiary(id);
+                selectDiary(Number(item.dataset.id));
             });
 
             newDiaryBtn.addEventListener('click', () => {
                 clearEditor();
+                editorContainer.style.display = 'flex';
+                emptyState.style.display = 'none';
+                diaryTitle.value = '';
+                diaryContent.innerHTML = '';
+                currentId = null;
                 renderList();
                 diaryTitle.focus();
             });
@@ -735,20 +777,18 @@
             saveDiaryBtn.addEventListener('click', saveCurrent);
             deleteDiaryBtn.addEventListener('click', deleteCurrent);
 
-            // 快捷键 Ctrl+S
             document.addEventListener('keydown', (e) => {
                 if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                     e.preventDefault();
-                    if (diaryScreen.classList.contains('active')) {
-                        saveCurrent();
-                    }
+                    if (diaryScreen.classList.contains('active') && isAdmin) saveCurrent();
                 }
             });
 
             // 初始化
+            isAdmin = checkAuth();
             loadCover();
             loadEntries();
-            // 默认显示首页
+            updateUIForAuth();
             homeScreen.classList.remove('hidden');
             diaryScreen.classList.remove('active');
         })();
