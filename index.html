@@ -185,7 +185,6 @@
       flex: 1; outline: none; font-size: 1rem; line-height: 1.7; color: var(--text-main);
       overflow-y: auto; min-height: 200px;
     }
-    /* 图片显示优化：默认缩小为40%宽度 */
     .content-area img {
       max-width: 40%;
       height: auto;
@@ -348,6 +347,13 @@
 
       function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
       function stripHtml(html) { const div = document.createElement('div'); div.innerHTML = html; return div.textContent || ''; }
+
+      // 格式化时间为 YYYY-MM-DD HH:MM:SS
+      function formatDateTime(iso) {
+        const d = new Date(iso);
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+      }
 
       async function openDB() {
         return new Promise((resolve, reject) => {
@@ -567,7 +573,7 @@
         }
         diaryList.innerHTML = sorted.map(e => `
           <div class="glass-card diary-list-item ${e.id === currentDiaryId ? 'active' : ''}" data-id="${e.id}">
-            <div class="date">${new Date(e.date).toLocaleDateString()}</div>
+            <div class="date">${formatDateTime(e.date)}</div>
             <h3>${escapeHtml(e.title || '无标题')}</h3>
             <p>${escapeHtml(stripHtml(e.content).substring(0, 60))}</p>
           </div>
