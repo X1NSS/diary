@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>乖宝和溪溪 | 樱花流体玻璃</title>
   <style>
-    /* 样式完全保留，未做任何改动 */
+    /* 样式完全保留，无任何改动 */
     :root {
       --bg-color: #fff5f7;
       --glass-bg: rgba(255, 255, 255, 0.6);
@@ -302,7 +302,7 @@
 
   <script>
     (function() {
-      // 安全密码（拆分成两部分，避免完整明文）
+      // 安全密码（拆分）
       const passPart1 = 'XX';
       const passPart2 = 'YY';
       const CORRECT_PASS = passPart1 + passPart2;
@@ -390,32 +390,25 @@
         });
       }
 
-      // ========== 签名工具函数 ==========
+      // 签名工具
       async function sha256(message) {
         const msgBuffer = new TextEncoder().encode(message);
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
       }
-
       const SIGN_KEY = 'xins_secret_key_2025';
-
       function generateToken() {
         const timestamp = Date.now();
         const random = Math.random().toString(36).substring(2, 10);
         return `${timestamp}.${random}`;
       }
-
-      async function createSignature(payload) {
-        return await sha256(payload + SIGN_KEY);
-      }
-
+      async function createSignature(payload) { return await sha256(payload + SIGN_KEY); }
       async function isTokenValid(token, signature) {
         const expectedSig = await createSignature(token);
         return signature === expectedSig;
       }
 
-      // ========== 登录管理 ==========
       async function isLoggedIn() {
         const token = sessionStorage.getItem(AUTH_KEY);
         const sig = sessionStorage.getItem(AUTH_SIG_KEY);
@@ -428,43 +421,34 @@
         }
         return true;
       }
-
       async function setLoggedIn() {
         const token = generateToken();
         const sig = await createSignature(token);
         sessionStorage.setItem(AUTH_KEY, token);
         sessionStorage.setItem(AUTH_SIG_KEY, sig);
       }
-
       function clearLoggedIn() {
         sessionStorage.removeItem(AUTH_KEY);
         sessionStorage.removeItem(AUTH_SIG_KEY);
       }
 
-      // ========== 锁定管理（带签名） ==========
+      // 锁定管理
       async function getLockState() {
         const raw = localStorage.getItem(LOCK_KEY);
         const sig = localStorage.getItem(LOCK_SIG_KEY);
         if (!raw || !sig) return { attempts: 0, lockUntil: 0 };
         const expectedSig = await createSignature(raw);
         if (sig !== expectedSig) {
-          // 被篡改，视为锁定
           return { attempts: MAX_ATTEMPTS, lockUntil: Date.now() + LOCK_DURATION };
         }
-        try {
-          return JSON.parse(raw);
-        } catch (e) {
-          return { attempts: MAX_ATTEMPTS, lockUntil: Date.now() + LOCK_DURATION };
-        }
+        try { return JSON.parse(raw); } catch (e) { return { attempts: MAX_ATTEMPTS, lockUntil: Date.now() + LOCK_DURATION }; }
       }
-
       async function setLockState(state) {
         const raw = JSON.stringify(state);
         const sig = await createSignature(raw);
         localStorage.setItem(LOCK_KEY, raw);
         localStorage.setItem(LOCK_SIG_KEY, sig);
       }
-
       async function isLocked() {
         const state = await getLockState();
         if (state.lockUntil > Date.now()) return true;
@@ -473,13 +457,11 @@
         }
         return false;
       }
-
       async function getLockRemaining() {
         const state = await getLockState();
         if (state.lockUntil > Date.now()) return state.lockUntil - Date.now();
         return 0;
       }
-
       async function recordFailedAttempt() {
         let state = await getLockState();
         state.attempts = (state.attempts || 0) + 1;
@@ -488,12 +470,11 @@
         }
         await setLockState(state);
       }
-
       async function clearLock() {
         await setLockState({ attempts: 0, lockUntil: 0 });
       }
 
-      // ========== UI ==========
+      // UI导航
       async function updateNav() {
         navContainer.innerHTML = '';
         if (!(await isLoggedIn())) {
@@ -515,7 +496,6 @@
         bindTiltToCards();
         updateDiaryAdminUI();
       }
-
       function updateDiaryAdminUI() {
         const show = document.body.classList.contains('logged-in');
         newDiaryBtn.style.display = show ? 'block' : 'none';
@@ -526,7 +506,6 @@
         editorTitleInput.readOnly = !show;
         editorContentArea.contentEditable = show ? 'true' : 'false';
       }
-
       function goToHomePage() {
         diaryPage.classList.remove('active');
         heroPage.style.display = '';
@@ -534,7 +513,6 @@
         heroPage.style.transform = '';
         updateNav();
       }
-
       async function enterDiaryPage() {
         if (!(await isLoggedIn())) { alert('请先登录'); return; }
         heroPage.style.opacity = '0';
@@ -561,9 +539,7 @@
         passwordError.style.display = 'none';
         passwordInput.focus();
       };
-
       passwordModal.onclick = (e) => { if (e.target === passwordModal) passwordModal.classList.remove('active'); };
-
       passwordSubmitBtn.onclick = async () => {
         if (await isLocked()) {
           const rem = await getLockRemaining();
@@ -572,7 +548,6 @@
           passwordModal.classList.remove('active');
           return;
         }
-
         if (passwordInput.value === CORRECT_PASS) {
           await clearLock();
           await setLoggedIn();
@@ -591,12 +566,9 @@
           }
         }
       };
+      passwordInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') passwordSubmitBtn.click(); });
 
-      passwordInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') passwordSubmitBtn.click();
-      });
-
-      // 定时检查登录状态（防篡改）
+      // 定时检查登录状态
       setInterval(async () => {
         const loggedIn = await isLoggedIn();
         if (!loggedIn && document.body.classList.contains('logged-in')) {
@@ -605,10 +577,22 @@
         }
       }, 3000);
 
-      // ========== 封面逻辑 ==========
-      const boxes = { left: document.querySelector('.cover-box.left'), center: document.querySelector('.cover-box.center'), right: document.querySelector('.cover-box.right') };
-      const imgs = { left: boxes.left.querySelector('img'), center: boxes.center.querySelector('img'), right: boxes.right.querySelector('img') };
-      const inputs = { left: boxes.left.querySelector('input'), center: boxes.center.querySelector('input'), right: boxes.right.querySelector('input') };
+      // 封面逻辑
+      const boxes = {
+        left: document.querySelector('.cover-box.left'),
+        center: document.querySelector('.cover-box.center'),
+        right: document.querySelector('.cover-box.right')
+      };
+      const imgs = {
+        left: boxes.left.querySelector('img'),
+        center: boxes.center.querySelector('img'),
+        right: boxes.right.querySelector('img')
+      };
+      const inputs = {
+        left: boxes.left.querySelector('input'),
+        center: boxes.center.querySelector('input'),
+        right: boxes.right.querySelector('input')
+      };
 
       function bindCoverTilt() {
         document.querySelectorAll('.cover-img').forEach(img => {
@@ -631,8 +615,13 @@
       function loadAllCovers() {
         ['left','center','right'].forEach(pos => {
           const dataUrl = localStorage.getItem(COVER_KEYS[pos]);
-          if (dataUrl) { imgs[pos].src = dataUrl; boxes[pos].classList.add('has-img'); }
-          else { imgs[pos].removeAttribute('src'); boxes[pos].classList.remove('has-img'); }
+          if (dataUrl) {
+            imgs[pos].src = dataUrl;
+            boxes[pos].classList.add('has-img');
+          } else {
+            imgs[pos].removeAttribute('src');
+            boxes[pos].classList.remove('has-img');
+          }
         });
         const centerData = localStorage.getItem(COVER_KEYS.center);
         if (centerData) {
@@ -646,60 +635,86 @@
         setTimeout(bindCoverTilt, 100);
       }
 
-      function compressImage(file, maxWidth = 1200) {
-        return new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onload = (ev) => {
-            const img = new Image();
-            img.onload = () => {
-              const canvas = document.createElement('canvas');
-              let w = img.width, h = img.height;
-              if (w > maxWidth) { h = h * (maxWidth / w); w = maxWidth; }
-              canvas.width = w; canvas.height = h;
-              const ctx = canvas.getContext('2d');
-              ctx.drawImage(img, 0, 0, w, h);
-              resolve(canvas.toDataURL('image/jpeg', 0.7));
-            };
-            img.src = ev.target.result;
-          };
-          reader.readAsDataURL(file);
-        });
-      }
-
-      async function handleUpload(position, file) {
+      // 核心：使用 Object URL 处理图片，避免 Base64 卡死
+      async function processAndUpload(position, file) {
         if (!(await isLoggedIn())) return;
+
+        // 创建本地预览 URL，不会产生巨量内存占用
+        const objectUrl = URL.createObjectURL(file);
+        const img = new Image();
+
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = () => reject(new Error('图片加载失败'));
+          img.src = objectUrl;
+        });
+
+        // 检查横竖规则
         if (position === 'left' || position === 'right') {
-          const checkImg = await new Promise(resolve => {
-            const reader = new FileReader();
-            reader.onload = (e) => { const img = new Image(); img.onload = () => resolve({ width: img.width, height: img.height }); img.src = e.target.result; };
-            reader.readAsDataURL(file);
-          });
-          if (checkImg.width > checkImg.height) { alert('左右框只能上传竖版图片'); return; }
+          if (img.width > img.height) {
+            URL.revokeObjectURL(objectUrl);
+            alert('左右框只能上传竖版图片（高大于宽）');
+            return;
+          }
         }
-        const dataUrl = await compressImage(file);
+
+        // 使用 canvas 压缩
+        const maxWidth = 1200;
+        let w = img.width, h = img.height;
+        if (w > maxWidth) {
+          h = h * (maxWidth / w);
+          w = maxWidth;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+        // 清理对象 URL
+        URL.revokeObjectURL(objectUrl);
+
+        // 存储到 localStorage
         localStorage.setItem(COVER_KEYS[position], dataUrl);
         imgs[position].src = dataUrl;
         boxes[position].classList.add('has-img');
+
+        // 中间图片横竖布局处理
         if (position === 'center') {
-          const img = new Image();
-          img.onload = () => {
-            if (img.width > img.height) {
-              coverArea.classList.add('layout-horizontal');
-              localStorage.removeItem(COVER_KEYS.left); localStorage.removeItem(COVER_KEYS.right);
-              imgs.left.removeAttribute('src'); imgs.right.removeAttribute('src');
-              boxes.left.classList.remove('has-img'); boxes.right.classList.remove('has-img');
-            } else coverArea.classList.remove('layout-horizontal');
-          };
-          img.src = dataUrl;
+          if (img.width > img.height) {
+            coverArea.classList.add('layout-horizontal');
+            localStorage.removeItem(COVER_KEYS.left);
+            localStorage.removeItem(COVER_KEYS.right);
+            imgs.left.removeAttribute('src');
+            imgs.right.removeAttribute('src');
+            boxes.left.classList.remove('has-img');
+            boxes.right.classList.remove('has-img');
+          } else {
+            coverArea.classList.remove('layout-horizontal');
+          }
         }
+
+        // 重新绑定倾斜效果
         setTimeout(bindCoverTilt, 100);
       }
 
+      // 绑定封面点击和文件选择
       Object.keys(boxes).forEach(pos => {
-        boxes[pos].addEventListener('click', async () => { if (!(await isLoggedIn())) return; inputs[pos].click(); });
-        inputs[pos].addEventListener('change', (e) => { const file = e.target.files[0]; if (file) { handleUpload(pos, file); e.target.value = ''; } });
+        boxes[pos].addEventListener('click', async () => {
+          if (!(await isLoggedIn())) return;
+          inputs[pos].click();
+        });
+        inputs[pos].addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            processAndUpload(pos, file);
+            e.target.value = ''; // 清空以便重复选择同一文件
+          }
+        });
       });
 
+      // 生成漂浮装饰
       function generateDecos() {
         const paths = ['M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z','M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'];
         const animations = ['floatUp', 'floatSide', 'floatWobble'];
@@ -720,7 +735,7 @@
         }
       }
 
-      // ========== 日记功能 ==========
+      // 日记功能
       function loadEntries() { entries = JSON.parse(localStorage.getItem(DIARY_KEY) || '[]'); }
       function saveEntries() { localStorage.setItem(DIARY_KEY, JSON.stringify(entries)); }
 
