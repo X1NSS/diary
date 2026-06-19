@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>乖宝和溪溪 | 樱花流体玻璃</title>
   <style>
-    /* 样式完全保留，无任何改动 */
     :root {
       --bg-color: #fff5f7;
       --glass-bg: rgba(255, 255, 255, 0.6);
@@ -302,7 +301,6 @@
 
   <script>
     (function() {
-      // 安全密码（拆分）
       const passPart1 = 'XX';
       const passPart2 = 'YY';
       const CORRECT_PASS = passPart1 + passPart2;
@@ -390,7 +388,6 @@
         });
       }
 
-      // 签名工具
       async function sha256(message) {
         const msgBuffer = new TextEncoder().encode(message);
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -432,7 +429,6 @@
         sessionStorage.removeItem(AUTH_SIG_KEY);
       }
 
-      // 锁定管理
       async function getLockState() {
         const raw = localStorage.getItem(LOCK_KEY);
         const sig = localStorage.getItem(LOCK_SIG_KEY);
@@ -474,7 +470,6 @@
         await setLockState({ attempts: 0, lockUntil: 0 });
       }
 
-      // UI导航
       async function updateNav() {
         navContainer.innerHTML = '';
         if (!(await isLoggedIn())) {
@@ -526,7 +521,6 @@
         }, 400);
       }
 
-      // 登录按钮
       loginTriggerBtn.onclick = async () => {
         if (await isLocked()) {
           const rem = await getLockRemaining();
@@ -568,7 +562,6 @@
       };
       passwordInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') passwordSubmitBtn.click(); });
 
-      // 定时检查登录状态
       setInterval(async () => {
         const loggedIn = await isLoggedIn();
         if (!loggedIn && document.body.classList.contains('logged-in')) {
@@ -577,7 +570,7 @@
         }
       }, 3000);
 
-      // 封面逻辑
+      // 封面功能
       const boxes = {
         left: document.querySelector('.cover-box.left'),
         center: document.querySelector('.cover-box.center'),
@@ -632,14 +625,13 @@
           };
           img.src = centerData;
         }
-        setTimeout(bindCoverTilt, 100);
+        bindCoverTilt();
       }
 
-      // 核心：使用 Object URL 处理图片，避免 Base64 卡死
+      // 修复后的上传处理
       async function processAndUpload(position, file) {
         if (!(await isLoggedIn())) return;
 
-        // 创建本地预览 URL，不会产生巨量内存占用
         const objectUrl = URL.createObjectURL(file);
         const img = new Image();
 
@@ -658,7 +650,6 @@
           }
         }
 
-        // 使用 canvas 压缩
         const maxWidth = 1200;
         let w = img.width, h = img.height;
         if (w > maxWidth) {
@@ -672,15 +663,12 @@
         ctx.drawImage(img, 0, 0, w, h);
         const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
 
-        // 清理对象 URL
         URL.revokeObjectURL(objectUrl);
 
-        // 存储到 localStorage
         localStorage.setItem(COVER_KEYS[position], dataUrl);
         imgs[position].src = dataUrl;
         boxes[position].classList.add('has-img');
 
-        // 中间图片横竖布局处理
         if (position === 'center') {
           if (img.width > img.height) {
             coverArea.classList.add('layout-horizontal');
@@ -695,26 +683,40 @@
           }
         }
 
-        // 重新绑定倾斜效果
-        setTimeout(bindCoverTilt, 100);
+        bindCoverTilt();
       }
 
-      // 绑定封面点击和文件选择
+      // 安全绑定文件选择事件
       Object.keys(boxes).forEach(pos => {
         boxes[pos].addEventListener('click', async () => {
           if (!(await isLoggedIn())) return;
           inputs[pos].click();
         });
-        inputs[pos].addEventListener('change', (e) => {
-          const file = e.target.files[0];
-          if (file) {
-            processAndUpload(pos, file);
-            e.target.value = ''; // 清空以便重复选择同一文件
-          }
-        });
+
+        // 移除之前可能绑定的监听，再添加新监听，防止重复触发
+        inputs[pos].removeEventListener('change', handleFileChange);
+        inputs[pos].addEventListener('change', handleFileChange);
       });
 
-      // 生成漂浮装饰
+      async function handleFileChange(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const pos = e.target.closest('.cover-box').dataset.position;
+        // 暂时移除监听，避免重复触发
+        e.target.removeEventListener('change', handleFileChange);
+        try {
+          await processAndUpload(pos, file);
+        } catch (err) {
+          console.error('上传出错:', err);
+          alert('上传图片失败，请重试');
+        } finally {
+          // 恢复监听
+          e.target.addEventListener('change', handleFileChange);
+          e.target.value = ''; // 清空值
+        }
+      }
+
+      // 漂浮装饰
       function generateDecos() {
         const paths = ['M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z','M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'];
         const animations = ['floatUp', 'floatSide', 'floatWobble'];
@@ -941,7 +943,6 @@
       async function init() {
         try { db = await openDB(); } catch (e) { console.warn('附件数据库打开失败'); }
         loadAllCovers();
-        bindCoverTilt();
         generateDecos();
         await updateNav();
         bindTiltToCards();
