@@ -100,6 +100,13 @@
       position: absolute; font-size: 2.5rem; color: var(--accent); opacity: 0;
       transition: opacity 0.3s ease; pointer-events: none; z-index: 3;
     }
+    .save-cover-btn {
+      position: absolute; bottom: 8px; right: 8px; z-index: 10;
+      padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+      background: var(--accent); color: #fff; border: none;
+      cursor: pointer; display: none; transition: all 0.3s;
+    }
+    .save-cover-btn:hover { background: #ff7b7b; transform: scale(1.05); }
     .logged-in .cover-box { cursor: pointer; }
     .logged-in .cover-box.center { border-color: rgba(255, 182, 193, 0.6); }
     .logged-in .cover-box.left, .logged-in .cover-box.right { border-color: rgba(255, 182, 193, 0.4); }
@@ -251,16 +258,19 @@
       <div class="cover-box left" data-position="left">
         <img src="" alt="Left Cover">
         <span class="plus-sign">+</span>
+        <button class="save-cover-btn" data-pos="left">保存</button>
         <input type="file" accept="image/*" hidden>
       </div>
       <div class="cover-box center" data-position="center">
         <img src="" alt="Center Cover">
         <span class="plus-sign">+</span>
+        <button class="save-cover-btn" data-pos="center">保存</button>
         <input type="file" accept="image/*" hidden>
       </div>
       <div class="cover-box right" data-position="right">
         <img src="" alt="Right Cover">
         <span class="plus-sign">+</span>
+        <button class="save-cover-btn" data-pos="right">保存</button>
         <input type="file" accept="image/*" hidden>
       </div>
     </div>
@@ -301,7 +311,6 @@
 
   <script>
     (function() {
-      // 密码
       const passPart1 = 'XX';
       const passPart2 = 'YY';
       const CORRECT_PASS = passPart1 + passPart2;
@@ -318,6 +327,8 @@
       let db = null;
       let entries = [];
       let currentDiaryId = null;
+      // 暂存待保存的封面图片 dataUrl
+      const pendingCover = { left: null, center: null, right: null };
 
       const $ = (id) => document.getElementById(id);
       const navContainer = $('nav-btns-container');
@@ -351,7 +362,6 @@
         return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
       }
 
-      // 数据库
       async function openDB() {
         return new Promise((resolve, reject) => {
           const req = indexedDB.open(DB_NAME, 1);
@@ -388,7 +398,6 @@
         });
       }
 
-      // 登录与锁定
       function isLoggedIn() { return sessionStorage.getItem(AUTH_KEY) === 'true'; }
       function setLoggedIn() { sessionStorage.setItem(AUTH_KEY, 'true'); }
       function clearLoggedIn() { sessionStorage.removeItem(AUTH_KEY); }
@@ -417,7 +426,6 @@
       }
       function clearLock() { setLockState({ attempts: 0, lockUntil: 0 }); }
 
-      // UI
       function updateNav() {
         navContainer.innerHTML = '';
         if (!isLoggedIn()) {
@@ -510,7 +518,7 @@
       };
       passwordInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') passwordSubmitBtn.click(); });
 
-      // 封面（稳定 base64 压缩上传）
+      // 封面逻辑
       const boxes = {
         left: document.querySelector('.cover-box.left'),
         center: document.querySelector('.cover-box.center'),
@@ -525,6 +533,11 @@
         left: boxes.left.querySelector('input'),
         center: boxes.center.querySelector('input'),
         right: boxes.right.querySelector('input')
+      };
+      const saveBtns = {
+        left: boxes.left.querySelector('.save-cover-btn'),
+        center: boxes.center.querySelector('.save-cover-btn'),
+        right: boxes.right.querySelector('.save-cover-btn')
       };
 
       function bindCoverTilt() {
@@ -568,27 +581,23 @@
         bindCoverTilt();
       }
 
-      // 稳定的上传函数
-      function handleCoverUpload(position, file) {
+      // 预览图片（不保存）
+      function previewCover(position, file) {
         if (!isLoggedIn()) return;
         if (file.size > 10 * 1024 * 1024) {
           alert('封面图片不能超过10MB');
           return;
         }
-
         const reader = new FileReader();
         reader.onload = function(e) {
           const img = new Image();
           img.onload = function() {
-            // 检查横竖规则
             if (position === 'left' || position === 'right') {
               if (img.width > img.height) {
                 alert('左右框只能上传竖版图片（高大于宽）');
                 return;
               }
             }
-
-            // 压缩
             const maxWidth = 1200;
             let w = img.width, h = img.height;
             if (w > maxWidth) {
@@ -601,26 +610,27 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, w, h);
             const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-
-            // 存储
-            localStorage.setItem(COVER_KEYS[position], dataUrl);
+            // 预览
             imgs[position].src = dataUrl;
             boxes[position].classList.add('has-img');
-
+            // 暂存，显示保存按钮
+            pendingCover[position] = dataUrl;
+            saveBtns[position].style.display = 'inline-block';
+            // 处理布局
             if (position === 'center') {
               if (img.width > img.height) {
                 coverArea.classList.add('layout-horizontal');
-                localStorage.removeItem(COVER_KEYS.left);
-                localStorage.removeItem(COVER_KEYS.right);
+                // 清除左右预览（但不删除 localStorage 中已保存的图片）
                 imgs.left.removeAttribute('src');
                 imgs.right.removeAttribute('src');
                 boxes.left.classList.remove('has-img');
                 boxes.right.classList.remove('has-img');
+                saveBtns.left.style.display = 'none';
+                saveBtns.right.style.display = 'none';
               } else {
                 coverArea.classList.remove('layout-horizontal');
               }
             }
-
             bindCoverTilt();
           };
           img.src = e.target.result;
@@ -628,6 +638,27 @@
         reader.readAsDataURL(file);
       }
 
+      // 点击保存按钮
+      function saveCover(position) {
+        if (!pendingCover[position]) return;
+        localStorage.setItem(COVER_KEYS[position], pendingCover[position]);
+        // 如果保存的是中间图片，且为横版，需要清理左右已保存的图片
+        if (position === 'center') {
+          const img = new Image();
+          img.onload = () => {
+            if (img.width > img.height) {
+              localStorage.removeItem(COVER_KEYS.left);
+              localStorage.removeItem(COVER_KEYS.right);
+            }
+          };
+          img.src = pendingCover[position];
+        }
+        pendingCover[position] = null;
+        saveBtns[position].style.display = 'none';
+        alert('封面已保存！');
+      }
+
+      // 绑定点击上传
       Object.keys(boxes).forEach(pos => {
         boxes[pos].addEventListener('click', () => {
           if (!isLoggedIn()) return;
@@ -636,13 +667,16 @@
         inputs[pos].addEventListener('change', (e) => {
           const file = e.target.files[0];
           if (file) {
-            handleCoverUpload(pos, file);
-            e.target.value = ''; // 允许重复选择同一文件
+            previewCover(pos, file);
+            e.target.value = '';
           }
+        });
+        saveBtns[pos].addEventListener('click', (e) => {
+          e.stopPropagation();
+          saveCover(pos);
         });
       });
 
-      // 漂浮装饰
       function generateDecos() {
         const paths = ['M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z','M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'];
         const animations = ['floatUp', 'floatSide', 'floatWobble'];
@@ -663,7 +697,7 @@
         }
       }
 
-      // 日记功能
+      // 日记功能（保持不变）
       function loadEntries() { entries = JSON.parse(localStorage.getItem(DIARY_KEY) || '[]'); }
       function saveEntries() { localStorage.setItem(DIARY_KEY, JSON.stringify(entries)); }
 
