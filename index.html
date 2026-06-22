@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>乖宝和溪溪 | 樱花流体玻璃</title>
   <style>
+    /* 全部 CSS 与之前完全一致，此处省略以节省篇幅，实际请粘贴完整的 CSS 代码 */
+    /* 你可从之前完美版本中复制所有样式 */
     :root {
       --bg-color: #fff5f7;
       --glass-bg: rgba(255, 255, 255, 0.6);
@@ -310,24 +312,22 @@
   </div>
 
   <script>
+    // ========== Supabase 配置（你的已填入） ==========
+    const SUPABASE_URL = 'https://fejyujgpuoysdtybsuzb.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZlanl1amdwdW95c2R0eWJzdXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNzY2OTgsImV4cCI6MjA5NzY1MjY5OH0.nD9WVSIiIHzZkzFf9iBa6z72oebAFB9jYo622XhLx_U';
+    const STORAGE_URL = SUPABASE_URL + '/storage/v1/object/public/attachments/'; // 附件公开访问根路径
+
     (function() {
       const passPart1 = 'XX';
       const passPart2 = 'YY';
       const CORRECT_PASS = passPart1 + passPart2;
-
       const AUTH_KEY = 'xins_auth';
-      const COVER_KEYS = { center: 'xins_cover_center', left: 'xins_cover_left', right: 'xins_cover_right' };
-      const DIARY_KEY = 'xins_diary_entries';
-      const DB_NAME = 'XinsAttachDB';
-      const STORE_NAME = 'attachments';
       const LOCK_KEY = 'xins_lock';
       const MAX_ATTEMPTS = 3;
       const LOCK_DURATION = 30 * 60 * 1000;
 
-      let db = null;
       let entries = [];
       let currentDiaryId = null;
-      // 暂存待保存的封面图片 dataUrl
       const pendingCover = { left: null, center: null, right: null };
 
       const $ = (id) => document.getElementById(id);
@@ -354,6 +354,28 @@
       const imageInput = $('image-input');
       const fileInput = $('file-input');
 
+      const boxes = {
+        left: document.querySelector('.cover-box.left'),
+        center: document.querySelector('.cover-box.center'),
+        right: document.querySelector('.cover-box.right')
+      };
+      const imgs = {
+        left: boxes.left.querySelector('img'),
+        center: boxes.center.querySelector('img'),
+        right: boxes.right.querySelector('img')
+      };
+      const inputs = {
+        left: boxes.left.querySelector('input'),
+        center: boxes.center.querySelector('input'),
+        right: boxes.right.querySelector('input')
+      };
+      const saveBtns = {
+        left: boxes.left.querySelector('.save-cover-btn'),
+        center: boxes.center.querySelector('.save-cover-btn'),
+        right: boxes.right.querySelector('.save-cover-btn')
+      };
+
+      // 工具函数
       function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
       function stripHtml(html) { const div = document.createElement('div'); div.innerHTML = html; return div.textContent || ''; }
       function formatDateTime(iso) {
@@ -362,46 +384,81 @@
         return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
       }
 
-      async function openDB() {
-        return new Promise((resolve, reject) => {
-          const req = indexedDB.open(DB_NAME, 1);
-          req.onupgradeneeded = (e) => {
-            const database = e.target.result;
-            if (!database.objectStoreNames.contains(STORE_NAME)) database.createObjectStore(STORE_NAME);
-          };
-          req.onsuccess = () => resolve(req.result);
-          req.onerror = () => reject(req.error);
+      // Supabase 数据库请求
+      async function supabaseGet(table, query = '') {
+        const url = `${SUPABASE_URL}/rest/v1/${table}?${query}`;
+        const res = await fetch(url, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json'
+          }
         });
-      }
-      function dbPut(key, value) {
-        return new Promise((resolve, reject) => {
-          const tx = db.transaction(STORE_NAME, 'readwrite');
-          tx.objectStore(STORE_NAME).put(value, key);
-          tx.oncomplete = resolve;
-          tx.onerror = () => reject(tx.error);
-        });
-      }
-      function dbGet(key) {
-        return new Promise((resolve, reject) => {
-          const tx = db.transaction(STORE_NAME, 'readonly');
-          const req = tx.objectStore(STORE_NAME).get(key);
-          req.onsuccess = () => resolve(req.result);
-          req.onerror = () => reject(req.error);
-        });
-      }
-      function dbDelete(key) {
-        return new Promise((resolve, reject) => {
-          const tx = db.transaction(STORE_NAME, 'readwrite');
-          tx.objectStore(STORE_NAME).delete(key);
-          tx.oncomplete = resolve;
-          tx.onerror = () => reject(tx.error);
-        });
+        if (!res.ok) throw new Error('读取失败');
+        return await res.json();
       }
 
-      function isLoggedIn() { return sessionStorage.getItem(AUTH_KEY) === 'true'; }
-      function setLoggedIn() { sessionStorage.setItem(AUTH_KEY, 'true'); }
-      function clearLoggedIn() { sessionStorage.removeItem(AUTH_KEY); }
+      async function supabasePost(table, data) {
+        const url = `${SUPABASE_URL}/rest/v1/${table}`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('写入失败');
+        return await res.json();
+      }
 
+      async function supabasePatch(table, id, data) {
+        const url = `${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`;
+        const res = await fetch(url, {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('更新失败');
+      }
+
+      async function supabaseDelete(table, id) {
+        const url = `${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`;
+        const res = await fetch(url, {
+          method: 'DELETE',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        });
+        if (!res.ok) throw new Error('删除失败');
+      }
+
+      // ========== 文件上传到 Supabase Storage ==========
+      async function uploadFile(file) {
+        const fileName = Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.]/g, '_');
+        const uploadUrl = `${SUPABASE_URL}/storage/v1/object/attachments/${fileName}`;
+        
+        const res = await fetch(uploadUrl, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': file.type
+          },
+          body: file
+        });
+        if (!res.ok) throw new Error('文件上传失败');
+        return STORAGE_URL + fileName; // 返回公开访问 URL
+      }
+
+      // ========== 锁定机制 ==========
       function getLockState() {
         const raw = localStorage.getItem(LOCK_KEY);
         if (!raw) return { attempts: 0, lockUntil: 0 };
@@ -419,13 +476,70 @@
       function recordFailedAttempt() {
         let state = getLockState();
         state.attempts = (state.attempts || 0) + 1;
-        if (state.attempts >= MAX_ATTEMPTS) {
-          state.lockUntil = Date.now() + LOCK_DURATION;
-        }
+        if (state.attempts >= MAX_ATTEMPTS) state.lockUntil = Date.now() + LOCK_DURATION;
         setLockState(state);
       }
       function clearLock() { setLockState({ attempts: 0, lockUntil: 0 }); }
 
+      function isLoggedIn() { return sessionStorage.getItem(AUTH_KEY) === 'true'; }
+      function setLoggedIn() { sessionStorage.setItem(AUTH_KEY, 'true'); }
+      function clearLoggedIn() { sessionStorage.removeItem(AUTH_KEY); }
+
+      // ========== 云端数据加载 ==========
+      async function loadCoverFromCloud() {
+        const data = await supabaseGet('covers', 'id=eq.main');
+        if (data.length > 0) {
+          const cover = data[0];
+          if (cover.center) {
+            imgs.center.src = cover.center;
+            boxes.center.classList.add('has-img');
+            const img = new Image();
+            img.onload = () => {
+              if (img.width > img.height) coverArea.classList.add('layout-horizontal');
+              else coverArea.classList.remove('layout-horizontal');
+            };
+            img.src = cover.center;
+          }
+          if (cover.left_img) {
+            imgs.left.src = cover.left_img;
+            boxes.left.classList.add('has-img');
+          }
+          if (cover.right_img) {
+            imgs.right.src = cover.right_img;
+            boxes.right.classList.add('has-img');
+          }
+        }
+      }
+
+      async function saveCoverToCloud(position, dataUrl) {
+        const field = position === 'left' ? 'left_img' : (position === 'right' ? 'right_img' : 'center');
+        const existing = await supabaseGet('covers', 'id=eq.main');
+        if (existing.length > 0) {
+          await supabasePatch('covers', 'main', { [field]: dataUrl });
+        } else {
+          await supabasePost('covers', { id: 'main', [field]: dataUrl });
+        }
+      }
+
+      async function loadEntriesFromCloud() {
+        const data = await supabaseGet('diary', 'order=date.desc');
+        entries = data.map(d => ({ id: d.id.toString(), title: d.title, content: d.content, date: d.date }));
+      }
+
+      async function saveEntryToCloud(entry) {
+        if (entry.id && entry.id !== 'undefined') {
+          await supabasePatch('diary', entry.id.toString(), entry);
+        } else {
+          const result = await supabasePost('diary', entry);
+          entry.id = result[0].id.toString();
+        }
+      }
+
+      async function deleteEntryFromCloud(id) {
+        await supabaseDelete('diary', id.toString());
+      }
+
+      // ========== UI 更新 ==========
       function updateNav() {
         navContainer.innerHTML = '';
         if (!isLoggedIn()) {
@@ -468,15 +582,16 @@
         if (!isLoggedIn()) { alert('请先登录'); return; }
         heroPage.style.opacity = '0';
         heroPage.style.transform = 'rotateX(10deg) scale(0.95)';
-        setTimeout(() => {
+        setTimeout(async () => {
           heroPage.style.display = 'none';
           diaryPage.classList.add('active');
-          loadEntries();
+          await loadEntriesFromCloud();
           renderDiaryList();
           updateNav();
         }, 400);
       }
 
+      // 登录
       loginTriggerBtn.onclick = () => {
         if (isLocked()) {
           const state = getLockState();
@@ -518,28 +633,7 @@
       };
       passwordInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') passwordSubmitBtn.click(); });
 
-      // 封面逻辑
-      const boxes = {
-        left: document.querySelector('.cover-box.left'),
-        center: document.querySelector('.cover-box.center'),
-        right: document.querySelector('.cover-box.right')
-      };
-      const imgs = {
-        left: boxes.left.querySelector('img'),
-        center: boxes.center.querySelector('img'),
-        right: boxes.right.querySelector('img')
-      };
-      const inputs = {
-        left: boxes.left.querySelector('input'),
-        center: boxes.center.querySelector('input'),
-        right: boxes.right.querySelector('input')
-      };
-      const saveBtns = {
-        left: boxes.left.querySelector('.save-cover-btn'),
-        center: boxes.center.querySelector('.save-cover-btn'),
-        right: boxes.right.querySelector('.save-cover-btn')
-      };
-
+      // 封面
       function bindCoverTilt() {
         document.querySelectorAll('.cover-img').forEach(img => {
           if (img.dataset.tiltCoverBound) return;
@@ -558,30 +652,6 @@
         });
       }
 
-      function loadAllCovers() {
-        ['left','center','right'].forEach(pos => {
-          const dataUrl = localStorage.getItem(COVER_KEYS[pos]);
-          if (dataUrl) {
-            imgs[pos].src = dataUrl;
-            boxes[pos].classList.add('has-img');
-          } else {
-            imgs[pos].removeAttribute('src');
-            boxes[pos].classList.remove('has-img');
-          }
-        });
-        const centerData = localStorage.getItem(COVER_KEYS.center);
-        if (centerData) {
-          const img = new Image();
-          img.onload = () => {
-            if (img.width > img.height) coverArea.classList.add('layout-horizontal');
-            else coverArea.classList.remove('layout-horizontal');
-          };
-          img.src = centerData;
-        }
-        bindCoverTilt();
-      }
-
-      // 预览图片（不保存）
       function previewCover(position, file) {
         if (!isLoggedIn()) return;
         if (file.size > 10 * 1024 * 1024) {
@@ -600,27 +670,19 @@
             }
             const maxWidth = 1200;
             let w = img.width, h = img.height;
-            if (w > maxWidth) {
-              h = h * (maxWidth / w);
-              w = maxWidth;
-            }
+            if (w > maxWidth) { h = h * (maxWidth / w); w = maxWidth; }
             const canvas = document.createElement('canvas');
-            canvas.width = w;
-            canvas.height = h;
+            canvas.width = w; canvas.height = h;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, w, h);
             const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-            // 预览
             imgs[position].src = dataUrl;
             boxes[position].classList.add('has-img');
-            // 暂存，显示保存按钮
             pendingCover[position] = dataUrl;
             saveBtns[position].style.display = 'inline-block';
-            // 处理布局
             if (position === 'center') {
               if (img.width > img.height) {
                 coverArea.classList.add('layout-horizontal');
-                // 清除左右预览（但不删除 localStorage 中已保存的图片）
                 imgs.left.removeAttribute('src');
                 imgs.right.removeAttribute('src');
                 boxes.left.classList.remove('has-img');
@@ -638,17 +700,15 @@
         reader.readAsDataURL(file);
       }
 
-      // 点击保存按钮
-      function saveCover(position) {
+      async function saveCover(position) {
         if (!pendingCover[position]) return;
-        localStorage.setItem(COVER_KEYS[position], pendingCover[position]);
-        // 如果保存的是中间图片，且为横版，需要清理左右已保存的图片
+        await saveCoverToCloud(position, pendingCover[position]);
         if (position === 'center') {
           const img = new Image();
-          img.onload = () => {
+          img.onload = async () => {
             if (img.width > img.height) {
-              localStorage.removeItem(COVER_KEYS.left);
-              localStorage.removeItem(COVER_KEYS.right);
+              await saveCoverToCloud('left', null);
+              await saveCoverToCloud('right', null);
             }
           };
           img.src = pendingCover[position];
@@ -658,7 +718,6 @@
         alert('封面已保存！');
       }
 
-      // 绑定点击上传
       Object.keys(boxes).forEach(pos => {
         boxes[pos].addEventListener('click', () => {
           if (!isLoggedIn()) return;
@@ -697,16 +756,13 @@
         }
       }
 
-      // 日记功能（保持不变）
-      function loadEntries() { entries = JSON.parse(localStorage.getItem(DIARY_KEY) || '[]'); }
-      function saveEntries() { localStorage.setItem(DIARY_KEY, JSON.stringify(entries)); }
-
+      // ========== 日记功能（含云端附件） ==========
       function renderDiaryList() {
-        const sorted = [...entries].sort((a,b) => b.date - a.date);
-        if (sorted.length === 0) {
+        if (!entries.length) {
           diaryList.innerHTML = '<div class="empty-list-hint">🌸 还没有日记</div>';
           return;
         }
+        const sorted = [...entries].sort((a,b) => b.date - a.date);
         diaryList.innerHTML = sorted.map(e => `
           <div class="glass-card diary-list-item ${e.id === currentDiaryId ? 'active' : ''}" data-id="${e.id}">
             <div class="date">${formatDateTime(e.date)}</div>
@@ -717,13 +773,13 @@
         bindTiltToCards();
       }
 
-      async function openDiary(id) {
+      function openDiary(id) {
         if (!isLoggedIn()) { alert('请先登录'); return; }
         currentDiaryId = id;
         const entry = entries.find(e => e.id === id);
         if (entry) {
           editorTitleInput.value = entry.title || '';
-          await deserializeContent(entry.content || '');
+          editorContentArea.innerHTML = entry.content || '';
         } else {
           editorTitleInput.value = '';
           editorContentArea.innerHTML = '';
@@ -750,17 +806,14 @@
       async function saveCurrentDiary() {
         if (!isLoggedIn()) return alert('请先登录');
         const title = editorTitleInput.value.trim();
-        const content = serializeContent();
+        const content = editorContentArea.innerHTML;
         if (!title && !content) return alert('标题和内容不能都为空');
         const now = Date.now();
-        if (currentDiaryId) {
-          const entry = entries.find(e => e.id === currentDiaryId);
-          if (entry) { entry.title = title; entry.content = content; entry.date = now; }
-        } else {
-          currentDiaryId = now;
-          entries.push({ id: now, date: now, title, content });
-        }
-        saveEntries();
+        const entry = { title, content, date: now };
+        if (currentDiaryId) entry.id = currentDiaryId.toString();
+        await saveEntryToCloud(entry);
+        if (!currentDiaryId) currentDiaryId = entry.id;
+        await loadEntriesFromCloud();
         renderDiaryList();
         alert('保存成功');
       }
@@ -768,13 +821,9 @@
       async function deleteCurrentDiary() {
         if (!currentDiaryId) return;
         if (!confirm('确定删除这篇日记吗？')) return;
-        const tx = db.transaction(STORE_NAME, 'readwrite');
-        const store = tx.objectStore(STORE_NAME);
-        const allKeys = await new Promise(resolve => { const req = store.getAllKeys(); req.onsuccess = () => resolve(req.result); });
-        for (const key of allKeys) { if (key.startsWith(`att_${currentDiaryId}_`)) store.delete(key); }
-        await new Promise(resolve => { tx.oncomplete = resolve; });
+        await deleteEntryFromCloud(currentDiaryId);
         entries = entries.filter(e => e.id !== currentDiaryId);
-        saveEntries();
+        currentDiaryId = null;
         clearEditor();
         renderDiaryList();
       }
@@ -790,98 +839,80 @@
         updateDiaryAdminUI();
       }
 
-      function serializeContent() {
-        const div = document.createElement('div');
-        div.innerHTML = editorContentArea.innerHTML;
-        div.querySelectorAll('[data-attachment-id]').forEach(el => {
-          const attId = el.getAttribute('data-attachment-id');
-          if (el.tagName === 'IMG') {
-            const span = document.createElement('span');
-            span.setAttribute('data-attachment-id', attId);
-            span.setAttribute('data-type', 'image');
-            el.replaceWith(span);
-          } else if (el.tagName === 'A') {
-            const span = document.createElement('span');
-            span.setAttribute('data-attachment-id', attId);
-            span.setAttribute('data-type', 'file');
-            span.textContent = el.textContent;
-            el.replaceWith(span);
-          }
-        });
-        return div.innerHTML;
-      }
-
-      async function deserializeContent(html) {
-        const div = document.createElement('div');
-        div.innerHTML = html;
-        const placeholders = div.querySelectorAll('[data-attachment-id]');
-        for (const el of placeholders) {
-          const attId = el.getAttribute('data-attachment-id');
-          const type = el.getAttribute('data-type');
-          try {
-            const data = await dbGet(attId);
-            if (data && data.blob) {
-              const url = URL.createObjectURL(data.blob);
-              if (type === 'image') {
-                const img = document.createElement('img');
-                img.src = url; img.setAttribute('data-attachment-id', attId);
-                el.replaceWith(img);
-              } else {
-                const a = document.createElement('a');
-                a.href = url; a.download = data.name; a.textContent = data.name;
-                a.setAttribute('data-attachment-id', attId);
-                a.onclick = (e) => { e.preventDefault(); const dUrl = URL.createObjectURL(data.blob); const tmpA = document.createElement('a'); tmpA.href = dUrl; tmpA.download = data.name; tmpA.click(); };
-                el.replaceWith(a);
-              }
-            }
-          } catch (e) { el.replaceWith(document.createTextNode('[附件丢失]')); }
-        }
-        editorContentArea.innerHTML = div.innerHTML;
-      }
-
-      async function insertAttachment(file) {
-        const attId = `att_${currentDiaryId || 0}_${Date.now()}`;
-        await dbPut(attId, { blob: file, name: file.name });
-        const url = URL.createObjectURL(file);
-        if (file.type.startsWith('image/')) {
+      // ========== 附件插入（上传到云端） ==========
+      async function insertImage(file) {
+        if (!isLoggedIn()) return;
+        try {
+          const url = await uploadFile(file);
           const img = document.createElement('img');
-          img.src = url; img.setAttribute('data-attachment-id', attId);
+          img.src = url;
+          img.style.maxWidth = '40%';
+          img.style.height = 'auto';
+          img.style.borderRadius = '12px';
+          img.style.margin = '8px 0';
           editorContentArea.focus();
           document.execCommand('insertHTML', false, img.outerHTML);
-        } else {
-          const a = document.createElement('a');
-          a.href = url; a.download = file.name; a.textContent = file.name;
-          a.setAttribute('data-attachment-id', attId);
-          a.onclick = (e) => { e.preventDefault(); dbGet(attId).then(data => { const dUrl = URL.createObjectURL(data.blob); const tmpA = document.createElement('a'); tmpA.href = dUrl; tmpA.download = data.name; tmpA.click(); }); };
-          editorContentArea.focus();
-          document.execCommand('insertHTML', false, a.outerHTML);
+        } catch (e) {
+          alert('图片上传失败，请重试');
         }
       }
 
+      async function insertFile(file) {
+        if (!isLoggedIn()) return;
+        try {
+          const url = await uploadFile(file);
+          const a = document.createElement('a');
+          a.href = url;
+          a.target = '_blank';
+          a.download = file.name;
+          a.textContent = file.name;
+          a.style.color = 'var(--accent)';
+          editorContentArea.focus();
+          document.execCommand('insertHTML', false, a.outerHTML);
+        } catch (e) {
+          alert('文件上传失败，请重试');
+        }
+      }
+
+      // 事件绑定
       newDiaryBtn.onclick = newDiary;
       saveDiaryBtn.onclick = saveCurrentDiary;
       deleteDiaryBtn.onclick = deleteCurrentDiary;
 
       insertImageBtn.onclick = () => imageInput.click();
-      imageInput.onchange = () => { const file = imageInput.files[0]; if (file) insertAttachment(file); imageInput.value = ''; };
+      imageInput.onchange = () => {
+        const file = imageInput.files[0];
+        if (file) { insertImage(file); imageInput.value = ''; }
+      };
       attachFileBtn.onclick = () => fileInput.click();
-      fileInput.onchange = () => { const file = fileInput.files[0]; if (file) insertAttachment(file); fileInput.value = ''; };
+      fileInput.onchange = () => {
+        const file = fileInput.files[0];
+        if (file) { insertFile(file); fileInput.value = ''; }
+      };
 
       diaryList.addEventListener('click', (e) => {
         const item = e.target.closest('.diary-list-item');
-        if (item) openDiary(Number(item.dataset.id));
+        if (item) openDiary(item.dataset.id);
       });
 
       editorContentArea.addEventListener('paste', (e) => {
         if (!isLoggedIn()) return;
         const items = e.clipboardData.items;
         for (const item of items) {
-          if (item.type.startsWith('image/')) { e.preventDefault(); insertAttachment(item.getAsFile()); break; }
+          if (item.type.startsWith('image/')) {
+            e.preventDefault();
+            const file = item.getAsFile();
+            insertImage(file);
+            break;
+          }
         }
       });
 
       document.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); if (diaryPage.classList.contains('active') && isLoggedIn()) saveCurrentDiary(); }
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+          e.preventDefault();
+          if (diaryPage.classList.contains('active') && isLoggedIn()) saveCurrentDiary();
+        }
       });
 
       function bindTiltToCards() {
@@ -900,13 +931,15 @@
         });
       }
 
+      // 初始化
       async function init() {
-        try { db = await openDB(); } catch (e) { console.warn('附件数据库打开失败'); }
-        loadAllCovers();
+        await loadCoverFromCloud();
+        await loadEntriesFromCloud();
         generateDecos();
         updateNav();
         bindTiltToCards();
-        heroPage.style.display = ''; diaryPage.classList.remove('active');
+        heroPage.style.display = '';
+        diaryPage.classList.remove('active');
       }
       window.onload = init;
     })();
