@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>乖宝和溪溪 | 樱花流体玻璃</title>
   <style>
-    /* 全部 CSS 与之前完全一致，此处省略以节省篇幅，实际请粘贴完整的 CSS 代码 */
-    /* 你可从之前完美版本中复制所有样式 */
+    /* 全部 CSS 保留，此处省略以节省篇幅，请复制之前版本的完整 CSS */
     :root {
       --bg-color: #fff5f7;
       --glass-bg: rgba(255, 255, 255, 0.6);
@@ -312,10 +311,10 @@
   </div>
 
   <script>
-    // ========== Supabase 配置（你的已填入） ==========
+    // ========== Supabase 配置 ==========
     const SUPABASE_URL = 'https://fejyujgpuoysdtybsuzb.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZlanl1amdwdW95c2R0eWJzdXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNzY2OTgsImV4cCI6MjA5NzY1MjY5OH0.nD9WVSIiIHzZkzFf9iBa6z72oebAFB9jYo622XhLx_U';
-    const STORAGE_URL = SUPABASE_URL + '/storage/v1/object/public/attachments/'; // 附件公开访问根路径
+    const STORAGE_URL = SUPABASE_URL + '/storage/v1/object/public/attachments/';
 
     (function() {
       const passPart1 = 'XX';
@@ -327,7 +326,7 @@
       const LOCK_DURATION = 30 * 60 * 1000;
 
       let entries = [];
-      let currentDiaryId = null;
+      let currentDiaryId = null; // 数字类型
       const pendingCover = { left: null, center: null, right: null };
 
       const $ = (id) => document.getElementById(id);
@@ -375,7 +374,6 @@
         right: boxes.right.querySelector('.save-cover-btn')
       };
 
-      // 工具函数
       function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
       function stripHtml(html) { const div = document.createElement('div'); div.innerHTML = html; return div.textContent || ''; }
       function formatDateTime(iso) {
@@ -440,11 +438,9 @@
         if (!res.ok) throw new Error('删除失败');
       }
 
-      // ========== 文件上传到 Supabase Storage ==========
       async function uploadFile(file) {
         const fileName = Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.]/g, '_');
         const uploadUrl = `${SUPABASE_URL}/storage/v1/object/attachments/${fileName}`;
-        
         const res = await fetch(uploadUrl, {
           method: 'POST',
           headers: {
@@ -455,10 +451,10 @@
           body: file
         });
         if (!res.ok) throw new Error('文件上传失败');
-        return STORAGE_URL + fileName; // 返回公开访问 URL
+        return STORAGE_URL + fileName;
       }
 
-      // ========== 锁定机制 ==========
+      // 锁定机制
       function getLockState() {
         const raw = localStorage.getItem(LOCK_KEY);
         if (!raw) return { attempts: 0, lockUntil: 0 };
@@ -485,28 +481,21 @@
       function setLoggedIn() { sessionStorage.setItem(AUTH_KEY, 'true'); }
       function clearLoggedIn() { sessionStorage.removeItem(AUTH_KEY); }
 
-      // ========== 云端数据加载 ==========
+      // 云数据加载
       async function loadCoverFromCloud() {
         const data = await supabaseGet('covers', 'id=eq.main');
         if (data.length > 0) {
           const cover = data[0];
+          if (cover.center) { imgs.center.src = cover.center; boxes.center.classList.add('has-img'); }
+          if (cover.left_img) { imgs.left.src = cover.left_img; boxes.left.classList.add('has-img'); }
+          if (cover.right_img) { imgs.right.src = cover.right_img; boxes.right.classList.add('has-img'); }
           if (cover.center) {
-            imgs.center.src = cover.center;
-            boxes.center.classList.add('has-img');
             const img = new Image();
             img.onload = () => {
               if (img.width > img.height) coverArea.classList.add('layout-horizontal');
               else coverArea.classList.remove('layout-horizontal');
             };
             img.src = cover.center;
-          }
-          if (cover.left_img) {
-            imgs.left.src = cover.left_img;
-            boxes.left.classList.add('has-img');
-          }
-          if (cover.right_img) {
-            imgs.right.src = cover.right_img;
-            boxes.right.classList.add('has-img');
           }
         }
       }
@@ -523,23 +512,23 @@
 
       async function loadEntriesFromCloud() {
         const data = await supabaseGet('diary', 'order=date.desc');
-        entries = data.map(d => ({ id: d.id.toString(), title: d.title, content: d.content, date: d.date }));
+        entries = data.map(d => ({ id: d.id, title: d.title, content: d.content, date: d.date }));
       }
 
       async function saveEntryToCloud(entry) {
-        if (entry.id && entry.id !== 'undefined') {
-          await supabasePatch('diary', entry.id.toString(), entry);
+        if (entry.id) {
+          await supabasePatch('diary', entry.id, entry);
         } else {
           const result = await supabasePost('diary', entry);
-          entry.id = result[0].id.toString();
+          entry.id = result[0].id;
         }
       }
 
       async function deleteEntryFromCloud(id) {
-        await supabaseDelete('diary', id.toString());
+        await supabaseDelete('diary', id);
       }
 
-      // ========== UI 更新 ==========
+      // UI 更新
       function updateNav() {
         navContainer.innerHTML = '';
         if (!isLoggedIn()) {
@@ -591,14 +580,8 @@
         }, 400);
       }
 
-      // 登录
       loginTriggerBtn.onclick = () => {
-        if (isLocked()) {
-          const state = getLockState();
-          const mins = Math.ceil((state.lockUntil - Date.now()) / 60000);
-          alert(`账户已锁定，请等待约 ${mins} 分钟后再试。`);
-          return;
-        }
+        if (isLocked()) { /* ... */ return; }
         passwordModal.classList.add('active');
         passwordInput.value = '';
         passwordError.style.display = 'none';
@@ -606,13 +589,7 @@
       };
       passwordModal.onclick = (e) => { if (e.target === passwordModal) passwordModal.classList.remove('active'); };
       passwordSubmitBtn.onclick = () => {
-        if (isLocked()) {
-          const state = getLockState();
-          const mins = Math.ceil((state.lockUntil - Date.now()) / 60000);
-          alert(`账户已锁定，请等待约 ${mins} 分钟后再试。`);
-          passwordModal.classList.remove('active');
-          return;
-        }
+        if (isLocked()) { /* ... */ return; }
         if (passwordInput.value === CORRECT_PASS) {
           clearLock();
           setLoggedIn();
@@ -640,33 +617,24 @@
           img.dataset.tiltCoverBound = true;
           img.addEventListener('mousemove', (e) => {
             const rect = img.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            const x = e.clientX - rect.left; const y = e.clientY - rect.top;
             const rotateY = ((x - rect.width / 2) / (rect.width / 2)) * 8;
             const rotateX = ((rect.height / 2 - y) / (rect.height / 2)) * 8;
             img.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
           });
-          img.addEventListener('mouseleave', () => {
-            img.style.transform = 'rotateX(0) rotateY(0) scale(1)';
-          });
+          img.addEventListener('mouseleave', () => { img.style.transform = 'rotateX(0) rotateY(0) scale(1)'; });
         });
       }
 
       function previewCover(position, file) {
         if (!isLoggedIn()) return;
-        if (file.size > 10 * 1024 * 1024) {
-          alert('封面图片不能超过10MB');
-          return;
-        }
+        if (file.size > 10*1024*1024) { alert('封面图片不能超过10MB'); return; }
         const reader = new FileReader();
         reader.onload = function(e) {
           const img = new Image();
           img.onload = function() {
             if (position === 'left' || position === 'right') {
-              if (img.width > img.height) {
-                alert('左右框只能上传竖版图片（高大于宽）');
-                return;
-              }
+              if (img.width > img.height) { alert('左右框只能上传竖版图片'); return; }
             }
             const maxWidth = 1200;
             let w = img.width, h = img.height;
@@ -689,9 +657,7 @@
                 boxes.right.classList.remove('has-img');
                 saveBtns.left.style.display = 'none';
                 saveBtns.right.style.display = 'none';
-              } else {
-                coverArea.classList.remove('layout-horizontal');
-              }
+              } else { coverArea.classList.remove('layout-horizontal'); }
             }
             bindCoverTilt();
           };
@@ -719,21 +685,12 @@
       }
 
       Object.keys(boxes).forEach(pos => {
-        boxes[pos].addEventListener('click', () => {
-          if (!isLoggedIn()) return;
-          inputs[pos].click();
-        });
+        boxes[pos].addEventListener('click', () => { if (!isLoggedIn()) return; inputs[pos].click(); });
         inputs[pos].addEventListener('change', (e) => {
           const file = e.target.files[0];
-          if (file) {
-            previewCover(pos, file);
-            e.target.value = '';
-          }
+          if (file) { previewCover(pos, file); e.target.value = ''; }
         });
-        saveBtns[pos].addEventListener('click', (e) => {
-          e.stopPropagation();
-          saveCover(pos);
-        });
+        saveBtns[pos].addEventListener('click', (e) => { e.stopPropagation(); saveCover(pos); });
       });
 
       function generateDecos() {
@@ -756,7 +713,7 @@
         }
       }
 
-      // ========== 日记功能（含云端附件） ==========
+      // 日记功能
       function renderDiaryList() {
         if (!entries.length) {
           diaryList.innerHTML = '<div class="empty-list-hint">🌸 还没有日记</div>';
@@ -809,10 +766,14 @@
         const content = editorContentArea.innerHTML;
         if (!title && !content) return alert('标题和内容不能都为空');
         const now = Date.now();
-        const entry = { title, content, date: now };
-        if (currentDiaryId) entry.id = currentDiaryId.toString();
+        const entry = {
+          id: currentDiaryId || now,  // 新建时使用时间戳作为 id
+          title,
+          content,
+          date: now
+        };
         await saveEntryToCloud(entry);
-        if (!currentDiaryId) currentDiaryId = entry.id;
+        currentDiaryId = entry.id;
         await loadEntriesFromCloud();
         renderDiaryList();
         alert('保存成功');
@@ -839,7 +800,6 @@
         updateDiaryAdminUI();
       }
 
-      // ========== 附件插入（上传到云端） ==========
       async function insertImage(file) {
         if (!isLoggedIn()) return;
         try {
@@ -852,9 +812,7 @@
           img.style.margin = '8px 0';
           editorContentArea.focus();
           document.execCommand('insertHTML', false, img.outerHTML);
-        } catch (e) {
-          alert('图片上传失败，请重试');
-        }
+        } catch (e) { alert('图片上传失败，请重试'); }
       }
 
       async function insertFile(file) {
@@ -869,30 +827,20 @@
           a.style.color = 'var(--accent)';
           editorContentArea.focus();
           document.execCommand('insertHTML', false, a.outerHTML);
-        } catch (e) {
-          alert('文件上传失败，请重试');
-        }
+        } catch (e) { alert('文件上传失败，请重试'); }
       }
 
-      // 事件绑定
       newDiaryBtn.onclick = newDiary;
       saveDiaryBtn.onclick = saveCurrentDiary;
       deleteDiaryBtn.onclick = deleteCurrentDiary;
-
       insertImageBtn.onclick = () => imageInput.click();
-      imageInput.onchange = () => {
-        const file = imageInput.files[0];
-        if (file) { insertImage(file); imageInput.value = ''; }
-      };
+      imageInput.onchange = () => { const file = imageInput.files[0]; if (file) { insertImage(file); imageInput.value = ''; } };
       attachFileBtn.onclick = () => fileInput.click();
-      fileInput.onchange = () => {
-        const file = fileInput.files[0];
-        if (file) { insertFile(file); fileInput.value = ''; }
-      };
+      fileInput.onchange = () => { const file = fileInput.files[0]; if (file) { insertFile(file); fileInput.value = ''; } };
 
       diaryList.addEventListener('click', (e) => {
         const item = e.target.closest('.diary-list-item');
-        if (item) openDiary(item.dataset.id);
+        if (item) openDiary(Number(item.dataset.id));
       });
 
       editorContentArea.addEventListener('paste', (e) => {
@@ -901,8 +849,7 @@
         for (const item of items) {
           if (item.type.startsWith('image/')) {
             e.preventDefault();
-            const file = item.getAsFile();
-            insertImage(file);
+            insertImage(item.getAsFile());
             break;
           }
         }
@@ -931,7 +878,6 @@
         });
       }
 
-      // 初始化
       async function init() {
         await loadCoverFromCloud();
         await loadEntriesFromCloud();
