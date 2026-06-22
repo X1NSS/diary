@@ -380,7 +380,6 @@
         return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
       }
 
-      // Supabase 请求封装
       async function supabaseGet(table, query = '') {
         const url = `${SUPABASE_URL}/rest/v1/${table}?select=*&${query}`;
         const res = await fetch(url, {
@@ -390,7 +389,7 @@
             'Content-Type': 'application/json'
           }
         });
-        if (!res.ok) throw new Error('读取失败');
+        if (!res.ok) throw new Error('读取失败: ' + res.status);
         return await res.json();
       }
 
@@ -406,7 +405,7 @@
           },
           body: JSON.stringify(data)
         });
-        if (!res.ok) throw new Error('写入失败');
+        if (!res.ok) throw new Error('写入失败: ' + res.status);
         return await res.json();
       }
 
@@ -421,7 +420,7 @@
           },
           body: JSON.stringify(data)
         });
-        if (!res.ok) throw new Error('更新失败');
+        if (!res.ok) throw new Error('更新失败: ' + res.status);
       }
 
       async function supabaseDelete(table, id) {
@@ -433,7 +432,7 @@
             'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
           }
         });
-        if (!res.ok) throw new Error('删除失败');
+        if (!res.ok) throw new Error('删除失败: ' + res.status);
       }
 
       async function uploadFile(file) {
@@ -452,7 +451,6 @@
         return STORAGE_URL + fileName;
       }
 
-      // 锁定机制
       function getLockState() {
         const raw = localStorage.getItem(LOCK_KEY);
         if (!raw) return { attempts: 0, lockUntil: 0 };
@@ -479,56 +477,46 @@
       function setLoggedIn() { sessionStorage.setItem(AUTH_KEY, 'true'); }
       function clearLoggedIn() { sessionStorage.removeItem(AUTH_KEY); }
 
-      // 云数据加载
       async function loadCoverFromCloud() {
-        const data = await supabaseGet('covers', 'id=eq.main');
-        if (data.length > 0) {
-          const cover = data[0];
-          if (cover.center) { imgs.center.src = cover.center; boxes.center.classList.add('has-img'); }
-          if (cover.left_img) { imgs.left.src = cover.left_img; boxes.left.classList.add('has-img'); }
-          if (cover.right_img) { imgs.right.src = cover.right_img; boxes.right.classList.add('has-img'); }
-          if (cover.center) {
-            const img = new Image();
-            img.onload = () => {
-              if (img.width > img.height) coverArea.classList.add('layout-horizontal');
-              else coverArea.classList.remove('layout-horizontal');
-            };
-            img.src = cover.center;
+        try {
+          const data = await supabaseGet('covers', 'id=eq.main');
+          if (data.length > 0) {
+            const cover = data[0];
+            if (cover.center) { imgs.center.src = cover.center; boxes.center.classList.add('has-img'); }
+            if (cover.left_img) { imgs.left.src = cover.left_img; boxes.left.classList.add('has-img'); }
+            if (cover.right_img) { imgs.right.src = cover.right_img; boxes.right.classList.add('has-img'); }
+            if (cover.center) {
+              const img = new Image();
+              img.onload = () => {
+                if (img.width > img.height) coverArea.classList.add('layout-horizontal');
+                else coverArea.classList.remove('layout-horizontal');
+              };
+              img.src = cover.center;
+            }
           }
-        }
+        } catch (e) { console.error('封面加载失败', e); }
       }
 
       async function saveCoverToCloud(position, dataUrl) {
         const field = position === 'left' ? 'left_img' : (position === 'right' ? 'right_img' : 'center');
-        const existing = await supabaseGet('covers', 'id=eq.main');
-        if (existing.length > 0) {
-          await supabasePatch('covers', 'main', { [field]: dataUrl });
-        } else {
-          await supabasePost('covers', { id: 'main', [field]: dataUrl });
-        }
+        try {
+          const existing = await supabaseGet('covers', 'id=eq.main');
+          if (existing.length > 0) {
+            await supabasePatch('covers', 'main', { [field]: dataUrl });
+          } else {
+            await supabasePost('covers', { id: 'main', [field]: dataUrl });
+          }
+        } catch (e) { alert('封面保存失败'); }
       }
 
       async function loadEntriesFromCloud() {
-        const data = await supabaseGet('diary', 'order=date.desc');
-        entries = data.map(d => ({ id: Number(d.id), title: d.title, content: d.content, date: d.date }));
-        renderDiaryList();
+        try {
+          const data = await supabaseGet('diary', 'order=date.desc');
+          entries = data.map(d => ({ id: Number(d.id), title: d.title, content: d.content, date: d.date }));
+          renderDiaryList();
+        } catch (e) { console.error('日记加载失败', e); }
       }
 
-      // 日记本地操作
-      function addOrUpdateEntry(entry) {
-        const index = entries.findIndex(e => e.id === entry.id);
-        if (index >= 0) {
-          entries[index] = entry;
-        } else {
-          entries.push(entry);
-        }
-      }
-
-      function removeEntryFromLocal(id) {
-        entries = entries.filter(e => e.id !== id);
-      }
-
-      // UI
       function updateNav() {
         navContainer.innerHTML = '';
         if (!isLoggedIn()) {
@@ -620,7 +608,6 @@
       };
       passwordInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') passwordSubmitBtn.click(); });
 
-      // 封面
       function bindCoverTilt() {
         document.querySelectorAll('.cover-img').forEach(img => {
           if (img.dataset.tiltCoverBound) return;
@@ -723,7 +710,6 @@
         }
       }
 
-      // ========== 日记功能（核心修复：本地即时更新） ==========
       function renderDiaryList() {
         if (!entries.length) {
           diaryList.innerHTML = '<div class="empty-list-hint">🌸 还没有日记</div>';
@@ -785,22 +771,21 @@
         };
         try {
           if (currentDiaryId) {
-            // 更新
             await supabasePatch('diary', entry.id, entry);
           } else {
-            // 新建
             const result = await supabasePost('diary', entry);
             entry.id = Number(result[0].id);
           }
-          // 本地同步
-          addOrUpdateEntry(entry);
+          // 本地同步（直接更新本地数组，不再重新查询）
+          const idx = entries.findIndex(e => e.id === entry.id);
+          if (idx >= 0) entries[idx] = entry;
+          else entries.push(entry);
           currentDiaryId = entry.id;
           renderDiaryList();
-          // 保持在编辑界面并显示新内容
           openDiary(currentDiaryId);
           alert('保存成功');
         } catch (e) {
-          alert('保存失败，请检查网络并重试');
+          alert('保存失败，请检查网络后重试');
           console.error(e);
         }
       }
@@ -810,14 +795,11 @@
         if (!confirm('确定删除这篇日记吗？')) return;
         try {
           await supabaseDelete('diary', currentDiaryId);
-          removeEntryFromLocal(currentDiaryId);
+          entries = entries.filter(e => e.id !== currentDiaryId);
           currentDiaryId = null;
           clearEditor();
           renderDiaryList();
-        } catch (e) {
-          alert('删除失败');
-          console.error(e);
-        }
+        } catch (e) { alert('删除失败'); }
       }
 
       function clearEditor() {
@@ -878,11 +860,7 @@
         if (!isLoggedIn()) return;
         const items = e.clipboardData.items;
         for (const item of items) {
-          if (item.type.startsWith('image/')) {
-            e.preventDefault();
-            insertImage(item.getAsFile());
-            break;
-          }
+          if (item.type.startsWith('image/')) { e.preventDefault(); insertImage(item.getAsFile()); break; }
         }
       });
 
