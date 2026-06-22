@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>乖宝和溪溪 | 樱花流体玻璃</title>
   <style>
-    /* 完整 CSS 保留，此处省略以保证篇幅，请从之前版本复制完整样式 */
     :root {
       --bg-color: #fff5f7;
       --glass-bg: rgba(255, 255, 255, 0.6);
@@ -511,8 +510,8 @@
 
       async function loadEntriesFromCloud() {
         const data = await supabaseGet('diary', 'order=date.desc');
-        // 确保 id 为数字
         entries = data.map(d => ({ id: Number(d.id), title: d.title, content: d.content, date: d.date }));
+        renderDiaryList();
       }
 
       async function saveEntryToCloud(entry) {
@@ -575,7 +574,6 @@
           heroPage.style.display = 'none';
           diaryPage.classList.add('active');
           await loadEntriesFromCloud();
-          renderDiaryList();
           updateNav();
         }, 400);
       }
@@ -724,7 +722,7 @@
         }
       }
 
-      // ========== 日记功能（修复列表显示） ==========
+      // ========== 日记功能 ==========
       function renderDiaryList() {
         if (!entries.length) {
           diaryList.innerHTML = '<div class="empty-list-hint">🌸 还没有日记</div>';
@@ -732,8 +730,8 @@
         }
         const sorted = [...entries].sort((a,b) => b.date - a.date);
         diaryList.innerHTML = sorted.map(e => {
-          const activeClass = (e.id === currentDiaryId) ? ' active' : '';
-          return `<div class="glass-card diary-list-item${activeClass}" data-id="${e.id}">
+          const active = (e.id === currentDiaryId) ? ' active' : '';
+          return `<div class="glass-card diary-list-item${active}" data-id="${e.id}">
             <div class="date">${formatDateTime(e.date)}</div>
             <h3>${escapeHtml(e.title || '无标题')}</h3>
             <p>${escapeHtml(stripHtml(e.content).substring(0, 60))}</p>
@@ -787,8 +785,8 @@
         await saveEntryToCloud(entry);
         currentDiaryId = entry.id;
         await loadEntriesFromCloud();
-        renderDiaryList();
-        alert('保存成功');
+        // 重新渲染列表，并且重新打开当前日记以显示保存后的内容
+        openDiary(currentDiaryId);
       }
 
       async function deleteCurrentDiary() {
@@ -852,7 +850,7 @@
 
       diaryList.addEventListener('click', (e) => {
         const item = e.target.closest('.diary-list-item');
-        if (item) openDiary(item.dataset.id);
+        if (item) openDiary(Number(item.dataset.id));
       });
 
       editorContentArea.addEventListener('paste', (e) => {
