@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>乖宝和溪溪 | 樱花流体玻璃</title>
   <style>
+    /* 全部 CSS 保留，与之前的完全一致 */
     :root {
       --bg-color: #fff5f7;
       --glass-bg: rgba(255, 255, 255, 0.6);
@@ -382,7 +383,7 @@
 
       // Supabase 请求封装
       async function supabaseGet(table, query = '') {
-        const url = `${SUPABASE_URL}/rest/v1/${table}?${query}`;
+        const url = `${SUPABASE_URL}/rest/v1/${table}?select=*&${query}`;
         const res = await fetch(url, {
           headers: {
             'apikey': SUPABASE_ANON_KEY,
@@ -722,7 +723,7 @@
         }
       }
 
-      // ========== 日记功能 ==========
+      // ========== 日记功能（已修复） ==========
       function renderDiaryList() {
         if (!entries.length) {
           diaryList.innerHTML = '<div class="empty-list-hint">🌸 还没有日记</div>';
@@ -785,7 +786,7 @@
         await saveEntryToCloud(entry);
         currentDiaryId = entry.id;
         await loadEntriesFromCloud();
-        // 重新渲染列表，并且重新打开当前日记以显示保存后的内容
+        // 保持编辑器打开并显示刚保存的日记
         openDiary(currentDiaryId);
       }
 
