@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>乖宝和溪溪 | 樱花流体玻璃</title>
   <style>
-    /* 全部 CSS 保留，此处省略以节省篇幅，请复制之前版本的完整 CSS */
+    /* 完整 CSS 保留，此处省略以保证篇幅，请从之前版本复制完整样式 */
     :root {
       --bg-color: #fff5f7;
       --glass-bg: rgba(255, 255, 255, 0.6);
@@ -311,7 +311,6 @@
   </div>
 
   <script>
-    // ========== Supabase 配置 ==========
     const SUPABASE_URL = 'https://fejyujgpuoysdtybsuzb.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZlanl1amdwdW95c2R0eWJzdXpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNzY2OTgsImV4cCI6MjA5NzY1MjY5OH0.nD9WVSIiIHzZkzFf9iBa6z72oebAFB9jYo622XhLx_U';
     const STORAGE_URL = SUPABASE_URL + '/storage/v1/object/public/attachments/';
@@ -326,7 +325,7 @@
       const LOCK_DURATION = 30 * 60 * 1000;
 
       let entries = [];
-      let currentDiaryId = null; // 数字类型
+      let currentDiaryId = null;
       const pendingCover = { left: null, center: null, right: null };
 
       const $ = (id) => document.getElementById(id);
@@ -382,7 +381,7 @@
         return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
       }
 
-      // Supabase 数据库请求
+      // Supabase 请求封装
       async function supabaseGet(table, query = '') {
         const url = `${SUPABASE_URL}/rest/v1/${table}?${query}`;
         const res = await fetch(url, {
@@ -512,7 +511,8 @@
 
       async function loadEntriesFromCloud() {
         const data = await supabaseGet('diary', 'order=date.desc');
-        entries = data.map(d => ({ id: d.id, title: d.title, content: d.content, date: d.date }));
+        // 确保 id 为数字
+        entries = data.map(d => ({ id: Number(d.id), title: d.title, content: d.content, date: d.date }));
       }
 
       async function saveEntryToCloud(entry) {
@@ -520,7 +520,7 @@
           await supabasePatch('diary', entry.id, entry);
         } else {
           const result = await supabasePost('diary', entry);
-          entry.id = result[0].id;
+          entry.id = Number(result[0].id);
         }
       }
 
@@ -581,7 +581,12 @@
       }
 
       loginTriggerBtn.onclick = () => {
-        if (isLocked()) { /* ... */ return; }
+        if (isLocked()) {
+          const state = getLockState();
+          const mins = Math.ceil((state.lockUntil - Date.now()) / 60000);
+          alert(`账户已锁定，请等待约 ${mins} 分钟后再试。`);
+          return;
+        }
         passwordModal.classList.add('active');
         passwordInput.value = '';
         passwordError.style.display = 'none';
@@ -589,7 +594,13 @@
       };
       passwordModal.onclick = (e) => { if (e.target === passwordModal) passwordModal.classList.remove('active'); };
       passwordSubmitBtn.onclick = () => {
-        if (isLocked()) { /* ... */ return; }
+        if (isLocked()) {
+          const state = getLockState();
+          const mins = Math.ceil((state.lockUntil - Date.now()) / 60000);
+          alert(`账户已锁定，请等待约 ${mins} 分钟后再试。`);
+          passwordModal.classList.remove('active');
+          return;
+        }
         if (passwordInput.value === CORRECT_PASS) {
           clearLock();
           setLoggedIn();
@@ -713,27 +724,28 @@
         }
       }
 
-      // 日记功能
+      // ========== 日记功能（修复列表显示） ==========
       function renderDiaryList() {
         if (!entries.length) {
           diaryList.innerHTML = '<div class="empty-list-hint">🌸 还没有日记</div>';
           return;
         }
         const sorted = [...entries].sort((a,b) => b.date - a.date);
-        diaryList.innerHTML = sorted.map(e => `
-          <div class="glass-card diary-list-item ${e.id === currentDiaryId ? 'active' : ''}" data-id="${e.id}">
+        diaryList.innerHTML = sorted.map(e => {
+          const activeClass = (e.id === currentDiaryId) ? ' active' : '';
+          return `<div class="glass-card diary-list-item${activeClass}" data-id="${e.id}">
             <div class="date">${formatDateTime(e.date)}</div>
             <h3>${escapeHtml(e.title || '无标题')}</h3>
             <p>${escapeHtml(stripHtml(e.content).substring(0, 60))}</p>
-          </div>
-        `).join('');
+          </div>`;
+        }).join('');
         bindTiltToCards();
       }
 
       function openDiary(id) {
         if (!isLoggedIn()) { alert('请先登录'); return; }
-        currentDiaryId = id;
-        const entry = entries.find(e => e.id === id);
+        currentDiaryId = Number(id);
+        const entry = entries.find(e => e.id === currentDiaryId);
         if (entry) {
           editorTitleInput.value = entry.title || '';
           editorContentArea.innerHTML = entry.content || '';
@@ -767,7 +779,7 @@
         if (!title && !content) return alert('标题和内容不能都为空');
         const now = Date.now();
         const entry = {
-          id: currentDiaryId || now,  // 新建时使用时间戳作为 id
+          id: currentDiaryId ? currentDiaryId : now,
           title,
           content,
           date: now
@@ -840,7 +852,7 @@
 
       diaryList.addEventListener('click', (e) => {
         const item = e.target.closest('.diary-list-item');
-        if (item) openDiary(Number(item.dataset.id));
+        if (item) openDiary(item.dataset.id);
       });
 
       editorContentArea.addEventListener('paste', (e) => {
