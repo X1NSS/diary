@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>乖宝和溪溪 | 樱花流体玻璃</title>
   <style>
-    /* 全部 CSS 保留，与之前的完全一致 */
     :root {
       --bg-color: #fff5f7;
       --glass-bg: rgba(255, 255, 255, 0.6);
@@ -515,20 +514,21 @@
         renderDiaryList();
       }
 
-      async function saveEntryToCloud(entry) {
-        if (entry.id) {
-          await supabasePatch('diary', entry.id, entry);
+      // 日记本地操作
+      function addOrUpdateEntry(entry) {
+        const index = entries.findIndex(e => e.id === entry.id);
+        if (index >= 0) {
+          entries[index] = entry;
         } else {
-          const result = await supabasePost('diary', entry);
-          entry.id = Number(result[0].id);
+          entries.push(entry);
         }
       }
 
-      async function deleteEntryFromCloud(id) {
-        await supabaseDelete('diary', id);
+      function removeEntryFromLocal(id) {
+        entries = entries.filter(e => e.id !== id);
       }
 
-      // UI 更新
+      // UI
       function updateNav() {
         navContainer.innerHTML = '';
         if (!isLoggedIn()) {
@@ -723,7 +723,7 @@
         }
       }
 
-      // ========== 日记功能（已修复） ==========
+      // ========== 日记功能（核心修复：本地即时更新） ==========
       function renderDiaryList() {
         if (!entries.length) {
           diaryList.innerHTML = '<div class="empty-list-hint">🌸 还没有日记</div>';
@@ -783,21 +783,41 @@
           content,
           date: now
         };
-        await saveEntryToCloud(entry);
-        currentDiaryId = entry.id;
-        await loadEntriesFromCloud();
-        // 保持编辑器打开并显示刚保存的日记
-        openDiary(currentDiaryId);
+        try {
+          if (currentDiaryId) {
+            // 更新
+            await supabasePatch('diary', entry.id, entry);
+          } else {
+            // 新建
+            const result = await supabasePost('diary', entry);
+            entry.id = Number(result[0].id);
+          }
+          // 本地同步
+          addOrUpdateEntry(entry);
+          currentDiaryId = entry.id;
+          renderDiaryList();
+          // 保持在编辑界面并显示新内容
+          openDiary(currentDiaryId);
+          alert('保存成功');
+        } catch (e) {
+          alert('保存失败，请检查网络并重试');
+          console.error(e);
+        }
       }
 
       async function deleteCurrentDiary() {
         if (!currentDiaryId) return;
         if (!confirm('确定删除这篇日记吗？')) return;
-        await deleteEntryFromCloud(currentDiaryId);
-        entries = entries.filter(e => e.id !== currentDiaryId);
-        currentDiaryId = null;
-        clearEditor();
-        renderDiaryList();
+        try {
+          await supabaseDelete('diary', currentDiaryId);
+          removeEntryFromLocal(currentDiaryId);
+          currentDiaryId = null;
+          clearEditor();
+          renderDiaryList();
+        } catch (e) {
+          alert('删除失败');
+          console.error(e);
+        }
       }
 
       function clearEditor() {
